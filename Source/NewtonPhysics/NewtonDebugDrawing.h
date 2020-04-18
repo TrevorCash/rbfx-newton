@@ -29,7 +29,15 @@ namespace Urho3D
 
         virtual void SetColor(const dVector& color) override;
         virtual void DrawLine(const dVector& p0, const dVector& p1) override;
-    protected:
+
+		virtual void DrawPoint(const dVector& p0, dFloat thinckness = 1.0f) override;
+
+
+		virtual void SetOrthRendering() override;
+
+		virtual void ResetOrthRendering() override;
+
+	protected:
         float worldScale_ = 1.0f;
         Color currentColor_;
         bool depthTest_ = false;

@@ -111,4 +111,19 @@ namespace Urho3D {
         debugRenderer_->AddLine(NewtonToUrhoVec3(p0)*worldScale_, NewtonToUrhoVec3(p1)*worldScale_, currentColor_, depthTest_);
     }
 
+	void UrhoNewtonDebugDisplay::DrawPoint(const dVector& p0, dFloat thinckness /*= 1.0f*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void UrhoNewtonDebugDisplay::SetOrthRendering()
+	{
+		
+	}
+
+	void UrhoNewtonDebugDisplay::ResetOrthRendering()
+	{
+		
+	}
+
 }

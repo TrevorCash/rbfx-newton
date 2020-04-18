@@ -239,7 +239,7 @@ namespace Urho3D
         Vector3 gravity_ = DEF_GRAVITY;
 
         /// number of thread to allow newton to use
-        int newtonThreadCount_ = 6;
+        int newtonThreadCount_ = 64;
         /// number of iterations newton will internally use per substep
         int iterationCount_ = 4;
         /// number of substeps per scene subsystem update. (1,2,4,8)
