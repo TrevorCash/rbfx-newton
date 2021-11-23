@@ -27,29 +27,38 @@
 
 namespace Urho3D
 {
-
 class Node;
 class Scene;
 class NewtonHingeConstraint;
-
 }
-
 /// PhysicsTests example.
 /// This sample demonstrates different types of physics configurations and provides a testing ground for physics functionality.
-class PhysicsTests : public Sample
+class PhysicsTests : public Application
 {
-    URHO3D_OBJECT(PhysicsTests, Sample);
+    URHO3D_OBJECT(PhysicsTests, Application);
 
 public:
     /// Construct.
-    explicit PhysicsTests(Context* context);
+	explicit PhysicsTests(Context* context);
+
+	void Setup() override
+	{
+		// Engine is not initialized yet. Set up all the parameters now.
+		engineParameters_[EP_FULL_SCREEN] = false;
+		engineParameters_[EP_WINDOW_HEIGHT] = 600;
+		engineParameters_[EP_WINDOW_WIDTH] = 800;
+		// Resource prefix path is a list of semicolon-separated paths which will be checked for containing resource directories. They are relative to application executable file.
+		engineParameters_[EP_RESOURCE_PREFIX_PATHS] = ".;..";
+	}
+
 
     /// Setup after engine initialization and before running the main loop.
-    void Start() override;
+	virtual void Start();
+	virtual void Start(const ea::vector<ea::string>& args);
 
 protected:
     /// Return XML patch instructions for screen joystick layout for a specific sample app, if any.
-    ea::string GetScreenJoystickPatchString() const override { return
+    ea::string GetScreenJoystickPatchString() const  { return
         "<patch>"
         "    <remove sel=\"/element/element[./attribute[@name='Name' and @value='Button0']]/attribute[@name='Is Visible']\" />"
         "    <replace sel=\"/element/element[./attribute[@name='Name' and @value='Button0']]/element[./attribute[@name='Name' and @value='Label']]/attribute[@name='Text']/@value\">Spawn</replace>"
@@ -183,4 +192,74 @@ private:
     void RemovePickNode(bool removeRigidBodyOnly = false);
    
    
+
+
+	protected:
+
+		/// Initialize touch input on mobile platform.
+		void InitTouchInput();
+		/// Initialize mouse mode on non-web platform.
+		void InitMouseMode(MouseMode mode);
+		/// Control logo visibility.
+		void SetLogoVisible(bool enable);
+		///
+		void CloseSample();
+
+		/// Logo sprite.
+		SharedPtr<Sprite> logoSprite_;
+		/// Scene.
+		SharedPtr<Scene> scene_;
+		/// Camera scene node.
+		SharedPtr<Node> cameraNode_;
+		/// Camera yaw angle.
+		float yaw_;
+		/// Camera pitch angle.
+		float pitch_;
+		/// Flag to indicate whether touch input has been enabled.
+		bool touchEnabled_;
+		/// Mouse mode option to use in the sample.
+		MouseMode useMouseMode_;
+
+private:
+	/// Create logo.
+	void CreateLogo();
+	/// Set custom window Title & Icon
+	void SetWindowTitleAndIcon();
+	/// Create console and debug HUD.
+	void CreateConsoleAndDebugHud();
+	/// Handle request for mouse mode on web platform.
+	void HandleMouseModeRequest(StringHash eventType, VariantMap& eventData);
+	/// Handle request for mouse mode change on web platform.
+	void HandleMouseModeChange(StringHash eventType, VariantMap& eventData);
+	/// Handle key down event to process key controls common to all samples.
+	void HandleKeyDown(StringHash eventType, VariantMap& eventData);
+	/// Handle key up event to process key controls common to all samples.
+	void HandleKeyUp(StringHash eventType, VariantMap& eventData);
+	/// Handle scene update event to control camera's pitch and yaw for all samples.
+	void HandleSceneUpdate(StringHash eventType, VariantMap& eventData);
+	/// Handle touch begin event to initialize touch input on desktop platform.
+	void HandleTouchBegin(StringHash eventType, VariantMap& eventData);
+
+	/// Screen joystick index for navigational controls (mobile platforms only).
+	unsigned screenJoystickIndex_;
+	/// Screen joystick index for settings (mobile platforms only).
+	unsigned screenJoystickSettingsIndex_;
+	/// Pause flag.
+	bool paused_;
+
+
+
+
+
+
+
+
+
+
+
+
+
 };
+
+// A helper macro which defines main function. Forgetting it will result in linker errors complaining about missing `_main` or `_WinMain@16`.
+URHO3D_DEFINE_APPLICATION_MAIN(PhysicsTests);
