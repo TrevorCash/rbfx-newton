@@ -129,6 +129,7 @@ private:
     void SpawnKinematicBodyTest(Vector3 worldPosition, Quaternion worldRotation);
 	void SpawnRejointingTest(Vector3 worldPosition);
 	void SpawnCollisionOffsetTest(Vector3 worldPosition);
+	void SpawnATRT(Vector3 worldPosition);
 
 
     /// Handle the logic update event.
@@ -221,8 +222,7 @@ private:
 		MouseMode useMouseMode_;
 
 private:
-	/// Create logo.
-	void CreateLogo();
+
 	/// Set custom window Title & Icon
 	void SetWindowTitleAndIcon();
 	/// Create console and debug HUD.

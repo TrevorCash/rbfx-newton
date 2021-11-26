@@ -34,17 +34,20 @@ namespace Urho3D {
         if (rigidBodyComp->GetScene())//on scene destruction sometimes this is null so check...
         {
             NewtonPhysicsWorld* physicsWorld = rigidBodyComp->GetScene()->GetComponent<NewtonPhysicsWorld>();
-            gravityForce = physicsWorld->GetGravity() * rigidBodyComp->GetEffectiveMass();
-
-
-    
-            netForce += gravityForce;
+			if (physicsWorld)
+			{
+				gravityForce = physicsWorld->GetGravity() * rigidBodyComp->GetEffectiveMass();
 
 
 
-            //apply forces and torques scaled with the physics world scale accourdingly.
-            NewtonBodySetForce(body, &UrhoToNewton(netForce)[0]);
-            NewtonBodySetTorque(body, &UrhoToNewton(netTorque)[0]);
+				netForce += gravityForce;
+
+
+
+				//apply forces and torques scaled with the physics world scale accourdingly.
+				NewtonBodySetForce(body, &UrhoToNewton(netForce)[0]);
+				NewtonBodySetTorque(body, &UrhoToNewton(netTorque)[0]);
+			}
 
         }
     }

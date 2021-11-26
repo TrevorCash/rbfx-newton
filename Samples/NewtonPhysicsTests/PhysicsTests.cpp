@@ -45,6 +45,7 @@
 #include <Urho3D/UI/UI.h>
 #include "Urho3D/UI/Text3D.h"
 #include <Urho3D/RmlUI/RmlUI.h>
+#include <Urho3D/SystemUI/SystemUI.h>
 
 #include "Urho3D/Graphics/Terrain.h"
 #include "Urho3D/Scene/Node.h"
@@ -93,8 +94,6 @@ void PhysicsTests::Start()
 		// On desktop platform, do not detect touch when we already got a joystick
 		SubscribeToEvent(E_TOUCHBEGIN, URHO3D_HANDLER(PhysicsTests, HandleTouchBegin));
 
-	// Create logo
-	CreateLogo();
 
 	// Set custom window Title & Icon
 	SetWindowTitleAndIcon();
@@ -136,6 +135,8 @@ void PhysicsTests::CreateScene()
     scene_ = new Scene(context_);
 
     scene_->SetTimeScale(1.0f);
+	
+
 
     // Create octree, use default volume (-1000, -1000, -1000) to (1000, 1000, 1000)
     // Create a physics simulation world with default parameters, which will update at 60fps. the Octree must
@@ -144,6 +145,7 @@ void PhysicsTests::CreateScene()
     scene_->CreateComponent<Octree>();
     NewtonPhysicsWorld* newtonWorld = scene_->CreateComponent<NewtonPhysicsWorld>();
     newtonWorld->SetGravity(Vector3(0, -9.81f, 0));
+	
     //scene_->CreateComponent<NewtonCollisionShape_SceneCollision>();
     scene_->CreateComponent<DebugRenderer>();
 
@@ -200,9 +202,12 @@ void PhysicsTests::CreateScene()
     //SpawnCompound(Vector3(-2, 10 , 10));
     //SpawnConvexHull(Vector3(-2, 3, 10));
 
+	//SpawnATRT(Vector3(5, 5, 0));
+
     Quaternion tilt = Quaternion(Random(-1.0f, 1.0f), Vector3(1, 0, 0));
 
-    //SpawnTrialBike(Vector3(5, 5, 0),  Quaternion(0, Vector3(0, 1, 0)) * tilt, true);
+	for(int i = -10; i <= 10; i++)
+		SpawnTrialBike(Vector3(5, 5, i),  Quaternion(0, Vector3(0, 1, 0)) * tilt, true);
     //SpawnTrialBike(Vector3(-5, 5, 0), Quaternion(90, Vector3(0, 1, 0)) * tilt, false);
 
     //SpawnKinematicBodyTest(Vector3(0, 0, 0), Quaternion::IDENTITY);
@@ -215,7 +220,7 @@ void PhysicsTests::CreateScene()
 
     //SpawnCollisionExceptionsTest(Vector3(0, 1, 15));
 
-    SpawnSliderTest(Vector3(0, 10, 10));
+    //SpawnSliderTest(Vector3(0, 10, 10));
     //SpawnLinearJointedObject(1.0f, Vector3(10 , 2, 10));
 
     //SpawnNSquaredJointedObject(Vector3(-20, 20, 10));
@@ -239,6 +244,7 @@ void PhysicsTests::CreateScene()
     cameraNode_ = new Node(context_);
     auto* camera = cameraNode_->CreateComponent<Camera>();
     camera->SetFarClip(500.0f);
+	
 
     // Set an initial position for the camera scene node above the floor
     cameraNode_->SetPosition(Vector3(0.0f, 5.0f, -15.0));
@@ -269,6 +275,7 @@ void PhysicsTests::CreateInstructions()
 void PhysicsTests::SetupViewport()
 {
     auto* renderer = GetSubsystem<Renderer>();
+
 
     // Set up a viewport to the Renderer subsystem so that the 3D scene can be seen
     SharedPtr<Viewport> viewport(new Viewport(context_, scene_, cameraNode_->GetComponent<Camera>()));
@@ -1252,12 +1259,39 @@ void PhysicsTests::SpawnTrialBike(Vector3 worldPosition, Quaternion orientation,
     //frontAxle->SetMotorTargetAngularRate(10);
 
 
-
-
-
     root->SetWorldPosition(worldPosition);
-    root->SetWorldRotation(orientation);
+	root->SetWorldRotation(orientation);
 }
+
+void PhysicsTests::SpawnATRT(Vector3 worldPosition)
+{
+	Node* root = scene_->CreateChild("ATRT");
+
+	//Body
+	Node* Body = SpawnSamplePhysicsBox(root, Vector3::ZERO, Vector3(1, 1, 1));
+
+
+	//Leg
+	Node* HIP = SpawnSamplePhysicsCylinder(root, Vector3(0.5, -0.5, -0.5), 0.5, 0.25);
+	HIP->Rotate(Quaternion(90, Vector3(1, 0, 0)));
+
+
+	NewtonHingeConstraint* HIPBODYJOINT = Body->CreateComponent<NewtonHingeConstraint>();
+	HIPBODYJOINT->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
+	HIPBODYJOINT->SetPosition(Vector3(0.5, -0.5, -0.5));
+	HIPBODYJOINT->SetOtherBody(HIP->GetComponent<NewtonRigidBody>());
+
+
+	//Node* J1 = SpawnSamplePhysicsCylinder(root, Vector3(1, -1, -0.5), 0.5, 0.25);
+	//Node* J2 = SpawnSamplePhysicsCylinder(root, Vector3(1.5, -2, -0.5), 0.5, 0.25);
+	//Node* J3 = SpawnSamplePhysicsCylinder(root, Vector3(1, -3, -0.5), 0.5, 0.25);
+
+
+	root->SetWorldPosition(worldPosition);
+	//root->SetWorldRotation(orientation);
+
+}
+
 
 void PhysicsTests::SpawnKinematicBodyTest(Vector3 worldPosition, Quaternion worldRotation)
 {
@@ -1362,6 +1396,16 @@ void PhysicsTests::HandlePostRenderUpdate(StringHash eventType, VariantMap& even
         scene_->GetComponent<NewtonPhysicsWorld>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
         //GetSubsystem<VisualDebugger>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>());
     }
+
+	bool doFrSim = ui::Button("ForwardSim", ImVec2(100, 50));
+
+	if (doFrSim)
+	{
+		context_->GetSubsystem<Engine>()->FrameSkip(10,1/60.0f);
+	}
+
+	
+
 }
 
 void PhysicsTests::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData)
@@ -1806,50 +1850,12 @@ void PhysicsTests::SetLogoVisible(bool enable)
 		logoSprite_->SetVisible(enable);
 }
 
-void PhysicsTests::CreateLogo()
-{
-	// Get logo texture
-	ResourceCache* cache = GetSubsystem<ResourceCache>();
-	Texture2D* logoTexture = cache->GetResource<Texture2D>("Textures/FishBoneLogo.png");
-	if (!logoTexture)
-		return;
-
-	// Create logo sprite and add to the UI layout
-	UI* ui = GetSubsystem<UI>();
-	logoSprite_ = ui->GetRoot()->CreateChild<Sprite>();
-
-	// Set logo sprite texture
-	logoSprite_->SetTexture(logoTexture);
-
-	int textureWidth = logoTexture->GetWidth();
-	int textureHeight = logoTexture->GetHeight();
-
-	// Set logo sprite scale
-	logoSprite_->SetScale(256.0f / textureWidth);
-
-	// Set logo sprite size
-	logoSprite_->SetSize(textureWidth, textureHeight);
-
-	// Set logo sprite hot spot
-	logoSprite_->SetHotSpot(textureWidth, textureHeight);
-
-	// Set logo sprite alignment
-	logoSprite_->SetAlignment(HA_RIGHT, VA_BOTTOM);
-
-	// Make logo not fully opaque to show the scene underneath
-	logoSprite_->SetOpacity(0.9f);
-
-	// Set a low priority for the logo so that other UI elements can be drawn on top
-	logoSprite_->SetPriority(-100);
-}
 
 void PhysicsTests::SetWindowTitleAndIcon()
 {
 	ResourceCache* cache = GetSubsystem<ResourceCache>();
 	Graphics* graphics = GetSubsystem<Graphics>();
-	Image* icon = cache->GetResource<Image>("Textures/UrhoIcon.png");
-	graphics->SetWindowIcon(icon);
-	graphics->SetWindowTitle("rbfx Sample");
+	graphics->SetWindowTitle("PhysicsTests");
 }
 
 void PhysicsTests::CreateConsoleAndDebugHud()

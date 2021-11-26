@@ -52,9 +52,9 @@ Node* SpawnSamplePhysicsCylinder(Node* parentNode, const Vector3& worldPosition,
     NewtonRigidBody* s1RigBody = sphere1->CreateComponent<NewtonRigidBody>();
 
     NewtonCollisionShape_Cylinder* s1ColShape = sphere1->CreateComponent<NewtonCollisionShape_Cylinder>();
-    //s1ColShape->SetRadius1(radius);
-    //s1ColShape->SetRadius2(radius);
-    //s1ColShape->SetLength(height);
+    s1ColShape->SetRadius1(radius);
+    s1ColShape->SetRadius2(radius);
+    s1ColShape->SetLength(height);
 
     //s1ColShape->SetScaleFactor(Vector3(height, radius*2, radius*2)*0.25f);
 
