@@ -130,6 +130,7 @@ private:
 	void SpawnRejointingTest(Vector3 worldPosition);
 	void SpawnCollisionOffsetTest(Vector3 worldPosition);
 	void SpawnATRT(Vector3 worldPosition);
+    void SpawnSegway(Vector3 worldPosition);
 
 
     /// Handle the logic update event.

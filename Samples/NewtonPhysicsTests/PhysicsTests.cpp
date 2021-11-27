@@ -66,6 +66,9 @@
 #include <NewtonCollisionShape.h>
 #include <NewtonCollisionShapesDerived.h>
 
+#include <torch/torch.h>
+#include <iostream>
+
 PhysicsTests::PhysicsTests(Context* context) : Application(context),
 yaw_(0.0f),
 pitch_(0.0f),
@@ -82,6 +85,8 @@ paused_(false)
 void PhysicsTests::Start(const ea::vector<ea::string>& args)
 {
 	PhysicsTests::Start(args);
+
+
 }
 
 void PhysicsTests::Start()
@@ -130,6 +135,7 @@ void PhysicsTests::Start()
 
 void PhysicsTests::CreateScene()
 {
+
     auto* cache = GetSubsystem<ResourceCache>();
 
     scene_ = new Scene(context_);
@@ -145,6 +151,7 @@ void PhysicsTests::CreateScene()
     scene_->CreateComponent<Octree>();
     NewtonPhysicsWorld* newtonWorld = scene_->CreateComponent<NewtonPhysicsWorld>();
     newtonWorld->SetGravity(Vector3(0, -9.81f, 0));
+    //newtonWorld->SetGravity(Vector3(0, 0, 0));
 	
     //scene_->CreateComponent<NewtonCollisionShape_SceneCollision>();
     scene_->CreateComponent<DebugRenderer>();
@@ -206,8 +213,13 @@ void PhysicsTests::CreateScene()
 
     Quaternion tilt = Quaternion(Random(-1.0f, 1.0f), Vector3(1, 0, 0));
 
-	for(int i = -10; i <= 10; i++)
-		SpawnTrialBike(Vector3(5, 5, i),  Quaternion(0, Vector3(0, 1, 0)) * tilt, true);
+    for (int i = -10; i <= 10; i++)
+    {
+        //SpawnTrialBike(Vector3(5, 5, i),  Quaternion(0, Vector3(0, 1, 0)) * tilt, true);
+        SpawnSegway(Vector3(5, 5, i*2));
+    }
+
+
     //SpawnTrialBike(Vector3(-5, 5, 0), Quaternion(90, Vector3(0, 1, 0)) * tilt, false);
 
     //SpawnKinematicBodyTest(Vector3(0, 0, 0), Quaternion::IDENTITY);
@@ -1230,7 +1242,7 @@ void PhysicsTests::SpawnTrialBike(Vector3 worldPosition, Quaternion orientation,
 
 
     NewtonHingeConstraint* motor = backWheel->CreateComponent<NewtonHingeConstraint>();
-    motor->SetPowerMode(NewtonHingeConstraint::MOTOR);
+    motor->SetPowerMode(NewtonHingeConstraint::MOTOR_SPEED);
     motor->SetOtherBody(C->GetComponent<NewtonRigidBody>());
     motor->SetWorldPosition(Vector3::ZERO + backWheelOffset);
     motor->SetWorldRotation(Quaternion(0, 90, 0));
@@ -1291,6 +1303,31 @@ void PhysicsTests::SpawnATRT(Vector3 worldPosition)
 	//root->SetWorldRotation(orientation);
 
 }
+
+
+
+void PhysicsTests::SpawnSegway(Vector3 worldPosition)
+{
+    Node* root = scene_->CreateChild("SegWay");
+
+    Node* Body = SpawnSamplePhysicsBox(root, Vector3::ZERO, Vector3(1, 4, 1));
+
+    Node* Wheel = SpawnSamplePhysicsCylinder(root, Vector3(0, -3, 0), 1.0, 0.5);
+    Wheel->Rotate(Quaternion(90, Vector3(1, 0, 0)));
+
+    NewtonHingeConstraint* motor = Body->CreateComponent<NewtonHingeConstraint>();
+    motor->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
+    motor->SetPosition(Vector3(0, -3, 0));
+    motor->SetEnableLimits(false);
+    motor->SetPowerMode(NewtonHingeConstraint::MOTOR_TORQUE);
+    motor->SetOtherBody(Wheel->GetComponent<NewtonRigidBody>());
+	motor->SetMotorTorque(1);
+    root->SetWorldPosition(worldPosition);
+}
+
+
+
+
 
 
 void PhysicsTests::SpawnKinematicBodyTest(Vector3 worldPosition, Quaternion worldRotation)
@@ -1401,7 +1438,7 @@ void PhysicsTests::HandlePostRenderUpdate(StringHash eventType, VariantMap& even
 
 	if (doFrSim)
 	{
-		context_->GetSubsystem<Engine>()->FrameSkip(10,1/60.0f);
+		context_->GetSubsystem<Engine>()->FrameSkip(10, 1/60.0f);
 	}
 
 	
@@ -1419,6 +1456,13 @@ void PhysicsTests::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventD
     //kinematicNode_->Rotate(Quaternion(10*timeStep, Vector3(0, 1, 0)));
     //kinematicNode_->GetComponent<RigidBody>()->SetAngularVelocity(Vector3(0, 10, 0));
     //kinematicNode_->GetComponent<RigidBody>()->SetWorldTransformToNode();
+
+
+
+
+
+
+
 }
 
 void PhysicsTests::HandlePhysicsPostStep(StringHash eventType, VariantMap& eventData)

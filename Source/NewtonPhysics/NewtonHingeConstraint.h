@@ -24,7 +24,8 @@ namespace Urho3D {
         enum PoweredMode
         {
             NO_POWER = 0,
-            MOTOR,
+            MOTOR_SPEED,
+            MOTOR_TORQUE,
             ACTUATOR
         };
 
@@ -85,6 +86,8 @@ namespace Urho3D {
         ///motor specific:
         void SetMotorTargetAngularRate(float rate);
 
+        void SetMotorTorque(float torque);
+
 
 
 
@@ -108,6 +111,7 @@ namespace Urho3D {
 
         float maxTorque_ = 10000.0f;
         float maxAngularRate_ = 1.0f;
+        float commandedTorque_ = 0.0f;
         float targetAngle_ = 0.0f;
 
         virtual void buildConstraint() override;
