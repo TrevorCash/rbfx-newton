@@ -87,6 +87,7 @@ namespace Urho3D {
         void SetMotorTargetAngularRate(float rate);
 
         void SetMotorTorque(float torque);
+		float GetMotorTorque() const { return commandedTorque_; }
 
 
 

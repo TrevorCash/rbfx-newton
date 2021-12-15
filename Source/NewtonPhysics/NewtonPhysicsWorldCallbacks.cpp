@@ -31,10 +31,10 @@ namespace Urho3D {
         rigidBodyComp->GetForceAndTorque(netForce, netTorque);
 
         Vector3 gravityForce;
-        if (rigidBodyComp->GetScene())//on scene destruction sometimes this is null so check...
+        if (rigidBodyComp->GetScene() != nullptr)//on scene destruction sometimes this is null so check...
         {
             NewtonPhysicsWorld* physicsWorld = rigidBodyComp->GetScene()->GetComponent<NewtonPhysicsWorld>();
-			if (physicsWorld)
+			if (physicsWorld != nullptr)
 			{
 				gravityForce = physicsWorld->GetGravity() * rigidBodyComp->GetEffectiveMass();
 
@@ -129,6 +129,10 @@ namespace Urho3D {
 
     void Newton_ProcessContactsCallback(const NewtonJoint* contactJoint, dFloat timestep, int threadIndex)
     {
+		//#TODO
+		return;
+
+
         //URHO3D_PROFILE_THREAD(NewtonThreadProfilerString(threadIndex).c_str());
         URHO3D_PROFILE_FUNCTION();
 

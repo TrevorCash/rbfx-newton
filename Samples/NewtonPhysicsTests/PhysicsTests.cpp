@@ -46,12 +46,11 @@
 #include "Urho3D/UI/Text3D.h"
 #include <Urho3D/RmlUI/RmlUI.h>
 #include <Urho3D/SystemUI/SystemUI.h>
+#include <Urho3D/Network/GymClient.h>
 
 #include "Urho3D/Graphics/Terrain.h"
 #include "Urho3D/Scene/Node.h"
 
-#include "PhysicsTests.h"
-#include "PhysicsSamplesUtils.h"
 
 #include "NewtonPhysicsWorld.h"
 #include "NewtonFixedDistanceConstraint.h"
@@ -66,7 +65,14 @@
 #include <NewtonCollisionShape.h>
 #include <NewtonCollisionShapesDerived.h>
 
+
+#include "PhysicsTests.h"
+#include "PhysicsSamplesUtils.h"
+#include "GYM_TrialBike.h"
+
+
 #include <torch/torch.h>
+
 #include <iostream>
 
 PhysicsTests::PhysicsTests(Context* context) : Application(context),
@@ -116,6 +122,7 @@ void PhysicsTests::Start()
 	//Register Newton Physics Lib
 	RegisterNewtonPhysicsLibrary(context_);
 
+	context_->RegisterFactory<GYM_TrialBike>();
 
     // Create the scene content
     CreateScene();
@@ -210,15 +217,12 @@ void PhysicsTests::CreateScene()
     //SpawnConvexHull(Vector3(-2, 3, 10));
 
 	//SpawnATRT(Vector3(5, 5, 0));
+	int nHinges = 2;
+	int yawPitchRoll = 3;
+	int speed = 1;
+	context_->GetSubsystem<GymClient>()->SetGYMSpec(nHinges, nHinges  + speed);
 
-    Quaternion tilt = Quaternion(Random(-1.0f, 1.0f), Vector3(1, 0, 0));
-
-    for (int i = -10; i <= 10; i++)
-    {
-        //SpawnTrialBike(Vector3(5, 5, i),  Quaternion(0, Vector3(0, 1, 0)) * tilt, true);
-        SpawnSegway(Vector3(5, 5, i*2));
-    }
-
+	ResetGYMs();
 
     //SpawnTrialBike(Vector3(-5, 5, 0), Quaternion(90, Vector3(0, 1, 0)) * tilt, false);
 
@@ -337,7 +341,8 @@ void PhysicsTests::MoveCamera(float timeStep)
     pitch_ = Clamp(pitch_, -90.0f, 90.0f);
 
     // Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
-    cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
+	if(!GetSubsystem<Input>()->IsMouseVisible())
+		cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
 
     float speedFactor = 1.0f;
     if (input->GetKeyDown(KEY_SHIFT) && !input->GetKeyDown(KEY_CTRL))
@@ -1173,6 +1178,7 @@ void PhysicsTests::SpawnHingeSpringTest(const Vector3 worldPosition, const Quate
 void PhysicsTests::SpawnTrialBike(Vector3 worldPosition, Quaternion orientation, bool enableGyroOnWheels)
 {
     Node* root = scene_->CreateChild("TrialBike");
+	root->AddTag("TrialBike");
 
     //A (Engine Body)
     Node* A = SpawnSamplePhysicsBox(root, Vector3::ZERO, Vector3(1, 1, 0.5f));
@@ -1207,9 +1213,16 @@ void PhysicsTests::SpawnTrialBike(Vector3 worldPosition, Quaternion orientation,
 
 
     NewtonHingeConstraint* hinge = E->CreateComponent<NewtonHingeConstraint>();
+	hinge->SetPowerMode(NewtonHingeConstraint::MOTOR_TORQUE);
     hinge->SetOtherBody(A->GetComponent<NewtonRigidBody>());
     hinge->SetWorldPosition(Vector3::ZERO + Vector3(1.2, 0.8, 0));
     hinge->SetWorldRotation(Quaternion(0,0,-90 + 20));
+
+	NewtonHingeConstraint* hingelimits = E->CreateComponent<NewtonHingeConstraint>();
+	hingelimits->SetOtherBody(A->GetComponent<NewtonRigidBody>());
+	hingelimits->SetWorldPosition(Vector3::ZERO + Vector3(1.2, 0.8, 0));
+	hingelimits->SetWorldRotation(Quaternion(0, 0, -90 + 20));
+
 
 
     Node* F = SpawnSamplePhysicsBox(root, Vector3::ZERO + Vector3(1.5, 0, 0), Vector3(0.2, 2.5, 0.5));
@@ -1263,7 +1276,7 @@ void PhysicsTests::SpawnTrialBike(Vector3 worldPosition, Quaternion orientation,
 
 
     NewtonHingeConstraint* frontAxle = frontWheel->CreateComponent<NewtonHingeConstraint>();
-    //frontAxle->SetPowerMode(HingeConstraint::MOTOR);
+    //frontAxle->SetPowerMode(NewtonHingeConstraint::MOTOR_TORQUE);
     frontAxle->SetOtherBody(F->GetComponent<NewtonRigidBody>());
     frontAxle->SetWorldPosition(Vector3::ZERO + frontWheelOffset);
     frontAxle->SetWorldRotation(Quaternion(0, 90, 0));
@@ -1271,37 +1284,191 @@ void PhysicsTests::SpawnTrialBike(Vector3 worldPosition, Quaternion orientation,
     //frontAxle->SetMotorTargetAngularRate(10);
 
 
+
+
     root->SetWorldPosition(worldPosition);
 	root->SetWorldRotation(orientation);
 }
 
+
+void PhysicsTests::ResetGYMs()
+{	
+	GymClient* gymCli = context_->GetSubsystem<GymClient>();
+
+	while (gyms.size() > gymCli->numGYMS)
+	{
+		gyms.pop_back();
+	}
+	while (gyms.size() < gymCli->numGYMS)
+	{
+		gyms.push_back(context_->CreateObject<GYM_TrialBike>());
+	}
+
+
+	int sqrt = Sqrt(gymCli->numGYMS);
+
+	int i = 0; 
+	for (int x = 0; x <= sqrt; x++)
+	{
+		for (int y = 0; y <= sqrt; y++)
+		{
+			if (i >= gyms.size()) continue;
+			gyms[i]->worldPos = Vector3(x*10, 3, y*10);
+			i++;
+
+		}
+	}
+
+	for (int i = 0; i < gyms.size(); i++)
+	{
+		gyms[i]->scene_ = scene_;
+		gyms[i]->Reset();
+		gyms[i]->PostReset();
+	}
+
+}
 void PhysicsTests::SpawnATRT(Vector3 worldPosition)
 {
 	Node* root = scene_->CreateChild("ATRT");
+	root->AddTag("ATRT");
 
 	//Body
 	Node* Body = SpawnSamplePhysicsBox(root, Vector3::ZERO, Vector3(1, 1, 1));
 
 
-	//Leg
-	Node* HIP = SpawnSamplePhysicsCylinder(root, Vector3(0.5, -0.5, -0.5), 0.5, 0.25);
-	HIP->Rotate(Quaternion(90, Vector3(1, 0, 0)));
+	//LEFT LEG
+	Node* HIP_LEFT = SpawnSamplePhysicsCylinder(root, Vector3(0.5, -0.5, -0.5), 0.5, 0.25);
+	HIP_LEFT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
+
+	NewtonHingeConstraint* HIPBODYJOINT_LEFT = Body->CreateComponent<NewtonHingeConstraint>();
+	HIPBODYJOINT_LEFT->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
+	HIPBODYJOINT_LEFT->SetPosition(Vector3(0.5, -0.5, -0.5));
+	HIPBODYJOINT_LEFT->SetOtherBody(HIP_LEFT->GetComponent<NewtonRigidBody>());
+
+	NewtonHingeConstraint* HIPBODYJOINT_LEFT_R = Body->CreateComponent<NewtonHingeConstraint>();
+	HIPBODYJOINT_LEFT_R->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
+	HIPBODYJOINT_LEFT_R->SetPosition(Vector3(0.5, -0.5, -0.5));
+	HIPBODYJOINT_LEFT_R->SetOtherBody(HIP_LEFT->GetComponent<NewtonRigidBody>());
 
 
-	NewtonHingeConstraint* HIPBODYJOINT = Body->CreateComponent<NewtonHingeConstraint>();
-	HIPBODYJOINT->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
-	HIPBODYJOINT->SetPosition(Vector3(0.5, -0.5, -0.5));
-	HIPBODYJOINT->SetOtherBody(HIP->GetComponent<NewtonRigidBody>());
+
+	Node* KNEE_LEFT = SpawnSamplePhysicsCylinder(HIP_LEFT, Vector3(1.0, -1.5, -0.5), 0.3, 0.25);
+	KNEE_LEFT->RemoveComponent<NewtonRigidBody>();
+
+	Node* KNEE2_LEFT = SpawnSamplePhysicsCylinder(root, Vector3(1.0, -1.5, -0.75), 0.3, 0.25);
+	KNEE2_LEFT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
+
+	NewtonHingeConstraint* KNEEJOINT_LEFT = HIP_LEFT->CreateComponent<NewtonHingeConstraint>();
+	KNEEJOINT_LEFT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
+	KNEEJOINT_LEFT->SetWorldPosition(KNEE_LEFT->GetWorldPosition());
+	KNEEJOINT_LEFT->SetOtherBody(KNEE2_LEFT->GetComponent<NewtonRigidBody>());
+
+	NewtonHingeConstraint* KNEEJOINT_LEFT_R = HIP_LEFT->CreateComponent<NewtonHingeConstraint>();
+	KNEEJOINT_LEFT_R->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
+	KNEEJOINT_LEFT_R->SetWorldPosition(KNEE_LEFT->GetWorldPosition());
+	KNEEJOINT_LEFT_R->SetOtherBody(KNEE2_LEFT->GetComponent<NewtonRigidBody>());
 
 
-	//Node* J1 = SpawnSamplePhysicsCylinder(root, Vector3(1, -1, -0.5), 0.5, 0.25);
-	//Node* J2 = SpawnSamplePhysicsCylinder(root, Vector3(1.5, -2, -0.5), 0.5, 0.25);
-	//Node* J3 = SpawnSamplePhysicsCylinder(root, Vector3(1, -3, -0.5), 0.5, 0.25);
 
+
+
+
+
+	Node* KNEE3_LEFT = SpawnSamplePhysicsCylinder(KNEE2_LEFT, Vector3(1.0, -2.5, -0.5), 0.3, 0.25);
+	KNEE3_LEFT->RemoveComponent<NewtonRigidBody>();
+
+	Node* KNEE4_LEFT = SpawnSamplePhysicsCylinder(root, Vector3(1.0, -2.5, -0.75), 0.3, 0.25);
+	KNEE4_LEFT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
+
+	NewtonHingeConstraint* KNEEJOINT2_LEFT = KNEE2_LEFT->CreateComponent<NewtonHingeConstraint>();
+	KNEEJOINT2_LEFT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
+	KNEEJOINT2_LEFT->SetWorldPosition(KNEE3_LEFT->GetWorldPosition());
+	KNEEJOINT2_LEFT->SetOtherBody(KNEE4_LEFT->GetComponent<NewtonRigidBody>());
+
+	NewtonHingeConstraint* KNEEJOINT2_LEFT_R = KNEE2_LEFT->CreateComponent<NewtonHingeConstraint>();
+	KNEEJOINT2_LEFT_R->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
+	KNEEJOINT2_LEFT_R->SetWorldPosition(KNEE3_LEFT->GetWorldPosition());
+	KNEEJOINT2_LEFT_R->SetOtherBody(KNEE4_LEFT->GetComponent<NewtonRigidBody>());
+
+
+	Node* FOOT_LEFT = SpawnSamplePhysicsCylinder(KNEE4_LEFT, Vector3(0, -3, -0.5), 0.2, 0.25);
+	FOOT_LEFT->RemoveComponent<NewtonRigidBody>();
+
+	//RIGHT LEG
+	Node* HIP_RIGHT = SpawnSamplePhysicsCylinder(root, Vector3(0.5, -0.5, 0.5), 0.5, 0.25);
+	HIP_RIGHT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
+
+	NewtonHingeConstraint* HIPBODYJOINT_RIGHT = Body->CreateComponent<NewtonHingeConstraint>();
+	HIPBODYJOINT_RIGHT->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
+	HIPBODYJOINT_RIGHT->SetPosition(Vector3(0.5, -0.5, 0.5));
+	HIPBODYJOINT_RIGHT->SetOtherBody(HIP_RIGHT->GetComponent<NewtonRigidBody>());
+
+	NewtonHingeConstraint* HIPBODYJOINT_RIGHT_R = Body->CreateComponent<NewtonHingeConstraint>();
+	HIPBODYJOINT_RIGHT_R->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
+	HIPBODYJOINT_RIGHT_R->SetPosition(Vector3(0.5, -0.5, 0.5));
+	HIPBODYJOINT_RIGHT_R->SetOtherBody(HIP_RIGHT->GetComponent<NewtonRigidBody>());
+
+
+	Node* KNEE_RIGHT = SpawnSamplePhysicsCylinder(HIP_RIGHT, Vector3(1.0, -1.5, 0.75), 0.3, 0.25);
+	KNEE_RIGHT->RemoveComponent<NewtonRigidBody>();
+
+	Node* KNEE2_RIGHT = SpawnSamplePhysicsCylinder(root, Vector3(1.0, -1.5, 0.5), 0.3, 0.25);
+	KNEE2_RIGHT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
+
+	NewtonHingeConstraint* KNEEJOINT_RIGHT = HIP_RIGHT->CreateComponent<NewtonHingeConstraint>();
+	KNEEJOINT_RIGHT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
+	KNEEJOINT_RIGHT->SetWorldPosition(KNEE_RIGHT->GetWorldPosition());
+	KNEEJOINT_RIGHT->SetOtherBody(KNEE2_RIGHT->GetComponent<NewtonRigidBody>());
+
+	NewtonHingeConstraint* KNEEJOINT_RIGHT_R = HIP_RIGHT->CreateComponent<NewtonHingeConstraint>();
+	KNEEJOINT_RIGHT_R->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
+	KNEEJOINT_RIGHT_R->SetWorldPosition(KNEE_RIGHT->GetWorldPosition());
+	KNEEJOINT_RIGHT_R->SetOtherBody(KNEE2_RIGHT->GetComponent<NewtonRigidBody>());
+
+
+	Node* KNEE3_RIGHT = SpawnSamplePhysicsCylinder(KNEE2_RIGHT, Vector3(1.0, -2.5, 0.75), 0.3, 0.25);
+	KNEE3_RIGHT->RemoveComponent<NewtonRigidBody>();
+
+	Node* KNEE4_RIGHT = SpawnSamplePhysicsCylinder(root, Vector3(1.0, -2.5, 0.5), 0.3, 0.25);
+	KNEE4_RIGHT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
+
+	NewtonHingeConstraint* KNEEJOINT2_RIGHT = KNEE2_RIGHT->CreateComponent<NewtonHingeConstraint>();
+	KNEEJOINT2_RIGHT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
+	KNEEJOINT2_RIGHT->SetWorldPosition(KNEE3_RIGHT->GetWorldPosition());
+	KNEEJOINT2_RIGHT->SetOtherBody(KNEE4_RIGHT->GetComponent<NewtonRigidBody>());
+
+	NewtonHingeConstraint* KNEEJOINT2_RIGHT_R = KNEE2_RIGHT->CreateComponent<NewtonHingeConstraint>();
+	KNEEJOINT2_RIGHT_R->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
+	KNEEJOINT2_RIGHT_R->SetWorldPosition(KNEE3_RIGHT->GetWorldPosition());
+	KNEEJOINT2_RIGHT_R->SetOtherBody(KNEE4_RIGHT->GetComponent<NewtonRigidBody>());
+
+	Node* FOOT_RIGHT = SpawnSamplePhysicsCylinder(KNEE4_RIGHT, Vector3(0, -3, 0.5), 0.2, 0.25);
+	FOOT_RIGHT->RemoveComponent<NewtonRigidBody>();
+
+
+	NewtonHingeConstraint::PoweredMode powerMode = NewtonHingeConstraint::MOTOR_TORQUE;
+	HIPBODYJOINT_LEFT->SetPowerMode(powerMode);
+	HIPBODYJOINT_RIGHT->SetPowerMode(powerMode);
+	KNEEJOINT_LEFT->SetPowerMode(powerMode);
+	KNEEJOINT_RIGHT->SetPowerMode(powerMode);
+	KNEEJOINT2_LEFT->SetPowerMode(powerMode);
+	KNEEJOINT2_RIGHT->SetPowerMode(powerMode);
+
+	//ea::vector<NewtonHingeConstraint*> motors;
+	//motors.push_back(HIPBODYJOINT_LEFT);
+	//motors.push_back(HIPBODYJOINT_RIGHT);
+	//motors.push_back(KNEEJOINT_LEFT);
+	//motors.push_back(KNEEJOINT_RIGHT);
+	//motors.push_back(KNEEJOINT2_LEFT);
+	//motors.push_back(KNEEJOINT2_RIGHT);
+	//GymMotors.push_back(motors);
+
+	//GymBodies.push_back(Body);
 
 	root->SetWorldPosition(worldPosition);
-	//root->SetWorldRotation(orientation);
+	root->Rotate(Quaternion(RandomNormal(0, 45), Vector3(0, 0, 1)));
 
+	Body->GetComponent<NewtonRigidBody>()->SetLinearVelocityHard(Vector3(0, 0.1, 0));
 }
 
 
@@ -1380,9 +1547,7 @@ void PhysicsTests::SpawnCollisionOffsetTest(Vector3 worldPosition)
 	Node* boxB = SpawnSamplePhysicsBox(scene_, worldPosition + Vector3( 1,0,0 ), Vector3::ONE);
 
 	//alter boxB so its collision is offset by a large amount.
-	boxB->GetDerivedComponent<NewtonCollisionShape>()->SetPositionOffset(Vector3(0,10, 10));
-
-
+	boxB->GetDerivedComponent<NewtonCollisionShape>()->SetPositionOffset(Vector3(0, 10, 10));
 
 }
 
@@ -1422,6 +1587,19 @@ void PhysicsTests::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
     }
 
+	GymClient* GymCli = context_->GetSubsystem<GymClient>();
+	if (GymCli->resetPending)
+	{
+		ResetGYMs();
+		GymCli->resetPending = false;
+	}
+	else
+	{
+		for (int i = 0; i < gyms.size(); i++)
+		{
+			gyms[i]->Update(timeStep);
+		}
+	}
 
    
 }
@@ -1435,31 +1613,32 @@ void PhysicsTests::HandlePostRenderUpdate(StringHash eventType, VariantMap& even
     }
 
 	bool doFrSim = ui::Button("ForwardSim", ImVec2(100, 50));
-
+	bool openGYM = ui::Button("Open GYM Server", ImVec2(100, 50));
+	bool resetGYM = ui::Button("Reset", ImVec2(100, 50));
+	
+	ui::Text("NumGYMS: %d",context_->GetSubsystem<GymClient>()->numGYMS);
 	if (doFrSim)
 	{
 		context_->GetSubsystem<Engine>()->FrameSkip(10, 1/60.0f);
 	}
 
+	if (openGYM)
+	{
+
+		context_->GetSubsystem<GymClient>()->Connect();
+	}
+
+	if (resetGYM)
+	{
+		context_->GetSubsystem<GymClient>()->resetPending = true;
+
+	}
 	
 
 }
 
 void PhysicsTests::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData)
 {
-    //float timeStep = eventData[PhysicsPreStep::P_TIMESTEP].GetFloat();
-
-
-    ////rotate the kinamatic body
-
-    ////it is important that the node is rotated by an amount that is scaled by the physics timestep as to match the rigid bodies angular velocity.
-    //kinematicNode_->Rotate(Quaternion(10*timeStep, Vector3(0, 1, 0)));
-    //kinematicNode_->GetComponent<RigidBody>()->SetAngularVelocity(Vector3(0, 10, 0));
-    //kinematicNode_->GetComponent<RigidBody>()->SetWorldTransformToNode();
-
-
-
-
 
 
 
@@ -1468,6 +1647,23 @@ void PhysicsTests::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventD
 void PhysicsTests::HandlePhysicsPostStep(StringHash eventType, VariantMap& eventData)
 {
     float timeStep = eventData[NewtonPhysicsPostStep::P_TIMESTEP].GetFloat();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     //rotate the kinamatic body
@@ -1609,7 +1805,7 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
 
-    if (1) {
+    if (0) {
         // Create a floor object, 1000 x 1000 world units. Adjust position so that the ground is at zero Y
         Node* floorNode = scene_->CreateChild("Floor");
         floorNode->SetPosition(worldPosition - Vector3(0, 0.5f, 0));
@@ -1618,7 +1814,6 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
         floorObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
         floorObject->SetMaterial(cache->GetResource<Material>("Materials/StoneTiled.xml"));
 
-        //// Make the floor physical by adding NewtonCollisionShape component. 
 
         auto* shape = floorNode->CreateComponent<NewtonCollisionShape_Box>();
 
@@ -1759,6 +1954,9 @@ void PhysicsTests::CreatePickTargetNodeOnPhysics()
         //get the first root rigid body
 		ea::vector<NewtonRigidBody*> rgbodies;
 		GetRootRigidBodies(rgbodies, res.node_, false);
+		if (!rgbodies.size())
+			return;
+
 		NewtonRigidBody* candidateBody = rgbodies.front();
         if (!candidateBody)
             return;
@@ -1817,15 +2015,15 @@ void PhysicsTests::UpdatePickPull()
 {
     Node* pickTarget = cameraNode_->GetChild("CameraPullPoint");
 
-    if (!pickTarget)
+    if (pickTarget == nullptr)
         return;
-    if (!pickPullNode)
+    if (pickPullNode == nullptr)
         return;
 
 
     Node* pickSource = pickPullNode->GetChild("PickPullSurfaceNode");
 
-    if (!pickSource)
+    if (pickSource == nullptr)
         return;
 
     pickPullNode->GetComponent<NewtonKinematicsControllerConstraint>()->SetOtherPosition(pickTarget->GetWorldPosition());

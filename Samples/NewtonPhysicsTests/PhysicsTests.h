@@ -24,12 +24,14 @@
 
 #include "Samples/Sample.h"
 #include "NewtonConstraint.h"
+#include "GYM.h"
 
 namespace Urho3D
 {
 class Node;
 class Scene;
 class NewtonHingeConstraint;
+
 }
 /// PhysicsTests example.
 /// This sample demonstrates different types of physics configurations and provides a testing ground for physics functionality.
@@ -194,6 +196,8 @@ private:
     void RemovePickNode(bool removeRigidBodyOnly = false);
    
    
+	void ResetGYMs();
+	ea::vector<SharedPtr<GYM>> gyms;
 
 
 	protected:

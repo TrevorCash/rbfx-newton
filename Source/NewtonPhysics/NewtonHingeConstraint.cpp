@@ -220,7 +220,13 @@ namespace Urho3D {
             {
                 if (powerMode_ == MOTOR_TORQUE)
                 {
-					static_cast<dCustomHinge*>(newtonJoint_)->EnableMotor(true, 20000);
+					float speed = 20000;
+
+					if (commandedTorque_ < 0.0f)
+						speed = -speed;
+
+					static_cast<dCustomHinge*>(newtonJoint_)->EnableMotor(true, speed);
+					
 					static_cast<dCustomHinge*>(newtonJoint_)->SetFriction((commandedTorque_));
                 }
             }
@@ -371,12 +377,13 @@ namespace Urho3D {
         }
         else if (powerMode_ == MOTOR_SPEED)
         {
+			static_cast<dCustomHinge*>(newtonJoint_)->EnableLimits(enableLimits_);
             static_cast<dCustomHinge*>(newtonJoint_)->SetFriction((maxTorque_));
             static_cast<dCustomHinge*>(newtonJoint_)->EnableMotor(true, maxAngularRate_);
         }
         else if (powerMode_ == MOTOR_TORQUE)
         {
-
+			static_cast<dCustomHinge*>(newtonJoint_)->EnableLimits(enableLimits_);
 			static_cast<dCustomHinge*>(newtonJoint_)->EnableMotor(true, 20000);
 			static_cast<dCustomHinge*>(newtonJoint_)->SetFriction((commandedTorque_));
 

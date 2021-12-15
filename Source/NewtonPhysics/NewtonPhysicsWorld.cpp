@@ -453,16 +453,18 @@ namespace Urho3D {
             if (entry->expired_)
                 continue;
 
+			if (entry->body0.Expired() || entry->body1.Expired())//check expired
+			{
+				continue;
+			}
+
             eventData[NewtonPhysicsCollisionStart::P_BODYA] = entry->body0;
             eventData[NewtonPhysicsCollisionStart::P_BODYB] = entry->body1;
 
             eventData[NewtonPhysicsCollisionStart::P_CONTACT_DATA] = entry;
 
-            if (entry->body0.Expired() || entry->body1.Expired())//check expired
-            {
-                entry->expired_ = true;
-            }
-            else if (entry->wakeFlag_ && !entry->wakeFlagPrev_)//begin contact
+
+             if (entry->wakeFlag_ && !entry->wakeFlagPrev_)//begin contact
             {
                 if (entry->body0->collisionEventMode_ &&entry->body1->collisionEventMode_) {
                     SendEvent(E_NEWTON_PHYSICSCOLLISIONSTART, eventData);

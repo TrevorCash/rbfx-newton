@@ -190,8 +190,11 @@ namespace Urho3D {
 
     void NewtonConstraint::WakeBodies()
     {
-        ownBody_->Activate();
-        otherBody_->Activate(); 
+		if(ownBody_.NotNull())
+			ownBody_->Activate();
+
+		if(otherBody_.NotNull())
+			otherBody_->Activate(); 
     }
 
     void NewtonConstraint::SetWorldPosition(const Vector3& position)
@@ -597,6 +600,24 @@ namespace Urho3D {
 		return body;
 	}
 
+	Urho3D::NewtonRigidBody* NewtonConstraint::resolveBody(Node* node)
+	{
+		ea::vector<NewtonRigidBody*> rigidBodies;
+		GetRootRigidBodies(rigidBodies, node, true);
+
+		for (NewtonRigidBody* rb : rigidBodies)
+		{
+			if (rb->IsEnabled()) {
+				//if(rb != body)
+					//URHO3D_LOGINFO("NewtonConstraint(" + ea::to_string((long)(void*)this) + "): body resolved from node name " + body->GetNode()->GetName() + " to node name " + rb->GetNode()->GetName());
+
+				return rb;
+			}
+		}
+
+		return nullptr;
+	}
+
     void NewtonConstraint::buildConstraint()
     {
         /// ovverride in derived classes.
@@ -664,6 +685,7 @@ namespace Urho3D {
 
 			//resolve ownBody just in case it should actually belong to a parent body.
 			ownBodyResolved_ = resolveBody(ownBody_);
+
             
             SetOtherBody(physicsWorld_->sceneBody_, false);
 

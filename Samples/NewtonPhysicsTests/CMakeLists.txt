@@ -26,7 +26,17 @@ endif ()
 find_package(Torch REQUIRED)
 
 
-add_executable(NewtonPhysicsTests ${TARGET_TYPE} PhysicsTests.cpp PhysicsTests.h PhysicsSamplesUtils.h PhysicsSamplesUtils.cpp)
+file (GLOB_RECURSE SOURCE_FILES *.cpp *.h)
+group_sources()
+
+
+
+if (NOT URHO3D_WIN32_CONSOLE)
+    set (TARGET_TYPE WIN32)
+endif ()
+
+# Define executable name.
+add_executable(NewtonPhysicsTests ${TARGET_TYPE} ${SOURCE_FILES})
 target_link_libraries(NewtonPhysicsTests PUBLIC rbfx-newton Urho3D "${TORCH_LIBRARIES}")
 
 
@@ -39,7 +49,7 @@ if (MSVC)
   file(GLOB TORCH_DLLS "${TORCH_INSTALL_PREFIX}/lib/*.dll")
   add_custom_command(TARGET NewtonPhysicsTests
                      POST_BUILD
-                     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
                      ${TORCH_DLLS}
                      $<TARGET_FILE_DIR:NewtonPhysicsTests>)
 endif (MSVC)

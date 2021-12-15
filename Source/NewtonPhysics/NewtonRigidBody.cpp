@@ -579,12 +579,14 @@ namespace Urho3D {
 
 
 				debug->AddFrame(GetCOMWorldTransform(), 1.2f*localScale, Color::MAGENTA, Color::YELLOW, Color::CYAN, depthTest);
+
             }
 			if (showBodyFrame)
 			{
 				dMatrix matrix;
 				NewtonBodyGetMatrix(newtonBody_, &matrix[0][0]);
 				debug->AddFrame(Matrix3x4(NewtonToUrhoMat4(matrix)), 1.0f*localScale, Color::RED, Color::GREEN, Color::BLUE, depthTest);
+
 
 			}
             if (showContactForces)
@@ -737,12 +739,12 @@ namespace Urho3D {
         if (!IsEnabledEffective())
             return;
 
-		URHO3D_LOGINFO("rebuildbody..");
+		//URHO3D_LOGINFO("rebuildbody..");
         ea::vector<NewtonCollisionShape*> enabledCollisionShapes;
         updateChildCollisionShapes(enabledCollisionShapes);
 
 
-		URHO3D_LOGINFO("child collision shapes: " + ea::to_string(enabledCollisionShapes.size()));
+		//URHO3D_LOGINFO("child collision shapes: " + ea::to_string(enabledCollisionShapes.size()));
 
 
         ///determine early on if a compound is going to be needed.
@@ -969,7 +971,7 @@ namespace Urho3D {
                         }
 
 
-                       URHO3D_LOGINFO("Hacked Inertia Matrix: " + NewtonToUrhoMat4(finalInertia).ToString() + " Mass: " + ea::to_string(mass_) + " Volume: " + ea::to_string(vol));
+                       //URHO3D_LOGINFO("Hacked Inertia Matrix: " + NewtonToUrhoMat4(finalInertia).ToString() + " Mass: " + ea::to_string(mass_) + " Volume: " + ea::to_string(vol));
                     }
 
                     NewtonBodyGetCentreOfMass(newtonBody_, &finalCenterOfMass[0]);
@@ -1002,7 +1004,7 @@ namespace Urho3D {
 		NewtonBodySetFullMassMatrix(newtonBody_, mass_, &finalInertia[0][0]);
 
 
-        URHO3D_LOGINFO("Final Inertia Matrix: " + NewtonToUrhoMat4(finalInertia).ToString() + " Mass: " + ea::to_string(mass_));
+        //URHO3D_LOGINFO("Final Inertia Matrix: " + NewtonToUrhoMat4(finalInertia).ToString() + " Mass: " + ea::to_string(mass_));
 
       
 

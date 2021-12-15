@@ -244,6 +244,7 @@ namespace Urho3D {
         void reEvalConstraint();
         
 		NewtonRigidBody* resolveBody(NewtonRigidBody* body);
+		NewtonRigidBody* resolveBody(Node* body);
 
         /// build the newton constraint.
         virtual void buildConstraint();
