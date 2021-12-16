@@ -1312,7 +1312,7 @@ void PhysicsTests::ResetGYMs()
 		for (int y = 0; y <= sqrt; y++)
 		{
 			if (i >= gyms.size()) continue;
-			gyms[i]->worldPos = Vector3(x*10, 3, y*10);
+			gyms[i]->worldPos = Vector3(x*20, 1.5, y*20);
 			i++;
 
 		}
@@ -1632,6 +1632,8 @@ void PhysicsTests::HandlePostRenderUpdate(StringHash eventType, VariantMap& even
 	bool openGYM = ui::Button("Open GYM Server", ImVec2(100, 50));
 	bool resetGYM = ui::Button("Reset", ImVec2(100, 50));
 	
+
+
 	ui::Text("NumGYMS: %d",context_->GetSubsystem<GymClient>()->numGYMS);
 	if (doFrSim)
 	{
@@ -1650,6 +1652,10 @@ void PhysicsTests::HandlePostRenderUpdate(StringHash eventType, VariantMap& even
 
 	}
 	
+
+	gyms[0]->DrawUIStats();
+
+
 
 }
 

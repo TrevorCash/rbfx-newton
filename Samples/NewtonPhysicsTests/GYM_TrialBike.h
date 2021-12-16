@@ -129,40 +129,51 @@ public:
 		//frontAxle->SetMotorTargetAngularRate(10);
 
 		motors.clear();
+		
 		motors.push_back(hinge);
+		motors.push_back(motor);
 
 		rootNode->SetWorldPosition(worldPos);
-
+		rootNode->Rotate(Quaternion(10, Vector3(1, 0, 0)));
 
 	}
 
 
 	virtual void ResizeVectors()
 	{
-		stateVec.resize(2);
+		stateVec.resize(5);
 		actionVec.resize(1);
 	}
 
-	virtual void FormResponses()
+	virtual void FormResponses(float timeStep)
 	{
-		GYM::FormResponses();
+		GYM::FormResponses(timeStep);
 		GymClient* GymCli = context_->GetSubsystem<GymClient>();
 
-		stateVec[0] = bodyNode->GetUp().z_;
-		stateVec[1] = motors[0]->GetCurrentAngle();
+		sideAngle_1 = stateVec[1];
 
-		reward = bodyNode->GetComponent<NewtonRigidBody>()->GetAngularVelocity(Urho3D::TS_WORLD).y_ + bodyNode->GetUp().z_;
+		stateVec[0] = bodyNode->GetUp().y_;
+		stateVec[1] = 2.0f*bodyNode->GetRotation().EulerAngles().x_/180.0f;
+		stateVec[2] = motors[0]->GetCurrentAngle();
+		stateVec[3] = bodyNode->GetComponent<NewtonRigidBody>()->GetLinearVelocity(Urho3D::TS_LOCAL).x_;
+		stateVec[4] = (stateVec[1] - sideAngle_1)/timeStep;
+
+
+		float angularFactor = bodyNode->GetComponent<NewtonRigidBody>()->GetAngularVelocity(Urho3D::TS_WORLD).y_;
+		angularFactor = angularFactor * 100;
+		reward = stateVec[0];
 	}
 
-	virtual void ApplyActionVec()
+	virtual void ApplyActionVec(float timeStep)
 	{
-		GYM::ApplyActionVec();
+		GYM::ApplyActionVec(timeStep);
 
-		motors[0]->SetMotorTorque(actionVec[0]);
+		motors[0]->SetMotorTorque(actionVec[0]*3);
 		
 	}
 
 
+	float sideAngle_1 = 0.0f;
 	ea::vector<NewtonHingeConstraint*> motors;
 	WeakPtr<Node> bodyNode;
 };
