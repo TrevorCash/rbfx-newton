@@ -57,7 +57,7 @@ namespace Urho3D {
 
     NewtonConstraint::~NewtonConstraint()
     {
-		URHO3D_LOGINFO("NewtonConstraint Destructor");
+		//URHO3D_LOGINFO("NewtonConstraint Destructor");
     }
 
     void NewtonConstraint::RegisterObject(Context* context)
@@ -190,10 +190,10 @@ namespace Urho3D {
 
     void NewtonConstraint::WakeBodies()
     {
-		if(ownBody_.NotNull())
+		if(!ownBody_.Expired())
 			ownBody_->Activate();
 
-		if(otherBody_.NotNull())
+		if(!otherBody_.Expired())
 			otherBody_->Activate(); 
     }
 

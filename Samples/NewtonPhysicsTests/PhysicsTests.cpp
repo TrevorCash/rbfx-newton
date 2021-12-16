@@ -217,12 +217,9 @@ void PhysicsTests::CreateScene()
     //SpawnConvexHull(Vector3(-2, 3, 10));
 
 	//SpawnATRT(Vector3(5, 5, 0));
-	int nHinges = 2;
-	int yawPitchRoll = 3;
-	int speed = 1;
-	context_->GetSubsystem<GymClient>()->SetGYMSpec(nHinges, nHinges  + speed);
 
-	ResetGYMs();
+	ResetGYMs();	
+
 
     //SpawnTrialBike(Vector3(-5, 5, 0), Quaternion(90, Vector3(0, 1, 0)) * tilt, false);
 
@@ -1292,11 +1289,13 @@ void PhysicsTests::SpawnTrialBike(Vector3 worldPosition, Quaternion orientation,
 
 
 void PhysicsTests::ResetGYMs()
-{	
+{
+	URHO3D_LOGINFO("ResetGYMs");
 	GymClient* gymCli = context_->GetSubsystem<GymClient>();
 
 	while (gyms.size() > gymCli->numGYMS)
 	{
+		gyms.back()->TearDown();
 		gyms.pop_back();
 	}
 	while (gyms.size() < gymCli->numGYMS)
@@ -1319,12 +1318,17 @@ void PhysicsTests::ResetGYMs()
 		}
 	}
 
-	for (int i = 0; i < gyms.size(); i++)
+	for (int i = 0; i < gymCli->numGYMS; i++)
 	{
 		gyms[i]->scene_ = scene_;
 		gyms[i]->Reset();
 		gyms[i]->PostReset();
 	}
+
+
+
+	context_->GetSubsystem<GymClient>()->SetGYMSpec(gyms[0]->actionVec.size(), gyms[0]->stateVec.size());
+
 
 }
 void PhysicsTests::SpawnATRT(Vector3 worldPosition)
@@ -1591,16 +1595,28 @@ void PhysicsTests::HandleUpdate(StringHash eventType, VariantMap& eventData)
 	if (GymCli->resetPending)
 	{
 		ResetGYMs();
+
 		GymCli->resetPending = false;
 	}
 	else
 	{
 		for (int i = 0; i < gyms.size(); i++)
 		{
+			//get actions from gymclient
+			gyms[i]->actionVec = GymCli->actionSets[i];
+
+
 			gyms[i]->Update(timeStep);
 		}
 	}
 
+	//gather response data and copy to GymCli
+	for (int i = 0; i < gyms.size(); i++)
+	{
+		GymCli->states[i] = gyms[i]->stateVec;
+		GymCli->rewards[i] = gyms[i]->reward;
+		GymCli->ends[i] = gyms[i]->end;
+	}
    
 }
 
@@ -1805,7 +1821,7 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
 
-    if (0) {
+    if (1) {
         // Create a floor object, 1000 x 1000 world units. Adjust position so that the ground is at zero Y
         Node* floorNode = scene_->CreateChild("Floor");
         floorNode->SetPosition(worldPosition - Vector3(0, 0.5f, 0));

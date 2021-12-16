@@ -128,7 +128,7 @@ public:
 		frontAxle->SetEnableLimits(false);
 		//frontAxle->SetMotorTargetAngularRate(10);
 
-		motors.push_back(motor);
+		motors.clear();
 		motors.push_back(hinge);
 
 		rootNode->SetWorldPosition(worldPos);
@@ -140,7 +140,7 @@ public:
 	virtual void ResizeVectors()
 	{
 		stateVec.resize(2);
-		actionVec.resize(2);
+		actionVec.resize(1);
 	}
 
 	virtual void FormResponses()
@@ -148,20 +148,18 @@ public:
 		GYM::FormResponses();
 		GymClient* GymCli = context_->GetSubsystem<GymClient>();
 
-		stateVec[0] = motors[0]->GetCurrentAngularRate();
-		stateVec[1] = motors[1]->GetCurrentAngle();
+		stateVec[0] = bodyNode->GetUp().z_;
+		stateVec[1] = motors[0]->GetCurrentAngle();
 
-		reward = bodyNode->GetComponent<NewtonRigidBody>()->GetLinearVelocity().x_;
-
+		reward = bodyNode->GetComponent<NewtonRigidBody>()->GetAngularVelocity(Urho3D::TS_WORLD).y_ + bodyNode->GetUp().z_;
 	}
 
 	virtual void ApplyActionVec()
 	{
 		GYM::ApplyActionVec();
-		for (int v = 0; v < actionVec.size(); v++)
-		{
-			motors[v]->SetMotorTorque(actionVec[v] * 10);
-		}
+
+		motors[0]->SetMotorTorque(actionVec[0]);
+		
 	}
 
 

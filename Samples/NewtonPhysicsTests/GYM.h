@@ -15,16 +15,22 @@ public:
 
 	}
 
-	virtual void Reset()
+	virtual void TearDown()
 	{
 		if (rootNode.NotNull())
 		{
 			rootNode->RemoveAllChildren();
 			rootNode->Remove();
 		}
+	}
+
+	virtual void Reset()
+	{
+		
+		TearDown();
 
 
-	
+		timeUpCounter = 0;
 		end = 0;
 		ResizeVectors();
 	}
@@ -43,7 +49,7 @@ public:
 
 		timeUpCounter += timeStep;
 
-		if (timeUpCounter > 2.5f)
+		if (timeUpCounter > timeLimit)
 			end = 1;
 	}
 
@@ -61,6 +67,7 @@ public:
 	ea::vector<float> stateVec;
 	float reward;
 	float timeUpCounter = 0.0f;
+	float timeLimit = 2.5f;
 	int end = 0;
 
 	Vector3 worldPos;
