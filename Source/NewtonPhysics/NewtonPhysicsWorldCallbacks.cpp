@@ -111,8 +111,7 @@ namespace Urho3D {
     void Newton_DestroyContactCallback(const NewtonWorld* const newtonWorld, NewtonJoint* const contact)
     {
         if (NewtonJointGetUserData(contact)) {
-            //URHO3D_LOGINFO("Contact Joint Destructor");
-            static_cast<NewtonRigidBodyContactEntry*>(NewtonJointGetUserData(contact))->newtonJoint_ = nullptr;
+          
         }
 
     }
@@ -129,8 +128,8 @@ namespace Urho3D {
 
     void Newton_ProcessContactsCallback(const NewtonJoint* contactJoint, dFloat timestep, int threadIndex)
     {
-		//#TODO
-		return;
+		
+		
 
 
         //URHO3D_PROFILE_THREAD(NewtonThreadProfilerString(threadIndex).c_str());
@@ -153,35 +152,15 @@ namespace Urho3D {
 
         
 
-        // Get a handle to a contact entry.
-        NewtonRigidBodyContactEntry* contactEntry = nullptr;
+
         NewtonPhysicsWorld* physicsWorld = rigBody0->GetPhysicsWorld();
-        NewtonWorldCriticalSectionLock(physicsWorld->GetNewtonWorld(), threadIndex);
-            contactEntry = physicsWorld->GetCreateContactEntry(rigBody0, rigBody1);
-        NewtonWorldCriticalSectionUnlock(physicsWorld->GetNewtonWorld());
-
-        //If it is an "expired" entry - re-initialize it.
-        if (contactEntry->expired_) {
-            contactEntry->body0 = rigBody0;
-            contactEntry->body1 = rigBody1;
-
-            contactEntry->expired_ = false;
-            contactEntry->numContacts = 0;
-        }
-
-        contactEntry->newtonJoint_ = (NewtonJoint*)contactJoint;
-        NewtonJointSetUserData(contactJoint, (void*)contactEntry);
-        contactEntry->wakeFlag_ = NewtonJointIsActive(contactJoint);
-
-        if (NewtonContactJointGetContactCount(contactJoint) > contactEntry->numContacts)
-            contactEntry->numContacts = NewtonContactJointGetContactCount(contactJoint);
 
 
 
-        if (contactEntry->numContacts > DEF_PHYSICS_MAX_CONTACT_POINTS)
-        {
-            URHO3D_LOGWARNING("Contact Entry Contact Count Greater Than DEF_PHYSICS_MAX_CONTACT_POINTS, consider increasing the limit.");
-        }
+
+
+
+
 
 
         int contactIdx = 0;
@@ -209,15 +188,7 @@ namespace Urho3D {
                 NewtonMaterialGetContactForce(material, body0, &force[0]);
 
 
-                contactEntry->contactNormals[contactIdx] = (NewtonToUrhoVec3(norm));
-                contactEntry->contactPositions[contactIdx] = (NewtonToUrhoVec3(pos));
-                contactEntry->contactTangent0[contactIdx] =(NewtonToUrhoVec3(tan0));
-                contactEntry->contactTangent1[contactIdx] = (NewtonToUrhoVec3(tan1));
-                contactEntry->contactForces[contactIdx] = (NewtonToUrhoVec3(force));
 
-
-                contactEntry->shapes0[contactIdx] = colShape0;
-                contactEntry->shapes1[contactIdx] = colShape1;
 
                 //#todo debugging
                 //GetSubsystem<VisualDebugger>()->AddCross(contactEntry->contactPositions[contactIdx], 0.1f, Color::BLUE, true);

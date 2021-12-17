@@ -168,6 +168,8 @@ namespace Urho3D {
             {
                 if (powerMode_ == ACTUATOR)
                     static_cast<dCustomHingeActuator*>(newtonJoint_)->SetAngularRate(maxAngularRate_);
+
+
             }
             else
                 MarkDirty();
@@ -210,6 +212,27 @@ namespace Urho3D {
     }
 
 
+
+
+	void NewtonHingeConstraint::SetMotorMaxAngularRate(float rate)
+	{
+		if (maxAngularRate_ != rate)
+		{
+			maxAngularRate_ = rate;
+			WakeBodies();
+			if (newtonJoint_)
+			{
+				if (powerMode_ == MOTOR_TORQUE)
+				{
+					static_cast<dCustomHinge*>(newtonJoint_)->EnableMotor(true, maxAngularRate_);
+				}
+			}
+			else
+				MarkDirty();
+		}
+	}
+
+
     void NewtonHingeConstraint::SetMotorTorque(float torque)
     {
         if (commandedTorque_ != torque)
@@ -220,13 +243,12 @@ namespace Urho3D {
             {
                 if (powerMode_ == MOTOR_TORQUE)
                 {
-					float speed = 20000;
+					float speed = maxAngularRate_;
 
 					if (commandedTorque_ < 0.0f)
 						speed = -speed;
 
 					static_cast<dCustomHinge*>(newtonJoint_)->EnableMotor(true, speed);
-					
 					static_cast<dCustomHinge*>(newtonJoint_)->SetFriction((commandedTorque_));
                 }
             }

@@ -1771,12 +1771,7 @@ void PhysicsTests::HandleCollisionStart(StringHash eventType, VariantMap& eventD
     NewtonRigidBody* bodyA = static_cast<NewtonRigidBody*>(eventData[NewtonPhysicsCollisionStart::P_BODYA].GetPtr());
     NewtonRigidBody* bodyB = static_cast<NewtonRigidBody*>(eventData[NewtonPhysicsCollisionStart::P_BODYB].GetPtr());
 
-    NewtonRigidBodyContactEntry* contactData = static_cast<NewtonRigidBodyContactEntry*>(eventData[NewtonPhysicsCollisionStart::P_CONTACT_DATA].GetPtr());
-    //URHO3D_LOGINFO("Collision Start");
-    for (int i = 0; i < contactData->numContacts; i++) {
-        //GetSubsystem<VisualDebugger>()->AddCross(contactData->contactPositions[i], 0.2f, Color::RED, true);
-        
-    }
+
 
 
 }
@@ -1786,12 +1781,6 @@ void PhysicsTests::HandleCollision(StringHash eventType, VariantMap& eventData)
     NewtonRigidBody* bodyA = static_cast<NewtonRigidBody*>(eventData[NewtonPhysicsCollisionStart::P_BODYA].GetPtr());
     NewtonRigidBody* bodyB = static_cast<NewtonRigidBody*>(eventData[NewtonPhysicsCollisionStart::P_BODYB].GetPtr());
 
-    NewtonRigidBodyContactEntry* contactData = static_cast<NewtonRigidBodyContactEntry*>(eventData[NewtonPhysicsCollisionStart::P_CONTACT_DATA].GetPtr());
-    //URHO3D_LOGINFO("Collision");
-    for (int i = 0; i < contactData->numContacts; i++) {
-        //GetSubsystem<VisualDebugger>()->AddCross(contactData->contactPositions[i], 0.2f, Color::GREEN, true);
-        
-    }
     
 }
 
@@ -1800,12 +1789,8 @@ void PhysicsTests::HandleCollisionEnd(StringHash eventType, VariantMap& eventDat
     NewtonRigidBody* bodyA = static_cast<NewtonRigidBody*>(eventData[NewtonPhysicsCollisionStart::P_BODYA].GetPtr());
     NewtonRigidBody* bodyB = static_cast<NewtonRigidBody*>(eventData[NewtonPhysicsCollisionStart::P_BODYB].GetPtr());
 
-	NewtonRigidBodyContactEntry* contactData = static_cast<NewtonRigidBodyContactEntry*>(eventData[NewtonPhysicsCollisionStart::P_CONTACT_DATA].GetPtr());
-    //URHO3D_LOGINFO("Collision End\n");
-    for (int i = 0; i < contactData->numContacts; i++) {
-        //GetSubsystem<VisualDebugger>()->AddCross(contactData->contactPositions[i], 0.2f, Color::BLUE, true);
-        
-    }
+	
+    
 }
 
 RayQueryResult PhysicsTests::GetCameraPickNode()

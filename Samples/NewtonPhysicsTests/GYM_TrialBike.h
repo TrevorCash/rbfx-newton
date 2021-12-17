@@ -91,7 +91,7 @@ public:
 
 
 
-		float wheelFriction = 2.0f;
+		float wheelFriction = 20.0f;
 
 		//backwheel
 		Vector3 backWheelOffset = Vector3(-2.0, -0.5, 0);
@@ -103,12 +103,13 @@ public:
 
 
 		NewtonHingeConstraint* motor = backWheel->CreateComponent<NewtonHingeConstraint>();
-		motor->SetPowerMode(NewtonHingeConstraint::MOTOR_SPEED);
+		motor->SetPowerMode(NewtonHingeConstraint::MOTOR_TORQUE);
 		motor->SetOtherBody(C->GetComponent<NewtonRigidBody>());
 		motor->SetWorldPosition(Vector3::ZERO + backWheelOffset);
 		motor->SetWorldRotation(Quaternion(0, 90, 0));
-		motor->SetMotorTargetAngularRate(10);
-		motor->SetMaxTorque(motor->GetMaxTorque()*0.00125f);
+		//motor->SetMotorTargetAngularRate(10);
+		motor->SetMotorMaxAngularRate(20);
+		//motor->SetMaxTorque(motor->GetMaxTorque()*0.00125f);
 
 
 		Vector3 frontWheelOffset = Vector3(1.8, -1, 0);
@@ -134,7 +135,7 @@ public:
 		motors.push_back(motor);
 
 		rootNode->SetWorldPosition(worldPos);
-		rootNode->Rotate(Quaternion(10, Vector3(1, 0, 0)));
+		rootNode->Rotate(Quaternion(Random(-1.0f,1.0f)*20, Vector3(1, 0, 0)));
 
 	}
 
@@ -142,7 +143,7 @@ public:
 	virtual void ResizeVectors()
 	{
 		stateVec.resize(5);
-		actionVec.resize(1);
+		actionVec.resize(2);
 	}
 
 	virtual void FormResponses(float timeStep)
@@ -155,13 +156,13 @@ public:
 		stateVec[0] = bodyNode->GetUp().y_;
 		stateVec[1] = 2.0f*bodyNode->GetRotation().EulerAngles().x_/180.0f;
 		stateVec[2] = motors[0]->GetCurrentAngle();
-		stateVec[3] = bodyNode->GetComponent<NewtonRigidBody>()->GetLinearVelocity(Urho3D::TS_LOCAL).x_;
+		stateVec[3] = bodyNode->GetComponent<NewtonRigidBody>()->GetLinearVelocity(Urho3D::TS_LOCAL).x_/20.0f;
 		stateVec[4] = (stateVec[1] - sideAngle_1)/timeStep;
 
 
 		float angularFactor = bodyNode->GetComponent<NewtonRigidBody>()->GetAngularVelocity(Urho3D::TS_WORLD).y_;
 		angularFactor = angularFactor * 100;
-		reward = stateVec[0];
+		reward = stateVec[0] + stateVec[3]*20.0f - actionVec[1];
 	}
 
 	virtual void ApplyActionVec(float timeStep)
@@ -169,7 +170,7 @@ public:
 		GYM::ApplyActionVec(timeStep);
 
 		motors[0]->SetMotorTorque(actionVec[0]*3);
-		
+		motors[1]->SetMotorTorque(actionVec[1]*50);
 	}
 
 

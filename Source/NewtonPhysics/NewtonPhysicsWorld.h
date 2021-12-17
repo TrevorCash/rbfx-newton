@@ -50,44 +50,7 @@ namespace Urho3D
     static const int DEF_PHYSICS_MAX_CONTACT_POINTS = 512;//maximum number of contacts per contact entry.
 
 
-    class URHONEWTON_API  NewtonRigidBodyContactEntry : public Object
-    {
-        URHO3D_OBJECT(NewtonRigidBodyContactEntry, Object);
-    public:
-
-        friend class NewtonPhysicsWorld;
-
-        NewtonRigidBodyContactEntry(Context* context);
-        virtual ~NewtonRigidBodyContactEntry() override;
-
-        /// Register object factory.
-        static void RegisterObject(Context* context);
-
-        virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest, float scale);
-
-        //flag indicating if the entry is in use or not. used for pooling.
-        bool expired_ = true;
-
-		WeakPtr<NewtonRigidBody> body0;
-		WeakPtr<NewtonRigidBody> body1;
-        NewtonCollisionShape* shapes0[DEF_PHYSICS_MAX_CONTACT_POINTS];
-        NewtonCollisionShape* shapes1[DEF_PHYSICS_MAX_CONTACT_POINTS];
-
-
-        int numContacts = 0;
-
-        Vector3 contactForces[DEF_PHYSICS_MAX_CONTACT_POINTS];    //net forces.
-        Vector3 contactPositions[DEF_PHYSICS_MAX_CONTACT_POINTS]; //global space
-        Vector3 contactNormals[DEF_PHYSICS_MAX_CONTACT_POINTS];   //normal relative to body0
-        Vector3 contactTangent0[DEF_PHYSICS_MAX_CONTACT_POINTS];  //tangent force in the 1st dimention.
-        Vector3 contactTangent1[DEF_PHYSICS_MAX_CONTACT_POINTS];  //tangent force in the 2nd dimention.
-
-        NewtonJoint* newtonJoint_ = nullptr;
-
-        bool wakeFlag_ = false;
-        bool wakeFlagPrev_ = false;
-
-    };
+    
 
     struct PhysicsRayCastIntersection {
         NewtonBody* body_ = nullptr;
@@ -222,12 +185,7 @@ namespace Urho3D
         void DrawDebugGeometry(DebugRenderer* debug, bool drawConstraints, bool drawContacts, bool drawRigidBodies, bool depthTest);
 
 
-        NewtonRigidBodyContactEntry* GetCreateContactEntry(NewtonRigidBody* body0, NewtonRigidBody* body1);
 
-
-        eastl::hash_map<unsigned int, NewtonRigidBodyContactEntry*> contactEntries_;
-
-        void CleanContactEntries();
 
 
         bool isUpdating_ = false;
@@ -286,12 +244,7 @@ namespace Urho3D
 
 
 
-        eastl::vector<SharedPtr<NewtonRigidBodyContactEntry>> contactEntryPool_;
-        int contactEntryPoolCurIdx_ = 0;
-        const int contactEntryPoolSize_ = 100;
 
-
-        void ParseContacts();
         bool contactMapLocked_ = false;
 
         /// Step the simulation forward.

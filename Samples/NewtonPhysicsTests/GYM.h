@@ -99,6 +99,6 @@ public:
 	int end = 0;
 
 	Vector3 worldPos;
-	WeakPtr<Node> rootNode;
+	SharedPtr<Node> rootNode;
 	WeakPtr<Scene> scene_;
 };

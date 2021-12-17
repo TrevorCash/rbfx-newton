@@ -1386,11 +1386,11 @@ namespace Urho3D {
 		}
 		else if (space == TS_LOCAL)
 		{
-			return node_->WorldToLocal(vel);
+			return node_->GetWorldRotation().Inverse() * vel;
 		}
 		else if (space == TS_PARENT)
 		{
-			return node_->GetParent()->WorldToLocal(vel);
+			return node_->GetParent()->GetWorldRotation().Inverse() * vel;
 		}
 
 		return vel;
@@ -1417,11 +1417,11 @@ namespace Urho3D {
 		}
 		else if (space == TS_LOCAL)
 		{
-			return node_->WorldToLocal(angularVel);
+			return node_->GetWorldRotation().Inverse() * angularVel;
 		}
 		else if (space == TS_PARENT)
 		{
-			return node_->GetParent()->WorldToLocal(angularVel);
+			return node_->GetParent()->GetWorldRotation().Inverse() * angularVel;
 		}
 		return angularVel;
 
