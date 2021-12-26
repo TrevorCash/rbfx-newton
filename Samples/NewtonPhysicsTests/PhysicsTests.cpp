@@ -68,8 +68,10 @@
 
 #include "PhysicsTests.h"
 #include "PhysicsSamplesUtils.h"
-#include "GYM_TrialBike.h"
 
+#include "GYM_TrialBike.h"
+#include "GYM_ATRT.h"
+#include "GYM_UniCycle.h"
 
 #include <torch/torch.h>
 
@@ -122,7 +124,12 @@ void PhysicsTests::Start()
 	//Register Newton Physics Lib
 	RegisterNewtonPhysicsLibrary(context_);
 
+	context_->RegisterSubsystem<VisualDebugger>();
+
 	context_->RegisterFactory<GYM_TrialBike>();
+	context_->RegisterFactory<GYM_ATRT>();
+	context_->RegisterFactory<GYM_UniCycle>();
+	
 
     // Create the scene content
     CreateScene();
@@ -219,6 +226,8 @@ void PhysicsTests::CreateScene()
 	//SpawnATRT(Vector3(5, 5, 0));
 
 	ResetGYMs();	
+
+	//SpawnSegway(Vector3(0,5,0));
 
 
     //SpawnTrialBike(Vector3(-5, 5, 0), Quaternion(90, Vector3(0, 1, 0)) * tilt, false);
@@ -1292,6 +1301,7 @@ void PhysicsTests::ResetGYMs()
 {
 	URHO3D_LOGINFO("ResetGYMs");
 	GymClient* gymCli = context_->GetSubsystem<GymClient>();
+	
 
 	while (gyms.size() > gymCli->numGYMS)
 	{
@@ -1300,23 +1310,24 @@ void PhysicsTests::ResetGYMs()
 	}
 	while (gyms.size() < gymCli->numGYMS)
 	{
-		gyms.push_back(context_->CreateObject<GYM_TrialBike>());
+		//gyms.push_back(context_->CreateObject<GYM_TrialBike>());
+		//gyms.push_back(context_->CreateObject<GYM_ATRT>());
+		gyms.push_back(context_->CreateObject<GYM_UniCycle>());
 	}
 
 
-	int sqrt = Sqrt(gymCli->numGYMS);
+	//int sqrt = Sqrt(gymCli->numGYMS);
 
 	int i = 0; 
-	for (int x = 0; x <= sqrt; x++)
-	{
-		for (int y = 0; y <= sqrt; y++)
-		{
-			if (i >= gyms.size()) continue;
-			gyms[i]->worldPos = Vector3(x*20, 1.5, y*20);
-			i++;
 
-		}
+	for (int y = 0; y <= gymCli->numGYMS; y++)
+	{
+		if (i >= gyms.size()) continue;
+		gyms[i]->worldPos = Vector3(0, 5, y*5);
+		i++;
+
 	}
+	
 
 	for (int i = 0; i < gymCli->numGYMS; i++)
 	{
@@ -1328,6 +1339,7 @@ void PhysicsTests::ResetGYMs()
 
 
 	context_->GetSubsystem<GymClient>()->SetGYMSpec(gyms[0]->actionVec.size(), gyms[0]->stateVec.size());
+	URHO3D_LOGINFO("GYM Reset Finished");
 
 
 }
@@ -1481,9 +1493,9 @@ void PhysicsTests::SpawnSegway(Vector3 worldPosition)
 {
     Node* root = scene_->CreateChild("SegWay");
 
-    Node* Body = SpawnSamplePhysicsBox(root, Vector3::ZERO, Vector3(1, 4, 1));
+    Node* Body = SpawnSamplePhysicsBox(root, Vector3::ZERO, Vector3(0.5, 4, 0.5));
 
-    Node* Wheel = SpawnSamplePhysicsCylinder(root, Vector3(0, -3, 0), 1.0, 0.5);
+    Node* Wheel = SpawnSamplePhysicsCylinder(root, Vector3(0, -3, 0), 1.0, 0.125);
     Wheel->Rotate(Quaternion(90, Vector3(1, 0, 0)));
 
     NewtonHingeConstraint* motor = Body->CreateComponent<NewtonHingeConstraint>();
@@ -1493,7 +1505,23 @@ void PhysicsTests::SpawnSegway(Vector3 worldPosition)
     motor->SetPowerMode(NewtonHingeConstraint::MOTOR_TORQUE);
     motor->SetOtherBody(Wheel->GetComponent<NewtonRigidBody>());
 	motor->SetMotorTorque(1);
+
+	//topwiegth
+	Node* top = SpawnSamplePhysicsCylinder(root, Vector3(0, 3, 0), 1);
+
+	NewtonHingeConstraint* topMotor = Body->CreateComponent<NewtonHingeConstraint>();
+
+	topMotor->SetPosition(Vector3(0, 3, 0));
+	topMotor->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
+	topMotor->SetEnableLimits(false);
+	topMotor->SetPowerMode(NewtonHingeConstraint::MOTOR_TORQUE);
+	topMotor->SetOtherBody(top->GetComponent<NewtonRigidBody>());
+	topMotor->SetMotorTorque(1);
+
+
     root->SetWorldPosition(worldPosition);
+
+
 }
 
 
@@ -1622,22 +1650,18 @@ void PhysicsTests::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 void PhysicsTests::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData)
 {
-    // If draw debug mode is enabled, draw physics debug geometry. Use depth test to make the result easier to interpret
-    if (drawDebug_) {
-        scene_->GetComponent<NewtonPhysicsWorld>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
-        //GetSubsystem<VisualDebugger>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>());
-    }
+
 
 	bool doFrSim = ui::Button("ForwardSim", ImVec2(100, 50));
 	bool openGYM = ui::Button("Open GYM Server", ImVec2(100, 50));
 	bool resetGYM = ui::Button("Reset", ImVec2(100, 50));
-	
 
 
-	ui::Text("NumGYMS: %d",context_->GetSubsystem<GymClient>()->numGYMS);
+
+	ui::Text("NumGYMS: %d", context_->GetSubsystem<GymClient>()->numGYMS);
 	if (doFrSim)
 	{
-		context_->GetSubsystem<Engine>()->FrameSkip(10, 1/60.0f);
+		context_->GetSubsystem<Engine>()->FrameSkip(10, 1 / 60.0f);
 	}
 
 	if (openGYM)
@@ -1649,13 +1673,26 @@ void PhysicsTests::HandlePostRenderUpdate(StringHash eventType, VariantMap& even
 	if (resetGYM)
 	{
 		context_->GetSubsystem<GymClient>()->resetPending = true;
-
 	}
+
+	if (gyms.size())
+	{
+
+		gyms[0]->DrawUIStats();
+	}
+
+	// If draw debug mode is enabled, draw physics debug geometry. Use depth test to make the result easier to interpret
+	if (drawDebug_) {
+		scene_->GetComponent<NewtonPhysicsWorld>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
+		GetSubsystem<VisualDebugger>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>());
+
+		for (int i = 0; i < gyms.size(); i++)
+		{
+			gyms[i]->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>());
+		}
+	}
+
 	
-
-	gyms[0]->DrawUIStats();
-
-
 
 }
 
@@ -1819,8 +1856,8 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
         floorNode->SetScale(Vector3(10000.0f, 1.0f, 10000.0f));
         auto* floorObject = floorNode->CreateComponent<StaticModel>();
         floorObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
-        floorObject->SetMaterial(cache->GetResource<Material>("Materials/StoneTiled.xml"));
-
+        floorObject->SetMaterial(cache->GetResource<Material>("Materials/StoneSmall.xml"));
+		//floorObject->GetMaterial()->SetShaderParameter("")
 
         auto* shape = floorNode->CreateComponent<NewtonCollisionShape_Box>();
 

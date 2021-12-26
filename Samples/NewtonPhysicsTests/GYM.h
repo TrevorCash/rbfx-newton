@@ -3,6 +3,10 @@
 
 #include <Urho3D/Core/Object.h>
 #include <Urho3D/SystemUI/SystemUI.h>
+#include <Urho3D/IO/ArchiveSerialization.h>
+#include <Urho3D/Graphics/DebugRenderer.h>
+#include <VisualDebugger.h>
+
 using namespace Urho3D;
 
 class GYM : public Object
@@ -27,7 +31,6 @@ public:
 	virtual void Reset()
 	{
 		TearDown();
-
 		timeUpCounter = 0;
 		end = 0;
 		ResizeVectors();
@@ -44,6 +47,7 @@ public:
 	{
 		ApplyActionVec( timeStep);
 		FormResponses( timeStep);
+		FormTotalReward();
 
 		timeUpCounter += timeStep;
 
@@ -53,14 +57,22 @@ public:
 
 	virtual void FormResponses(float timeStep)
 	{
-
+		stateVec_1 = stateVec;
 	}
 
 	virtual void ApplyActionVec(float timeStep)
 	{
-
+		actionVec_1 = actionVec;
 	}
 
+	virtual void FormTotalReward()
+	{
+		reward = 0;
+		for (int i = 0; i < rewardParts.size(); i++)
+		{
+			reward += rewardParts[i];
+		}
+	}
 	virtual void DrawUIStats()
 	{
 		ui::Begin("ActionVec");
@@ -82,17 +94,31 @@ public:
 		ui::End();
 
 		ui::Begin("Reward");
-
-			ui::Text("Reward: %f",  reward);
-		
+		for (int i = 0; i < rewardParts.size(); i++)
+		{
+			ui::Text("Reward[%d]: %f",i, rewardParts[i]);
+		}
+		ui::Text("Total Reward: %f", reward);
+		ui::Text("End: %d", end);
 		ui::End();
 
 
 
 	}
 
+	virtual void DrawDebugGeometry(DebugRenderer* debugRenderer)
+	{
+
+	}
+
 	ea::vector<float> actionVec;
 	ea::vector<float> stateVec;
+
+	ea::vector<float> actionVec_1;
+	ea::vector<float> stateVec_1;
+
+	ea::vector<float> rewardParts;
+
 	float reward;
 	float timeUpCounter = 0.0f;
 	float timeLimit =4.0f;

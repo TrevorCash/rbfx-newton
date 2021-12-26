@@ -41,8 +41,6 @@ namespace Urho3D {
         Matrix3x4 ownFrame = GetOwnBuildWorldFrame();
         Matrix3x4 otherFrame = GetOtherBuildWorldFrame();
 
-        //GetSubsystem<VisualDebugger>()->AddFrame(ownFrame, 1.0f, false)->SetLifeTimeMs(100000);
-        //GetSubsystem<VisualDebugger>()->AddFrame(otherFrame, 1.0f, false)->SetLifeTimeMs(100000);
 
         newtonJoint_ = new dCustomSixdof(UrhoToNewton(ownFrame), UrhoToNewton(otherFrame), GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
 
