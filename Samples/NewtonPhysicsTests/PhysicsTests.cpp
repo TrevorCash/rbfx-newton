@@ -1311,8 +1311,8 @@ void PhysicsTests::ResetGYMs()
 	while (gyms.size() < gymCli->numGYMS)
 	{
 		//gyms.push_back(context_->CreateObject<GYM_TrialBike>());
-		//gyms.push_back(context_->CreateObject<GYM_ATRT>());
-		gyms.push_back(context_->CreateObject<GYM_UniCycle>());
+		gyms.push_back(context_->CreateObject<GYM_ATRT>());
+		//gyms.push_back(context_->CreateObject<GYM_UniCycle>());
 	}
 
 
@@ -1323,7 +1323,7 @@ void PhysicsTests::ResetGYMs()
 	for (int y = 0; y <= gymCli->numGYMS; y++)
 	{
 		if (i >= gyms.size()) continue;
-		gyms[i]->worldPos = Vector3(0, 5, y*5);
+		gyms[i]->worldPos = Vector3(0, 3.5, y*5);
 		i++;
 
 	}
@@ -1650,7 +1650,8 @@ void PhysicsTests::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 void PhysicsTests::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData)
 {
-
+	// Take the frame time step, which is stored as a float
+	float timeStep = eventData[Update::P_TIMESTEP].GetFloat();
 
 	bool doFrSim = ui::Button("ForwardSim", ImVec2(100, 50));
 	bool openGYM = ui::Button("Open GYM Server", ImVec2(100, 50));
@@ -1678,7 +1679,7 @@ void PhysicsTests::HandlePostRenderUpdate(StringHash eventType, VariantMap& even
 	if (gyms.size())
 	{
 
-		gyms[0]->DrawUIStats();
+		gyms[0]->DrawUIStats(timeStep);
 	}
 
 	// If draw debug mode is enabled, draw physics debug geometry. Use depth test to make the result easier to interpret

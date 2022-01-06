@@ -157,12 +157,6 @@ namespace Urho3D {
 
 
 
-
-
-
-
-
-
         int contactIdx = 0;
 
         for (void* contact = NewtonContactJointGetFirstContact(contactJoint); contact; contact = NewtonContactJointGetNextContact(contactJoint, contact)) {
@@ -186,8 +180,6 @@ namespace Urho3D {
                 NewtonMaterialGetContactPositionAndNormal(material, body0, &pos[0], &norm[0]);
                 NewtonMaterialGetContactTangentDirections(material, body0, &tan0[0], &tan1[0]);
                 NewtonMaterialGetContactForce(material, body0, &force[0]);
-
-
 
 
                 //#todo debugging

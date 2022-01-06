@@ -19,6 +19,12 @@ public:
 
 	}
 
+	struct State {
+		float val;
+		float max;
+		float min;
+	};
+
 	virtual void TearDown()
 	{
 		if (rootNode.NotNull())
@@ -33,11 +39,14 @@ public:
 		TearDown();
 		timeUpCounter = 0;
 		end = 0;
-		ResizeVectors();
+		episodeRewards.push_back(episodeReward);
+		episodeReward = 0.0f;
+		
 	}
 
 	virtual void PostReset()
 	{
+		ResizeVectors();
 		FormResponses(1/60.0);
 	}
 
@@ -57,6 +66,8 @@ public:
 
 	virtual void FormResponses(float timeStep)
 	{
+		stateCounter = 0;
+		rewardPartCounter = 0;
 		stateVec_1 = stateVec;
 	}
 
@@ -72,8 +83,9 @@ public:
 		{
 			reward += rewardParts[i];
 		}
+		episodeReward += reward;
 	}
-	virtual void DrawUIStats()
+	virtual void DrawUIStats(float timeStep)
 	{
 		ui::Begin("ActionVec");
 			
@@ -104,12 +116,69 @@ public:
 
 
 
+		ui::Begin("Frame Stats");
+		ui::Text("Time Step: %f", timeStep);
+
+		ui::End();
+
 	}
 
 	virtual void DrawDebugGeometry(DebugRenderer* debugRenderer)
 	{
 
 	}
+
+	int SetNextState(float val) {
+
+		if (stateVec.size() <= stateCounter)
+		{
+			stateVec.push_back(val);
+			stateVec_1.push_back(0.0f);
+		}
+		else
+		{
+			stateVec[stateCounter] = val;
+		}
+
+		stateCounter++;
+		return stateCounter - 1;
+	}
+
+	void BuildStateDerivatives(float timeStep) {
+		for (int i = 0; i < stateCounter; i++)
+		{
+			float derivativeVal = (stateVec[i] - stateVec_1[i]) / timeStep;
+			if (stateVec.size() <= stateCounter + i)
+			{
+				stateVec.push_back(derivativeVal);
+			}
+			else
+			{
+				stateVec[i + stateCounter] = derivativeVal;
+			}
+		}
+		stateCounter *= 2;
+	}
+
+
+	int SetNextRewardPart(float val)
+	{
+		if (rewardParts.size() <= rewardPartCounter)
+		{
+			rewardParts.push_back(val);
+		}
+		else
+		{
+			rewardParts[rewardPartCounter] = val;
+		}
+		rewardPartCounter++;
+		return rewardPartCounter - 1;
+	}
+
+
+
+	int stateCounter = 0;
+	int rewardPartCounter = 0;
 
 	ea::vector<float> actionVec;
 	ea::vector<float> stateVec;
@@ -120,8 +189,10 @@ public:
 	ea::vector<float> rewardParts;
 
 	float reward;
+	float episodeReward=0.0f;
+	ea::vector<float> episodeRewards;
 	float timeUpCounter = 0.0f;
-	float timeLimit =4.0f;
+	float timeLimit =30.0f;
 	int end = 0;
 
 	Vector3 worldPos;
