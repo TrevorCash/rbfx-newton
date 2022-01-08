@@ -27,7 +27,7 @@ cmake_minimum_required (VERSION 3.4.3)
 project (rbfx-newton)
 
 # Dependencies
-add_subdirectory(ThirdParty/newton-dynamics/newton-3.14)
+add_subdirectory(ThirdParty/newton-dynamics/newton-4.00)
 
 # Library
 file(GLOB all_SRCS
@@ -41,6 +41,14 @@ target_include_directories(rbfx-newton PUBLIC
 Source/NewtonPhysics
 )
 
+include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dCore)
+include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton)
+include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dJoints)
+include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dModels)
+include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dModels/dVehicle)
+include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dModels/dCharacter)
+include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dTinyxml)
+include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dCollision)
 
 
 target_link_libraries(rbfx-newton PUBLIC 

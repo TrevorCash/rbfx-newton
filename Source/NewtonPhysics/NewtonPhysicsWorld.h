@@ -23,9 +23,9 @@
 #pragma once
 #include "UrhoNewtonApi.h"
 
-
+#include "ndNewton.h"
 #include "Urho3D/Scene/Component.h"
-#include "Newton.h"
+
 #include "NewtonCollisionShape.h"
 
 class NewtonWorld;
@@ -255,10 +255,7 @@ namespace Urho3D
 		int stepsRemaining_ = -1;
 
         /// Internal newton world
-        NewtonWorld* newtonWorld_ = nullptr;
-
-        ///vehicle manager for instantiating vehicles.
-        dVehicleManager* vehicleManager_ = nullptr;
+        ndWorld* newtonWorld_ = nullptr;
 
         NewtonRigidBody* sceneBody_ = nullptr;
 
@@ -268,13 +265,11 @@ namespace Urho3D
  
 
         ///convex casts
-        static const int convexCastRetInfoSize_ = 1000;
-        NewtonWorldConvexCastReturnInfo convexCastRetInfoArray[convexCastRetInfoSize_];
         int DoNewtonCollideTest(const dFloat* const matrix, const NewtonCollision* shape);
 		void GetBodiesInConvexCast(eastl::vector<NewtonRigidBody*>& result, int numContacts);
 
         ///newton mesh caching
-		eastl::hash_map <StringHash, SharedPtr<NewtonMeshObject >> newtonMeshCache_;
+		eastl::hash_map <StringHash, SharedPtr<NewtonMeshObject>> newtonMeshCache_;
 
         ///returns a unique key for looking up an exising NewtonMesh from the cache.
 		static StringHash NewtonMeshKey(eastl::string modelResourceName, int modelLodLevel, eastl::string otherData);

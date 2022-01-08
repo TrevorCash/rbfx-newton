@@ -60,11 +60,6 @@
 
 
 
-#include "Newton.h"
-#include "NewtonMeshObject.h"
-#include "dgMatrix.h"
-#include "dCustomJoint.h"
-#include "dMatrix.h"
 
 #include "EASTL/sort.h"
 #include "NewtonGearConstraint.h"
@@ -218,8 +213,7 @@ namespace Urho3D {
         if (scene) {
             //create the newton world
             if (newtonWorld_ == nullptr) {
-                newtonWorld_ = NewtonCreate();
-                NewtonWorldSetUserData(newtonWorld_, (void*)this);
+				newtonWorld_ = new ndWorld();
                 applyNewtonWorldSettings();
 
 
@@ -243,7 +237,7 @@ namespace Urho3D {
         else
         {
             //wait for update to finish if in async mode so we can safely clean up.
-            NewtonWaitForUpdateToFinish(newtonWorld_);
+			newtonWorld_->Sync();
 
             freeWorld();
         }
@@ -288,8 +282,8 @@ namespace Urho3D {
     void NewtonPhysicsWorld::freeWorld()
     {
         //wait for update to finish if in async mode so we can safely clean up.
-        if (newtonWorld_)
-            NewtonWaitForUpdateToFinish(newtonWorld_);
+		if (newtonWorld_)
+			newtonWorld_->Sync();
 
 
         //free any joints
@@ -327,11 +321,9 @@ namespace Urho3D {
 
         //destroy newton world.
         if (newtonWorld_ != nullptr) {
-            NewtonDestroy(newtonWorld_);
+			delete newtonWorld_;
             newtonWorld_ = nullptr;
         }
-
-
     }
 
 
@@ -354,12 +346,9 @@ namespace Urho3D {
 
     void NewtonPhysicsWorld::applyNewtonWorldSettings()
     {
-        NewtonSetSolverIterations(newtonWorld_, iterationCount_);
-        NewtonSetNumberOfSubsteps(newtonWorld_, subSteps_);
-        NewtonSetThreadsCount(newtonWorld_, newtonThreadCount_);
-        NewtonSelectBroadphaseAlgorithm(newtonWorld_, 1);//persistent broadphase.
-
-        
+		newtonWorld_->SetSolverIterations(iterationCount_);
+		newtonWorld_->SetSubSteps(subSteps_);
+		newtonWorld_->SetThreadCount(newtonThreadCount_);
     }
 
 

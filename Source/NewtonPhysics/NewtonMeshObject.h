@@ -1,7 +1,7 @@
 #pragma once
 #include "UrhoNewtonApi.h"
 #include "Urho3D/Core/Object.h"
-class NewtonMesh;
+
 namespace Urho3D {
 
 

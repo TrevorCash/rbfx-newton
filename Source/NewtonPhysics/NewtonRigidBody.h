@@ -26,7 +26,7 @@
 #include "Urho3D/Scene/Component.h"
 #include "Urho3D/Scene/Node.h"
 
-#include "Newton.h"
+#include "ndNewton.h"
 #include "dVector.h"
 
 #include "EASTL/hash_set.h"
