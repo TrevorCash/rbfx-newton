@@ -52,21 +52,21 @@ namespace Urho3D
 
     
 
-    struct PhysicsRayCastIntersection {
-        NewtonBody* body_ = nullptr;
-        NewtonCollision* collision_ = nullptr;
-        NewtonCollision* subCollision_ = nullptr;
-        float rayIntersectParameter_ = -1.0f;
+    //struct PhysicsRayCastIntersection {
+    //    NewtonBody* body_ = nullptr;
+    //    NewtonCollision* collision_ = nullptr;
+    //    NewtonCollision* subCollision_ = nullptr;
+    //    float rayIntersectParameter_ = -1.0f;
 
-        NewtonRigidBody* rigBody_ = nullptr;
-        NewtonCollisionShape* collisionShape_ = nullptr;
-        Vector3 rayIntersectWorldPosition_;
-        Vector3 rayIntersectWorldNormal_;
-        float rayDistance_ = -1.0f;
-        Vector3 rayOriginWorld_;
-    };
+    //    NewtonRigidBody* rigBody_ = nullptr;
+    //    NewtonCollisionShape* collisionShape_ = nullptr;
+    //    Vector3 rayIntersectWorldPosition_;
+    //    Vector3 rayIntersectWorldNormal_;
+    //    float rayDistance_ = -1.0f;
+    //    Vector3 rayOriginWorld_;
+    //};
 
-    URHONEWTON_API void PrintPhysicsRayCastIntersection(PhysicsRayCastIntersection& intersection);
+   /* URHONEWTON_API void PrintPhysicsRayCastIntersection(PhysicsRayCastIntersection& intersection);
 
     inline bool PhysicsRayCastIntersectionCompare(const PhysicsRayCastIntersection& intersect1, const PhysicsRayCastIntersection& intersect2) {
         return (intersect1.rayIntersectParameter_ < intersect2.rayIntersectParameter_);
@@ -75,7 +75,7 @@ namespace Urho3D
         ea::vector<PhysicsRayCastIntersection> intersections;
         unsigned bodyIntersectionCounter_ = M_MAX_UNSIGNED;
     };
-
+*/
 
     class URHONEWTON_API NewtonPhysicsWorld : public Component
     {
@@ -97,7 +97,7 @@ namespace Urho3D
         static void RegisterObject(Context* context);
 
         /// Return the internal Newton world.
-        NewtonWorld* GetNewtonWorld() { return newtonWorld_; }
+        ndWorld* GetNewtonWorld() { return newtonWorld_; }
 
 
         /// Saves the NewtonWorld to a serializable newton file.
@@ -108,19 +108,19 @@ namespace Urho3D
 
 
 
-        bool RigidBodyContainsPoint(NewtonRigidBody* rigidBody, const Vector3&worldPoint);
-        /// Return rigid bodies by a ray query. bodies are returned in order from closest to farthest along the ray.
-        void RayCast(
-            eastl::vector<PhysicsRayCastIntersection>& intersections,
-            const Ray& ray, float maxDistance = M_LARGE_VALUE,
-            unsigned maxBodyIntersections = M_MAX_UNSIGNED,
-            unsigned collisionMask = M_MAX_UNSIGNED);
-        /// Return rigid bodies by a ray query.
-        void RayCast(
-			eastl::vector<PhysicsRayCastIntersection>& intersections,
-            const Vector3& pointOrigin, const Vector3& pointDestination,
-            unsigned maxBodyIntersections = M_MAX_UNSIGNED,
-            unsigned collisionMask = M_MAX_UNSIGNED);
+   //     bool RigidBodyContainsPoint(NewtonRigidBody* rigidBody, const Vector3&worldPoint);
+   //     /// Return rigid bodies by a ray query. bodies are returned in order from closest to farthest along the ray.
+   //     void RayCast(
+   //         eastl::vector<PhysicsRayCastIntersection>& intersections,
+   //         const Ray& ray, float maxDistance = M_LARGE_VALUE,
+   //         unsigned maxBodyIntersections = M_MAX_UNSIGNED,
+   //         unsigned collisionMask = M_MAX_UNSIGNED);
+   //     /// Return rigid bodies by a ray query.
+   //     void RayCast(
+			//eastl::vector<PhysicsRayCastIntersection>& intersections,
+   //         const Vector3& pointOrigin, const Vector3& pointDestination,
+   //         unsigned maxBodyIntersections = M_MAX_UNSIGNED,
+   //         unsigned collisionMask = M_MAX_UNSIGNED);
 
 
         /// Return rigid bodies by a sphere query.
@@ -230,14 +230,14 @@ namespace Urho3D
 
         void freeWorld();
 
-        void addToFreeQueue(NewtonBody* newtonBody);
-        void addToFreeQueue(dCustomJoint* newtonConstraint);
-        void addToFreeQueue(NewtonCollision* newtonCollision);
+        void addToFreeQueue(ndBodyKinematic* newtonBody);
+        void addToFreeQueue(ndConstraint* newtonConstraint);
+        void addToFreeQueue(ndShape* newtonShape);
 
 
-		eastl::vector<NewtonBody*> freeBodyQueue_;
-		eastl::vector<dCustomJoint*> freeConstraintQueue_;
-		eastl::vector<NewtonCollision*> freeCollisionQueue_;
+		eastl::vector<ndBodyKinematic*> freeBodyQueue_;
+		eastl::vector<ndConstraint*> freeConstraintQueue_;
+		eastl::vector<ndShape*> freeShapeQueue_;
 
 
         void applyNewtonWorldSettings();
@@ -265,16 +265,16 @@ namespace Urho3D
  
 
         ///convex casts
-        int DoNewtonCollideTest(const dFloat* const matrix, const NewtonCollision* shape);
-		void GetBodiesInConvexCast(eastl::vector<NewtonRigidBody*>& result, int numContacts);
+        //int DoNewtonCollideTest(const dFloat* const matrix, const NewtonCollision* shape);
+		//void GetBodiesInConvexCast(eastl::vector<NewtonRigidBody*>& result, int numContacts);
 
         ///newton mesh caching
-		eastl::hash_map <StringHash, SharedPtr<NewtonMeshObject>> newtonMeshCache_;
+		//eastl::hash_map <StringHash, SharedPtr<NewtonMeshObject>> newtonMeshCache_;
 
         ///returns a unique key for looking up an exising NewtonMesh from the cache.
-		static StringHash NewtonMeshKey(eastl::string modelResourceName, int modelLodLevel, eastl::string otherData);
-        NewtonMeshObject* GetCreateNewtonMesh(StringHash urhoNewtonMeshKey);
-        NewtonMeshObject* GetNewtonMesh(StringHash urhoNewtonMeshKey);
+		//static StringHash NewtonMeshKey(eastl::string modelResourceName, int modelLodLevel, eastl::string otherData);
+        //NewtonMeshObject* GetCreateNewtonMesh(StringHash urhoNewtonMeshKey);
+        //NewtonMeshObject* GetNewtonMesh(StringHash urhoNewtonMeshKey);
         
 
         void freePhysicsInternals();
@@ -285,29 +285,29 @@ namespace Urho3D
 	eastl::string NewtonThreadProfilerString(int threadIndex);
 
 
-    void Newton_PostUpdateCallback(const NewtonWorld* const world, dFloat timestep);
+    //void Newton_PostUpdateCallback(const NewtonWorld* const world, dFloat timestep);
 
 
     /// newtwon body callbacks
-    void Newton_ApplyForceAndTorqueCallback(const NewtonBody* body, dFloat timestep, int threadIndex);
-    void Newton_SetTransformCallback(const NewtonBody* body, const dFloat* matrix, int threadIndex);
-    void Newton_DestroyBodyCallback(const NewtonBody* body);
-    unsigned Newton_WorldRayPrefilterCallback(const NewtonBody* const body, const NewtonCollision* const collision, void* const userData);
-    dFloat Newton_WorldRayCastFilterCallback(const NewtonBody* const body, const NewtonCollision* const collisionHit, const dFloat* const contact, const dFloat* const normal, dLong collisionID, void* const userData, dFloat intersetParam);
+    //void Newton_ApplyForceAndTorqueCallback(const NewtonBody* body, dFloat timestep, int threadIndex);
+    //void Newton_SetTransformCallback(const NewtonBody* body, const dFloat* matrix, int threadIndex);
+    //void Newton_DestroyBodyCallback(const NewtonBody* body);
+    //unsigned Newton_WorldRayPrefilterCallback(const NewtonBody* const body, const NewtonCollision* const collision, void* const userData);
+    //dFloat Newton_WorldRayCastFilterCallback(const NewtonBody* const body, const NewtonCollision* const collisionHit, const dFloat* const contact, const dFloat* const normal, dLong collisionID, void* const userData, dFloat intersetParam);
 
     ///newton joint callbacks
     //void Newton_JointDestructorCallback(const NewtonJoint* const joint);
-    void Newton_DestroyContactCallback(const NewtonWorld* const newtonWorld, NewtonJoint* const contact);
+    //void Newton_DestroyContactCallback(const NewtonWorld* const newtonWorld, NewtonJoint* const contact);
 
 
     /// newton material callbacks
-    void Newton_ProcessContactsCallback(const NewtonJoint* contactJoint, dFloat timestep, int threadIndex);
+ /*   void Newton_ProcessContactsCallback(const NewtonJoint* contactJoint, dFloat timestep, int threadIndex);
     int Newton_AABBOverlapCallback(const NewtonJoint* const contactJoint, dFloat timestep, int threadIndex);
     int Newton_AABBCompoundOverlapCallback(const NewtonJoint* const contact, dFloat timestep, const NewtonBody* const body0, const void* const collisionNode0, const NewtonBody* const body1, const void* const collisionNode1, int threadIndex);
 
     int Newton_WakeBodiesInAABBCallback(const NewtonBody* const body, void* const userData);
 
-
+*/
 
 
 	URHONEWTON_API void  GetRootRigidBodies(eastl::vector<NewtonRigidBody*>& rigidBodies, Node* node, bool includeScene);

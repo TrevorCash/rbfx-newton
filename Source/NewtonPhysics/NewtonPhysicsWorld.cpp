@@ -341,7 +341,7 @@ namespace Urho3D {
 
     void NewtonPhysicsWorld::addToFreeQueue(NewtonCollision* newtonCollision)
     {
-        freeCollisionQueue_.push_front(newtonCollision);
+        freeShapeQueue_.push_front(newtonCollision);
     }
 
     void NewtonPhysicsWorld::applyNewtonWorldSettings()
@@ -564,11 +564,11 @@ namespace Urho3D {
 
 
 
-    Urho3D::StringHash NewtonPhysicsWorld::NewtonMeshKey(eastl::string modelResourceName, int modelLodLevel, eastl::string otherData)
-    {
-        return modelResourceName + eastl::to_string(modelLodLevel) + otherData;
-    }
-
+    //Urho3D::StringHash NewtonPhysicsWorld::NewtonMeshKey(eastl::string modelResourceName, int modelLodLevel, eastl::string otherData)
+    //{
+    //    return modelResourceName + eastl::to_string(modelLodLevel) + otherData;
+    //}
+/*
     NewtonMeshObject* NewtonPhysicsWorld::GetCreateNewtonMesh(StringHash urhoNewtonMeshKey)
     {
         if (newtonMeshCache_.contains(urhoNewtonMeshKey)) {
@@ -590,7 +590,7 @@ namespace Urho3D {
             return newtonMeshCache_[urhoNewtonMeshKey];
         }
         return nullptr;
-    }
+    }*/
 
     void NewtonPhysicsWorld::freePhysicsInternals()
     {
@@ -601,11 +601,11 @@ namespace Urho3D {
         freeConstraintQueue_.clear();
 
 
-        for (NewtonCollision* col : freeCollisionQueue_)
+        for (NewtonCollision* col : freeShapeQueue_)
         {
             NewtonDestroyCollision(col);
         }
-        freeCollisionQueue_.clear();
+        freeShapeQueue_.clear();
 
 
         for (NewtonBody* body : freeBodyQueue_)
@@ -641,7 +641,7 @@ namespace Urho3D {
 
     
     //called when the newton update finished.
-    void Newton_PostUpdateCallback(const NewtonWorld* const world, dFloat timestep)
+    void Newton_PostUpdateCallback(const NewtonWorld* const world, ndFloat32 timestep)
     {
         NewtonPhysicsWorld* physicsWorld = (NewtonPhysicsWorld*)NewtonWorldGetUserData(world);
         physicsWorld->isUpdating_ = false;

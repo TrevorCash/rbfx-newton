@@ -22,7 +22,7 @@ namespace Urho3D {
 
 
 
-    void NewtonDebug_ShowGeometryCollisionCallback(void* userData, int vertexCount, const dFloat* const faceVertec, int id)
+    void NewtonDebug_ShowGeometryCollisionCallback(void* userData, int vertexCount, const ndFloat* const faceVertec, int id)
     {
         debugRenderOptions* options = static_cast<debugRenderOptions*>(userData);
 

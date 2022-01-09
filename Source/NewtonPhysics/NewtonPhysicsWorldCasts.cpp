@@ -5,8 +5,6 @@
 #include "Urho3D/Math/Ray.h"
 #include "Urho3D/Math/Matrix3x4.h"
 
-#include "dVector.h"
-#include "Newton.h"
 
 #include "EASTL/sort.h"
 

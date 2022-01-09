@@ -1,10 +1,8 @@
 #pragma once
-#include "Newton.h"
-#include "dCustomJoint.h"
+#include "ndNewton.h"
 #include "Urho3D/Graphics/DebugRenderer.h"
 #include "Urho3D/Math/Color.h"
 
-class NewtonBody;
 
 namespace Urho3D
 {
@@ -14,10 +12,10 @@ namespace Urho3D
 
 
     //class enabling native newton debug calls using Urho3D::DebugRenderer.
-    class UrhoNewtonDebugDisplay : public dCustomJoint::dDebugDisplay
+    class UrhoNewtonDebugDisplay : public ndConstraintDebugCallback
     {
     public:
-        UrhoNewtonDebugDisplay(DebugRenderer* debugRenderer, bool depthTest) : dCustomJoint::dDebugDisplay(dMatrix())
+        UrhoNewtonDebugDisplay(DebugRenderer* debugRenderer, bool depthTest) : ndConstraint::dDebugDisplay(ndMatrix())
         {
             debugRenderer_ = debugRenderer;
             depthTest_ = depthTest;
@@ -30,7 +28,7 @@ namespace Urho3D
         virtual void SetColor(const dVector& color) override;
         virtual void DrawLine(const dVector& p0, const dVector& p1) override;
 
-		virtual void DrawPoint(const dVector& p0, dFloat thinckness = 1.0f) override;
+		virtual void DrawPoint(const dVector& p0, ndFloat32 thinckness = 1.0f) override;
 
 
 		virtual void SetOrthRendering() override;
@@ -58,7 +56,7 @@ namespace Urho3D
     void NewtonDebug_BodyDrawCollision(NewtonPhysicsWorld* physicsWorld, const NewtonBody* const body, DebugRenderer* debug, bool depthTest = false);
     void NewtonDebug_DrawCollision(NewtonCollision* collision, const Matrix3x4& transform, const Color& color, DebugRenderer* debug, bool depthTest = false);
 
-    void NewtonDebug_ShowGeometryCollisionCallback(void* userData, int vertexCount, const dFloat* const faceVertec, int id);
+    void NewtonDebug_ShowGeometryCollisionCallback(void* userData, int vertexCount, const ndFloat32* const faceVertec, int id);
 
 
 

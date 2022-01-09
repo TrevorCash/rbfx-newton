@@ -104,7 +104,7 @@ namespace Urho3D {
     }
 
 
-    Matrix4 NewtonToUrhoMat4(const dMatrix& mat)
+    Matrix4 NewtonToUrhoMat4(const ndMatrix& mat)
     {
 #ifndef _NEWTON_USE_DOUBLE
         return Matrix4(&mat[0][0]).Transpose();
@@ -122,7 +122,7 @@ namespace Urho3D {
 #endif
     }
 
-    Quaternion NewtonToUrhoQuat(const dQuaternion& quat)
+    Quaternion NewtonToUrhoQuat(const ndQuaternion& quat)
     {
         return Quaternion(quat.m_w, quat.m_x, quat.m_y, quat.m_z);
     }

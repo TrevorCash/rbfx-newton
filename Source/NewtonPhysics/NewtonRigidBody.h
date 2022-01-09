@@ -27,7 +27,7 @@
 #include "Urho3D/Scene/Node.h"
 
 #include "ndNewton.h"
-#include "dVector.h"
+
 
 #include "EASTL/hash_set.h"
 
@@ -358,7 +358,7 @@ namespace Urho3D
 
 
         /// Internal newton body
-        NewtonBody * newtonBody_ = nullptr;
+        ndBodyKinematic * newtonBody_ = nullptr;
         /// compound collision if needed.
         NewtonCollision* effectiveCollision_ = nullptr;
         /// Physics world.

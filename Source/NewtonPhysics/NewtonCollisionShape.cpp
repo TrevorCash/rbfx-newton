@@ -41,9 +41,6 @@
 #include "Urho3D/Scene/SceneEvents.h"
 
 
-#include "Newton.h"
-#include "dMatrix.h"
-
 
 
 namespace Urho3D {

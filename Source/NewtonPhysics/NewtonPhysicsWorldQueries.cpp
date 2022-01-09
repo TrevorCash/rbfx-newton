@@ -9,9 +9,6 @@
 
 
 
-#include "dMatrix.h"
-
-
 
 namespace Urho3D {
 
@@ -25,7 +22,7 @@ namespace Urho3D {
         if (!effectiveCollision)
             return false;
 
-        dMatrix collisionMatrix;
+        ndMatrix collisionMatrix;
         NewtonCollisionGetMatrix(effectiveCollision, &collisionMatrix[0][0]);
 
         //#todo double check the matrix here may need tweeking to get the true transform of the compound:

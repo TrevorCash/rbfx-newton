@@ -9,7 +9,7 @@
 #include "Urho3D/IO/Log.h"
 #include "Urho3D/Core/Context.h"
 
-#include "dCustomKinematicController.h"
+
 #include "Urho3D/Core/CoreEvents.h"
 
 
@@ -138,10 +138,10 @@ namespace Urho3D {
     void NewtonKinematicsControllerConstraint::updateFrictions()
     {
 
-        dFloat Ixx;
-        dFloat Iyy;
-        dFloat Izz;
-        dFloat mass;
+        ndFloat Ixx;
+        ndFloat Iyy;
+        ndFloat Izz;
+        ndFloat mass;
         NewtonBodyGetMass(ownBody_->GetNewtonBody(), &mass, &Ixx, &Iyy, &Izz);
 
 

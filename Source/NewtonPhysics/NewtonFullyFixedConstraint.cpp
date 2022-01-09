@@ -8,10 +8,6 @@
 #include "Urho3D/Scene/Scene.h"
 #include "Urho3D/Core/Context.h"
 
-#include "Newton.h"
-#include "dMatrix.h"
-#include "dCustomFixDistance.h"
-#include "dCustomSixdof.h"
 
 
 

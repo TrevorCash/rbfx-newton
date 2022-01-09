@@ -55,108 +55,108 @@ namespace Urho3D {
 	};
 
 
-    void Newton_ApplyForceAndTorqueCallback(const NewtonBody* body, dFloat timestep, int threadIndex)
-    {
-        //URHO3D_PROFILE_THREAD(NewtonThreadProfilerString(threadIndex).c_str());
-        URHO3D_PROFILE_FUNCTION()
+   // void Newton_ApplyForceAndTorqueCallback(const NewtonBody* body, dFloat timestep, int threadIndex)
+   // {
+   //     //URHO3D_PROFILE_THREAD(NewtonThreadProfilerString(threadIndex).c_str());
+   //     URHO3D_PROFILE_FUNCTION()
 
 
-        Vector3 netForce;
-        Vector3 netTorque;
-        NewtonRigidBody* rigidBodyComp = nullptr;
+   //     Vector3 netForce;
+   //     Vector3 netTorque;
+   //     NewtonRigidBody* rigidBodyComp = nullptr;
 
-        rigidBodyComp = static_cast<NewtonRigidBody*>(NewtonBodyGetUserData(body));
+   //     rigidBodyComp = static_cast<NewtonRigidBody*>(NewtonBodyGetUserData(body));
 
-        if (rigidBodyComp == nullptr)
-            return;
+   //     if (rigidBodyComp == nullptr)
+   //         return;
 
-        rigidBodyComp->GetForceAndTorque(netForce, netTorque);
+   //     rigidBodyComp->GetForceAndTorque(netForce, netTorque);
 
-        Vector3 gravityForce;
-        if (rigidBodyComp->GetScene() != nullptr)//on scene destruction sometimes this is null so check...
-        {
-            NewtonPhysicsWorld* physicsWorld = rigidBodyComp->GetScene()->GetComponent<NewtonPhysicsWorld>();
-			if (physicsWorld != nullptr)
-			{
-				gravityForce = physicsWorld->GetGravity() * rigidBodyComp->GetEffectiveMass();
-
-
-
-				netForce += gravityForce;
+   //     Vector3 gravityForce;
+   //     if (rigidBodyComp->GetScene() != nullptr)//on scene destruction sometimes this is null so check...
+   //     {
+   //         NewtonPhysicsWorld* physicsWorld = rigidBodyComp->GetScene()->GetComponent<NewtonPhysicsWorld>();
+			//if (physicsWorld != nullptr)
+			//{
+			//	gravityForce = physicsWorld->GetGravity() * rigidBodyComp->GetEffectiveMass();
 
 
 
-				//apply forces and torques scaled with the physics world scale accourdingly.
-				NewtonBodySetForce(body, &UrhoToNewton(netForce)[0]);
-				NewtonBodySetTorque(body, &UrhoToNewton(netTorque)[0]);
-			}
-
-        }
-    }
-
-
-    void Newton_SetTransformCallback(const NewtonBody* body, const dFloat* matrix, int threadIndex)
-    {
-        NewtonRigidBody* rigBody = static_cast<NewtonRigidBody*>(NewtonBodyGetUserData(body));
-        if(rigBody)
-            rigBody->MarkInternalTransformDirty();
-    }
-
-
-    void Newton_DestroyBodyCallback(const NewtonBody* body)
-    {
-
-    }
+			//	netForce += gravityForce;
 
 
 
-    dFloat Newton_WorldRayCastFilterCallback(const NewtonBody* const body,
-        const NewtonCollision* const collisionHit, const dFloat* const contact,
-        const dFloat* const normal, dLong collisionID, void* const userData, dFloat intersetParam)
-    {
-        PhysicsRayCastUserData*  data = (PhysicsRayCastUserData*)userData;
+			//	//apply forces and torques scaled with the physics world scale accourdingly.
+			//	NewtonBodySetForce(body, &UrhoToNewton(netForce)[0]);
+			//	NewtonBodySetTorque(body, &UrhoToNewton(netTorque)[0]);
+			//}
 
-        PhysicsRayCastIntersection intersection;
-        intersection.body_ = (NewtonBody*)body;
-        intersection.collision_ = (NewtonCollision*)collisionHit;
-        intersection.rayIntersectParameter_ = intersetParam;
-        intersection.rayIntersectWorldPosition_ = NewtonToUrhoVec3(dVector(contact));
-        intersection.rayIntersectWorldNormal_ = NewtonToUrhoVec3(dVector(normal));
-        intersection.rigBody_ = (NewtonRigidBody*)NewtonBodyGetUserData(body);
-        intersection.collisionShape_ = (NewtonCollisionShape*)NewtonCollisionGetUserData(collisionHit);
-        data->intersections.push_back(intersection);
-        data->bodyIntersectionCounter_--;
+   //     }
+   // }
 
-        URHO3D_LOGINFO("RayIntersection: " + Urho3D::ToString((void*)collisionHit) + ", " + ea::to_string(collisionID));
 
-        if (data->bodyIntersectionCounter_ > 0) {
-            //continue
-            return 1.0f;
-        }
-        else
-            return 0.0f;
-    }
+   // void Newton_SetTransformCallback(const NewtonBody* body, const dFloat* matrix, int threadIndex)
+   // {
+   //     NewtonRigidBody* rigBody = static_cast<NewtonRigidBody*>(NewtonBodyGetUserData(body));
+   //     if(rigBody)
+   //         rigBody->MarkInternalTransformDirty();
+   // }
+
+
+   // void Newton_DestroyBodyCallback(const NewtonBody* body)
+   // {
+
+   // }
 
 
 
+   // dFloat Newton_WorldRayCastFilterCallback(const NewtonBody* const body,
+   //     const NewtonCollision* const collisionHit, const dFloat* const contact,
+   //     const dFloat* const normal, dLong collisionID, void* const userData, dFloat intersetParam)
+   // {
+   //     PhysicsRayCastUserData*  data = (PhysicsRayCastUserData*)userData;
 
-    unsigned Newton_WorldRayPrefilterCallback(const NewtonBody* const body, const NewtonCollision* const collision, void* const userData)
-    {
-        ///no filtering right now.
-        return 1;///?
-    }
+   //     PhysicsRayCastIntersection intersection;
+   //     intersection.body_ = (NewtonBody*)body;
+   //     intersection.collision_ = (NewtonCollision*)collisionHit;
+   //     intersection.rayIntersectParameter_ = intersetParam;
+   //     intersection.rayIntersectWorldPosition_ = NewtonToUrhoVec3(dVector(contact));
+   //     intersection.rayIntersectWorldNormal_ = NewtonToUrhoVec3(dVector(normal));
+   //     intersection.rigBody_ = (NewtonRigidBody*)NewtonBodyGetUserData(body);
+   //     intersection.collisionShape_ = (NewtonCollisionShape*)NewtonCollisionGetUserData(collisionHit);
+   //     data->intersections.push_back(intersection);
+   //     data->bodyIntersectionCounter_--;
+
+   //     URHO3D_LOGINFO("RayIntersection: " + Urho3D::ToString((void*)collisionHit) + ", " + ea::to_string(collisionID));
+
+   //     if (data->bodyIntersectionCounter_ > 0) {
+   //         //continue
+   //         return 1.0f;
+   //     }
+   //     else
+   //         return 0.0f;
+   // }
 
 
 
 
+   // unsigned Newton_WorldRayPrefilterCallback(const NewtonBody* const body, const NewtonCollision* const collision, void* const userData)
+   // {
+   //     ///no filtering right now.
+   //     return 1;///?
+   // }
 
-    void Newton_DestroyContactCallback(const NewtonWorld* const newtonWorld, NewtonJoint* const contact)
-    {
-        if (NewtonJointGetUserData(contact)) {
-          
-        }
 
-    }
+
+
+
+   // void Newton_DestroyContactCallback(const NewtonWorld* const newtonWorld, NewtonJoint* const contact)
+   // {
+   //     if (NewtonJointGetUserData(contact)) {
+   //       
+   //     }
+
+   // }
 
 
 

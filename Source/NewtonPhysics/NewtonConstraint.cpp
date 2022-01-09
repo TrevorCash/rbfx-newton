@@ -32,8 +32,6 @@
 #include "Urho3D/Scene/Scene.h"
 #include "Urho3D/IO/Log.h"
 
-#include "dCustomFixDistance.h"
-#include "Newton.h"
 
 
 
