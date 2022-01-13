@@ -269,7 +269,7 @@ namespace Urho3D {
             {
                 if (powerMode_ == NO_POWER)
                 {
-                    static_cast<dCustomHinge*>(newtonJoint_)->SetAsSpringDamper(enableSpringDamper_, springRelaxation_, springSpringCoef_, springDamperCoef_);
+                    static_cast<dCustomHinge*>(newtonJoint_)->SetAsSpringDamper(enableSpringDamper_, springRelaxation_, springSpringCoef_);
                 }
             }
             else
@@ -290,7 +290,7 @@ namespace Urho3D {
             {
                 if (powerMode_ == NO_POWER)
                 {
-                    static_cast<dCustomHinge*>(newtonJoint_)->SetAsSpringDamper(enableSpringDamper_, springRelaxation_, springSpringCoef_, springDamperCoef_);
+                    static_cast<dCustomHinge*>(newtonJoint_)->SetAsSpringDamper(enableSpringDamper_, springSpringCoef_, springDamperCoef_);
                 }
             }
             else
@@ -309,7 +309,7 @@ namespace Urho3D {
             {
                 if (powerMode_ == NO_POWER)
                 {
-                    static_cast<dCustomHinge*>(newtonJoint_)->SetAsSpringDamper(enableSpringDamper_, springRelaxation_, springSpringCoef_, springDamperCoef_);
+                    static_cast<dCustomHinge*>(newtonJoint_)->SetAsSpringDamper(enableSpringDamper_, springSpringCoef_, springDamperCoef_);
                 }
             }
             else
@@ -328,7 +328,7 @@ namespace Urho3D {
             {
                 if (powerMode_ == NO_POWER)
                 {
-                    static_cast<dCustomHinge*>(newtonJoint_)->SetAsSpringDamper(enableSpringDamper_, springRelaxation_, springSpringCoef_, springDamperCoef_);
+                    static_cast<dCustomHinge*>(newtonJoint_)->SetAsSpringDamper(enableSpringDamper_, springSpringCoef_, springDamperCoef_);
                 }
             }
             else
@@ -416,7 +416,7 @@ namespace Urho3D {
             static_cast<dCustomHinge*>(newtonJoint_)->EnableLimits(enableLimits_);
             static_cast<dCustomHinge*>(newtonJoint_)->SetLimits(minAngle_ * dDegreeToRad, maxAngle_ * dDegreeToRad);
             static_cast<dCustomHinge*>(newtonJoint_)->SetFriction((frictionTorque_));
-            static_cast<dCustomHinge*>(newtonJoint_)->SetAsSpringDamper(enableSpringDamper_, springRelaxation_, springSpringCoef_, springDamperCoef_);
+            static_cast<dCustomHinge*>(newtonJoint_)->SetAsSpringDamper(enableSpringDamper_,  springSpringCoef_, springDamperCoef_);
         }
 
 

@@ -111,6 +111,8 @@ public:
 			ui::Text("Reward[%d]: %f",i, rewardParts[i]);
 		}
 		ui::Text("Total Reward: %f", reward);
+
+		ui::Text("Episode Reward: %f", episodeReward);
 		ui::Text("End: %d", end);
 		ui::End();
 

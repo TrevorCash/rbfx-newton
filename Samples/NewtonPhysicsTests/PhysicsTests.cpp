@@ -1310,8 +1310,8 @@ void PhysicsTests::ResetGYMs()
 	}
 	while (gyms.size() < gymCli->numGYMS)
 	{
-		//gyms.push_back(context_->CreateObject<GYM_TrialBike>());
-		gyms.push_back(context_->CreateObject<GYM_ATRT>());
+		gyms.push_back(context_->CreateObject<GYM_TrialBike>());
+		//gyms.push_back(context_->CreateObject<GYM_ATRT>());
 		//gyms.push_back(context_->CreateObject<GYM_UniCycle>());
 	}
 

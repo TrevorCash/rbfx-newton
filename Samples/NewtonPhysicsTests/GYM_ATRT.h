@@ -28,7 +28,7 @@ public:
 		motors.clear();
 		//Body
 		bodyNode = SpawnSamplePhysicsBox(rootNode, Vector3::ZERO, Vector3(1, 1, 1));
-
+		
 
 		//LEFT LEG
 		Node* HIP_LEFT = SpawnSamplePhysicsCylinder(rootNode, Vector3(0.0, -0.5, -0.5), 0.5, 0.25);
@@ -71,21 +71,21 @@ public:
 		Node* KNEE3_LEFT = SpawnSamplePhysicsCylinder(KNEE2_LEFT, Vector3(0.5, -2.5, -0.5), 0.3, 0.25);
 		KNEE3_LEFT->RemoveComponent<NewtonRigidBody>();
 
-		Node* KNEE4_LEFT = SpawnSamplePhysicsCylinder(rootNode, Vector3(0.5, -2.5, -0.75), 0.3, 0.25);
-		KNEE4_LEFT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
+		KNEE_LOWER_LEFT = SpawnSamplePhysicsCylinder(rootNode, Vector3(0.5, -2.5, -0.75), 0.3, 0.25);
+		KNEE_LOWER_LEFT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
 
 		NewtonHingeConstraint* KNEEJOINT2_LEFT = KNEE2_LEFT->CreateComponent<NewtonHingeConstraint>();
 		KNEEJOINT2_LEFT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
 		KNEEJOINT2_LEFT->SetWorldPosition(KNEE3_LEFT->GetWorldPosition());
-		KNEEJOINT2_LEFT->SetOtherBody(KNEE4_LEFT->GetComponent<NewtonRigidBody>());
+		KNEEJOINT2_LEFT->SetOtherBody(KNEE_LOWER_LEFT->GetComponent<NewtonRigidBody>());
 
 		NewtonHingeConstraint* KNEEJOINT2_LEFT_R = KNEE2_LEFT->CreateComponent<NewtonHingeConstraint>();
 		KNEEJOINT2_LEFT_R->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
 		KNEEJOINT2_LEFT_R->SetWorldPosition(KNEE3_LEFT->GetWorldPosition());
-		KNEEJOINT2_LEFT_R->SetOtherBody(KNEE4_LEFT->GetComponent<NewtonRigidBody>());
+		KNEEJOINT2_LEFT_R->SetOtherBody(KNEE_LOWER_LEFT->GetComponent<NewtonRigidBody>());
 
 
-		FOOT_LEFT = SpawnSamplePhysicsCylinder(KNEE4_LEFT, Vector3(0, -3, -0.5), 0.2, 0.25);
+		FOOT_LEFT = SpawnSamplePhysicsCylinder(KNEE_LOWER_LEFT, Vector3(0, -3, -0.5), 0.2, 0.25);
 		FOOT_LEFT->RemoveComponent<NewtonRigidBody>();
 		FOOT_LEFT->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(10.0f);
 
@@ -124,20 +124,20 @@ public:
 		Node* KNEE3_RIGHT = SpawnSamplePhysicsCylinder(KNEE2_RIGHT, Vector3(0.5, -2.5, 0.75), 0.3, 0.25);
 		KNEE3_RIGHT->RemoveComponent<NewtonRigidBody>();
 
-		Node* KNEE4_RIGHT = SpawnSamplePhysicsCylinder(rootNode, Vector3(0.5, -2.5, 0.5), 0.3, 0.25);
-		KNEE4_RIGHT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
+		KNEE_LOWER_RIGHT = SpawnSamplePhysicsCylinder(rootNode, Vector3(0.5, -2.5, 0.5), 0.3, 0.25);
+		KNEE_LOWER_RIGHT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
 
 		NewtonHingeConstraint* KNEEJOINT2_RIGHT = KNEE2_RIGHT->CreateComponent<NewtonHingeConstraint>();
 		KNEEJOINT2_RIGHT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
 		KNEEJOINT2_RIGHT->SetWorldPosition(KNEE3_RIGHT->GetWorldPosition());
-		KNEEJOINT2_RIGHT->SetOtherBody(KNEE4_RIGHT->GetComponent<NewtonRigidBody>());
+		KNEEJOINT2_RIGHT->SetOtherBody(KNEE_LOWER_RIGHT->GetComponent<NewtonRigidBody>());
 
 		NewtonHingeConstraint* KNEEJOINT2_RIGHT_R = KNEE2_RIGHT->CreateComponent<NewtonHingeConstraint>();
 		KNEEJOINT2_RIGHT_R->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
 		KNEEJOINT2_RIGHT_R->SetWorldPosition(KNEE3_RIGHT->GetWorldPosition());
-		KNEEJOINT2_RIGHT_R->SetOtherBody(KNEE4_RIGHT->GetComponent<NewtonRigidBody>());
+		KNEEJOINT2_RIGHT_R->SetOtherBody(KNEE_LOWER_RIGHT->GetComponent<NewtonRigidBody>());
 
-		FOOT_RIGHT = SpawnSamplePhysicsCylinder(KNEE4_RIGHT, Vector3(0, -3, 0.5), 0.2, 0.25);
+		FOOT_RIGHT = SpawnSamplePhysicsCylinder(KNEE_LOWER_RIGHT, Vector3(0, -3, 0.5), 0.2, 0.25);
 		FOOT_RIGHT->RemoveComponent<NewtonRigidBody>();
 		FOOT_RIGHT->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(10.0f);
 
@@ -174,8 +174,7 @@ public:
 	virtual void FormResponses(float timeStep)
 	{
 		GYM::FormResponses(timeStep);
-		GymClient* GymCli = context_->GetSubsystem<GymClient>();
-
+	
 
 		int vertState = SetNextState((bodyNode->GetWorldPosition().y_ - 2.0f)*0.5f);//Vertical Translation
 
@@ -200,9 +199,6 @@ public:
 		SetNextState(FOOT_LEFT->GetWorldPosition().y_);
 		SetNextState(FOOT_RIGHT->GetWorldPosition().y_);
 		
-		SetNextRewardPart(Sign(stateVec[vertState])*100.0*stateVec[vertState]*stateVec[vertState]);//vertical displacement
-		//SetNextRewardPart(-0.1*Abs(stateVec[fbtilt]));
-		//SetNextRewardPart(-0.1*Abs(stateVec[rolltilt]));
 
 
 		//SetNextState(targetWorldVel.x_);
@@ -224,17 +220,37 @@ public:
 
 
 
+		SetNextRewardPart(Pow(2.0f, stateVec[vertState]));//vertical displacement
+
+
+		float discountFeetAboveKnee = 0.0f;
+		if (FOOT_LEFT->GetWorldPosition().y_ >= KNEE_LOWER_LEFT->GetWorldPosition().y_)
+		{
+			discountFeetAboveKnee = -10000;
+		}
+		if (FOOT_RIGHT->GetWorldPosition().y_ >= KNEE_LOWER_RIGHT->GetWorldPosition().y_)
+		{
+			discountFeetAboveKnee = -10000;
+		}
+
+		SetNextRewardPart(discountFeetAboveKnee);
+
+
+//SetNextRewardPart(-0.1*Abs(stateVec[fbtilt]));
+//SetNextRewardPart(-0.1*Abs(stateVec[rolltilt]));
+
+
 
 
 		//float velocityAgreement = worldVel.DotProduct(targetWorldVel.Normalized()) / targetWorldVel.Length();
 		//SetNextRewardPart(10*velocityAgreement);
-		SetNextRewardPart(0.1*timeStep);
-		SetNextRewardPart(-(Abs(actionVec_1[0])+
-			Abs(actionVec_1[1]) +
-				Abs(actionVec_1[2]) +
-					Abs(actionVec_1[3]) +
-						Abs(actionVec_1[4]) +
-							Abs(actionVec_1[5])));//prev torques
+		//SetNextRewardPart(0.1*timeStep);
+		//SetNextRewardPart(-(Abs(actionVec_1[0])+
+		//	Abs(actionVec_1[1]) +
+		//		Abs(actionVec_1[2]) +
+		//			Abs(actionVec_1[3]) +
+		//				Abs(actionVec_1[4]) +
+		//					Abs(actionVec_1[5])));//prev torques
 
 
 
@@ -264,6 +280,11 @@ public:
 	WeakPtr<Node> bodyNode;
 	WeakPtr<Node> FOOT_RIGHT;
 	WeakPtr<Node> FOOT_LEFT;
+	WeakPtr<Node> KNEE_LOWER_RIGHT;
+	WeakPtr<Node> KNEE_LOWER_LEFT;
+
+
+
 	Vector3 targetWorldVel;
 };
 

@@ -27,7 +27,7 @@ cmake_minimum_required (VERSION 3.4.3)
 project (rbfx-newton)
 
 # Dependencies
-add_subdirectory(ThirdParty/newton-dynamics)
+add_subdirectory(ThirdParty/newton-dynamics/newton-3.14)
 
 # Library
 file(GLOB all_SRCS

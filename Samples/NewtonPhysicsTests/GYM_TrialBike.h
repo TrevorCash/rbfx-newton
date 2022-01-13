@@ -21,7 +21,7 @@ public:
 	{
 		GYM::Reset();
 
-
+		timeLimit = 15.0f;
 		rootNode = scene_->CreateChild("TrialBike");
 		rootNode->AddTag("TrialBike");
 
@@ -134,35 +134,74 @@ public:
 		motors.push_back(hinge);
 		motors.push_back(motor);
 
-		rootNode->SetWorldPosition(worldPos);
-		rootNode->Rotate(Quaternion(Random(-1.0f,1.0f)*20, Vector3(1, 0, 0)));
+		rootNode->SetWorldPosition(worldPos - Vector3(0,1.8,0));
+		//rootNode->Rotate(Quaternion(Random(-1.0f,1.0f)*20, Vector3(1, 0, 0)));
+
+
+		targetVel = Quaternion(Random(-180,180), Vector3(0,1,0)) * Vector3(10, 0, 0);
+
 
 	}
 
 
 	virtual void ResizeVectors()
 	{
-		stateVec.resize(5);
 		actionVec.resize(2);
+		actionVec_1 = actionVec;
+
+		FormResponses(0.0f);
+		stateVec_1 = stateVec;
 	}
 
 	virtual void FormResponses(float timeStep)
 	{
 		GYM::FormResponses(timeStep);
-		GymClient* GymCli = context_->GetSubsystem<GymClient>();
 
-		sideAngle_1 = stateVec[1];
-
-		stateVec[0] = bodyNode->GetUp().y_;
-		stateVec[1] = 2.0f*bodyNode->GetRotation().EulerAngles().x_/180.0f;
-		stateVec[2] = motors[0]->GetCurrentAngle();
-		stateVec[3] = bodyNode->GetComponent<NewtonRigidBody>()->GetLinearVelocity(Urho3D::TS_LOCAL).x_/20.0f;
-		stateVec[4] = (stateVec[1] - sideAngle_1)/timeStep;
+		float crossY = bodyNode->GetWorldRight().CrossProduct(targetVel.Normalized()).y_;
+		float forwardVel = bodyNode->GetComponent<NewtonRigidBody>()->GetLinearVelocity(TS_LOCAL).x_;
+		SetNextState(crossY);
+		SetNextState(bodyNode->GetWorldRight().DotProduct(targetVel.Normalized()));
 
 
-		float angularFactor = bodyNode->GetComponent<NewtonRigidBody>()->GetAngularVelocity(Urho3D::TS_WORLD).y_;
-		angularFactor = angularFactor * 100;
-		reward = stateVec[0] + stateVec[3]*20.0f - actionVec[1];
+		SetNextState(bodyNode->GetWorldRight().y_);//side to side tilt indicator
+		SetNextState(motors[0]->GetCurrentAngle()/(M_PI));
+		SetNextState(forwardVel*0.1f);
+
+		BuildStateDerivatives(timeStep);
+
+
+		//reward for turning toward the target velocity
+		float angularY = bodyNode->GetComponent<NewtonRigidBody>()->GetAngularVelocity().y_;
+
+		float turnAgreement = angularY * crossY;
+		SetNextRewardPart(turnAgreement);
+
+
+
+
+		//reward for velocity along target velocity (facing the right direction)
+		float directionAgreement = bodyNode->GetWorldRight().DotProduct(targetVel.Normalized());	
+		if (directionAgreement <= 0.0f)
+			directionAgreement = 0.0f;
+
+		float reward = directionAgreement*directionAgreement * forwardVel;
+		SetNextRewardPart(10.0f*reward);
+
+
+		//reward staying vertical
+		SetNextRewardPart(10.0f*bodyNode->GetWorldUp().y_);
+
+		//energy save backwheel
+		SetNextRewardPart(-actionVec_1[0]*actionVec_1[0] - actionVec_1[1]*actionVec_1[1]);
+
+		//guide the bike to lean towards the target vel.
+		//float tiltDot = bodyNode->GetWorldUp().DotProduct(targetVel.Normalized());
+		//SetNextRewardPart(10*tiltDot);
+
+		if (bodyNode->GetWorldUp().y_ <= 0.1f)
+		{
+			end = 1;
+		}
 	}
 
 	virtual void ApplyActionVec(float timeStep)
@@ -170,11 +209,22 @@ public:
 		GYM::ApplyActionVec(timeStep);
 
 		motors[0]->SetMotorTorque(actionVec[0]*3);
-		motors[1]->SetMotorTorque(actionVec[1]*50);
+		motors[1]->SetMotorTorque(actionVec[1]*10);
 	}
 
+	virtual void DrawDebugGeometry(DebugRenderer* debugRenderer)
+	{
+		debugRenderer->AddLine(bodyNode->GetWorldPosition(), bodyNode->GetWorldPosition() + targetVel, Color::RED);
+		debugRenderer->AddLine(bodyNode->GetWorldPosition(), bodyNode->GetWorldPosition() + bodyNode->GetComponent<NewtonRigidBody>()->GetAngularVelocity(), Color::BLUE);
 
-	float sideAngle_1 = 0.0f;
+
+		debugRenderer->AddLine(bodyNode->GetWorldPosition(), bodyNode->GetWorldPosition() + bodyNode->GetWorldRight().CrossProduct(targetVel.Normalized())*10.0f, Color::BLACK);
+	}
+
 	ea::vector<NewtonHingeConstraint*> motors;
 	WeakPtr<Node> bodyNode;
+
+	Vector3 targetVel;
+
+
 };
