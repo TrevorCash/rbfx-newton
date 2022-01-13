@@ -626,7 +626,7 @@ namespace Urho3D {
         /// extend in derived classes.
 		newtonConstraint_->GetAsBilateral()->SetCollidable(enableBodyCollision_);
 
-        if(solveMode_ != SOLVE_MODE_JOINT_DEFAULT)
+        if(solveMode_ != m_jointkinematicOpenLoop)
             newtonConstraint_->GetAsBilateral()->SetSolverModel(solveMode_);
 
         return true;

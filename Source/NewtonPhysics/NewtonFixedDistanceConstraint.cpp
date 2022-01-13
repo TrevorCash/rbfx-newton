@@ -46,18 +46,11 @@ namespace Urho3D {
     void NewtonFixedDistanceConstraint::buildConstraint()
 {
         //get own body transform.
-        dVector pivot0 = UrhoToNewton(GetOwnBuildWorldFrame().Translation());
-        dVector pivot1 = UrhoToNewton(GetOtherBuildWorldFrame().Translation());
+        ndVector pivot0 = UrhoToNewton(GetOwnBuildWorldFrame().Translation());
+        ndVector pivot1 = UrhoToNewton(GetOtherBuildWorldFrame().Translation());
         
 
-		URHO3D_LOGINFO("Building NewtonFixedDistanceConstraint..");
-
-		URHO3D_LOGINFO("OwnBuildWorldFrame: " + GetOwnBuildWorldFrame().ToString());
-
-		URHO3D_LOGINFO("Own Body Node: " + GetOwnBody()->GetNode()->GetName());
-
-
-        newtonConstraint_ = new dCustomFixDistance(pivot0, pivot1, GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
+        newtonConstraint_ = new ndJointFixDistance(pivot0, pivot1, GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
 
     }
 
