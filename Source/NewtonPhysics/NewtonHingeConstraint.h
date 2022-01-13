@@ -24,8 +24,6 @@ namespace Urho3D {
         enum PoweredMode
         {
             NO_POWER = 0,
-            MOTOR_SPEED,
-            MOTOR_TORQUE,
             ACTUATOR
         };
 
@@ -81,15 +79,6 @@ namespace Urho3D {
 
         void SetActuatorTargetAngle(float angle);
         float GetActuatorTargetAngle() const { return targetAngle_; }
-
-
-        ///motor specific:
-        void SetMotorTargetAngularRate(float rate);
-		void SetMotorMaxAngularRate(float rate);
-
-        void SetMotorTorque(float torque);
-		float GetMotorTorque() const { return commandedTorque_; }
-
 
 
 

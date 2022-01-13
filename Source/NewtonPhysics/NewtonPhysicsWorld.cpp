@@ -99,7 +99,7 @@ namespace Urho3D {
 
 	void NewtonPhysicsWorld::SerializeNewtonWorld(eastl::string fileName)
     {
-        NewtonSerializeToFile(newtonWorld_, fileName.c_str(), nullptr, nullptr);
+       // NewtonSerializeToFile(newtonWorld_, fileName.c_str(), nullptr, nullptr);
     }
 
 
@@ -107,8 +107,7 @@ namespace Urho3D {
     
 	eastl::string NewtonPhysicsWorld::GetSolverPluginName()
     {
-        void* plugin = NewtonCurrentPlugin(newtonWorld_);
-		return eastl::string(NewtonGetPluginString(newtonWorld_, plugin));
+		return eastl::string("???");
     }
 
 
@@ -127,7 +126,7 @@ namespace Urho3D {
 
     void NewtonPhysicsWorld::WaitForUpdateFinished()
     {
-        NewtonWaitForUpdateToFinish(newtonWorld_);
+		newtonWorld_->Sync();
         isUpdating_ = false;
     }
 
@@ -226,10 +225,10 @@ namespace Urho3D {
                 }
 
 
-                NewtonMaterialSetCollisionCallback(newtonWorld_, 0, 0, Newton_AABBOverlapCallback, Newton_ProcessContactsCallback);
+                //NewtonMaterialSetCollisionCallback(newtonWorld_, 0, 0, Newton_AABBOverlapCallback, Newton_ProcessContactsCallback);
                 //NewtonMaterialSetCompoundCollisionCallback(newtonWorld_, 0, 0, Newton_AABBCompoundOverlapCallback);
-                NewtonSetPostUpdateCallback(newtonWorld_, Newton_PostUpdateCallback);
-                NewtonWorldSetCreateDestroyContactCallback(newtonWorld_, nullptr, Newton_DestroyContactCallback);
+                //NewtonSetPostUpdateCallback(newtonWorld_, Newton_PostUpdateCallback);
+                //NewtonWorldSetCreateDestroyContactCallback(newtonWorld_, nullptr, Newton_DestroyContactCallback);
 				
 
             }
@@ -312,7 +311,7 @@ namespace Urho3D {
 
 
         //free meshes in mesh cache
-        newtonMeshCache_.clear();
+        //newtonMeshCache_.clear();
 
         //free the actual memory
         freePhysicsInternals();
@@ -329,17 +328,17 @@ namespace Urho3D {
 
 
 
-    void NewtonPhysicsWorld::addToFreeQueue(NewtonBody* newtonBody)
+    void NewtonPhysicsWorld::addToFreeQueue(ndBodyKinematic* newtonBody)
     {
         freeBodyQueue_.push_front(newtonBody);
     }
 
-    void NewtonPhysicsWorld::addToFreeQueue(dCustomJoint* newtonConstraint)
+    void NewtonPhysicsWorld::addToFreeQueue(ndConstraint* newtonConstraint)
     {
         freeConstraintQueue_.push_front(newtonConstraint);
     }
 
-    void NewtonPhysicsWorld::addToFreeQueue(NewtonCollision* newtonCollision)
+    void NewtonPhysicsWorld::addToFreeQueue(ndShape* newtonCollision)
     {
         freeShapeQueue_.push_front(newtonCollision);
     }
@@ -392,7 +391,7 @@ namespace Urho3D {
         if (simulationStarted_) {
             URHO3D_PROFILE("Wait For ASync Update To finish.");
             
-            NewtonWaitForUpdateToFinish(newtonWorld_);
+			newtonWorld_->Sync();
             isUpdating_ = false;
 
             // Send post-step event
@@ -468,15 +467,16 @@ namespace Urho3D {
             }
 
             //wake bodies around kinematic bodies
-            if (rigBody->isKinematic_) {
-                dVector p0, p1;
-                NewtonBodyGetAABB(rigBody->newtonBody_, &p0[0], &p1[0]);
+            //if (rigBody->isKinematic_) {
+            //    ndVector p0, p1;
+            //    NewtonBodyGetAABB(rigBody->newtonBody_, &p0[0], &p1[0]);
 
-                //p0 = p0 - dVector(5, 5, 5);
-                //p1 = p1 + dVector(5, 5, 5);
 
-                NewtonWorldForEachBodyInAABBDo(newtonWorld_, &p0[0], &p1[0], Newton_WakeBodiesInAABBCallback, nullptr);
-            }
+            //    //p0 = p0 - dVector(5, 5, 5);
+            //    //p1 = p1 + dVector(5, 5, 5);
+
+            //    NewtonWorldForEachBodyInAABBDo(newtonWorld_, &p0[0], &p1[0], Newton_WakeBodiesInAABBCallback, nullptr);
+            //}
 
 			//save cached variables
 			rigBody->lastLinearVelocity_ = rigBody->GetLinearVelocity(TS_WORLD);
@@ -506,7 +506,7 @@ namespace Urho3D {
 
 
             //use target time step to give newton constant time steps. 
-            NewtonUpdateAsync(newtonWorld_, physicsTimeStep);
+			newtonWorld_->Update(physicsTimeStep);
             isUpdating_ = true;
             simulationStarted_ = true;
         }
@@ -594,23 +594,23 @@ namespace Urho3D {
 
     void NewtonPhysicsWorld::freePhysicsInternals()
     {
-        for (dCustomJoint* constraint : freeConstraintQueue_)
+        for (ndConstraint* constraint : freeConstraintQueue_)
         {
             delete constraint;
         }
         freeConstraintQueue_.clear();
 
 
-        for (NewtonCollision* col : freeShapeQueue_)
+        for (ndShape* col : freeShapeQueue_)
         {
-            NewtonDestroyCollision(col);
+		
         }
         freeShapeQueue_.clear();
 
 
-        for (NewtonBody* body : freeBodyQueue_)
+        for (ndBodyKinematic* body : freeBodyQueue_)
         {
-            NewtonDestroyBody(body);
+			delete body;
         }
         freeBodyQueue_.clear();
 

@@ -74,7 +74,7 @@ namespace Urho3D {
 
 			if (newtonConstraint_)
 			{
-				static_cast<dCustomHinge*>(newtonConstraint_)->SetLimits(minAngle_ * dDegreeToRad, maxAngle_ * dDegreeToRad);
+				static_cast<ndJointHinge*>(newtonConstraint_)->EnableLimits(enableLimits_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad);
 			}
             else
                 MarkDirty();
@@ -87,7 +87,7 @@ namespace Urho3D {
             maxAngle_ = maxAngle;
             WakeBodies();
             if (newtonConstraint_) {
-				static_cast<dCustomHinge*>(newtonConstraint_)->SetLimits(minAngle_ * dDegreeToRad, maxAngle_ * dDegreeToRad);
+				static_cast<ndJointHinge*>(newtonConstraint_)->EnableLimits(enableLimits_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad);
             }
             else
                 MarkDirty();
@@ -101,7 +101,7 @@ namespace Urho3D {
             enableLimits_ = enable;
             WakeBodies();
             if (newtonConstraint_) {
-				static_cast<dCustomHinge*>(newtonConstraint_)->EnableLimits(enableLimits_);
+				static_cast<ndJointHinge*>(newtonConstraint_)->EnableLimits(enableLimits_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad);
             }
             else
                 MarkDirty();
@@ -116,7 +116,7 @@ namespace Urho3D {
             WakeBodies();
             if (newtonConstraint_) {
                 if (powerMode_ == NO_POWER)
-                    dynamic_cast<dCustomHinge*>(newtonConstraint_)->SetFriction((frictionTorque_));
+                    dynamic_cast<ndJointHinge*>(newtonConstraint_)->SetFriction((frictionTorque_));
             }
             else
                 MarkDirty();
@@ -132,9 +132,8 @@ namespace Urho3D {
             if (newtonConstraint_)
             {
                 if (powerMode_ == ACTUATOR)
-                    static_cast<dCustomHingeActuator*>(newtonConstraint_)->SetMaxTorque((maxTorque_));
-                else if (powerMode_ == MOTOR_SPEED )
-                    static_cast<dCustomHinge*>(newtonConstraint_)->SetFriction((maxTorque_));
+                    static_cast<ndJointHingeActuator*>(newtonConstraint_)->SetMaxTorque((maxTorque_));
+
             }
             else
                 MarkDirty();
@@ -162,7 +161,7 @@ namespace Urho3D {
             if (newtonConstraint_)
             {
                 if (powerMode_ == ACTUATOR)
-                    static_cast<dCustomHingeActuator*>(newtonConstraint_)->SetAngularRate(maxAngularRate_);
+                    static_cast<ndJointHingeActuator*>(newtonConstraint_)->SetAngularRate(maxAngularRate_);
 
 
             }
@@ -180,26 +179,7 @@ namespace Urho3D {
             if (newtonConstraint_)
             {
                 if (powerMode_ == ACTUATOR)
-                    static_cast<dCustomHingeActuator*>(newtonConstraint_)->SetTargetAngle(targetAngle_* dDegreeToRad);
-            }
-            else
-                MarkDirty();
-        }
-    }
-
-
-    void NewtonHingeConstraint::SetMotorTargetAngularRate(float rate)
-    {
-        if (maxAngularRate_ != rate)
-        {
-            maxAngularRate_ = rate;
-            WakeBodies();
-            if (newtonConstraint_)
-            {
-                if (powerMode_ == MOTOR_SPEED)
-                {
-                    static_cast<dCustomHinge*>(newtonConstraint_)->EnableMotor(true, maxAngularRate_);
-                }
+                    static_cast<ndJointHingeActuator*>(newtonConstraint_)->SetTargetAngle(targetAngle_* ndDegreeToRad);
             }
             else
                 MarkDirty();
@@ -208,49 +188,6 @@ namespace Urho3D {
 
 
 
-
-	void NewtonHingeConstraint::SetMotorMaxAngularRate(float rate)
-	{
-		if (maxAngularRate_ != rate)
-		{
-			maxAngularRate_ = rate;
-			WakeBodies();
-			if (newtonConstraint_)
-			{
-				if (powerMode_ == MOTOR_TORQUE)
-				{
-					static_cast<dCustomHinge*>(newtonConstraint_)->EnableMotor(true, maxAngularRate_);
-				}
-			}
-			else
-				MarkDirty();
-		}
-	}
-
-
-    void NewtonHingeConstraint::SetMotorTorque(float torque)
-    {
-        if (commandedTorque_ != torque)
-        {
-			commandedTorque_ = torque;
-            WakeBodies();
-            if (newtonConstraint_)
-            {
-                if (powerMode_ == MOTOR_TORQUE)
-                {
-					float speed = maxAngularRate_;
-
-					if (commandedTorque_ < 0.0f)
-						speed = -speed;
-
-					static_cast<dCustomHinge*>(newtonConstraint_)->EnableMotor(true, speed);
-					static_cast<dCustomHinge*>(newtonConstraint_)->SetFriction((commandedTorque_));
-                }
-            }
-            else
-                MarkDirty();
-        }
-    }
 
 
 
@@ -264,7 +201,7 @@ namespace Urho3D {
             {
                 if (powerMode_ == NO_POWER)
                 {
-                    static_cast<dCustomHinge*>(newtonConstraint_)->SetAsSpringDamper(enableSpringDamper_, springRelaxation_, springSpringCoef_);
+                 //   static_cast<ndJointHinge*>(newtonConstraint_)->SetAsSpringDamper(enableSpringDamper_, springRelaxation_, springSpringCoef_);
                 }
             }
             else
@@ -285,7 +222,7 @@ namespace Urho3D {
             {
                 if (powerMode_ == NO_POWER)
                 {
-                    static_cast<dCustomHinge*>(newtonConstraint_)->SetAsSpringDamper(enableSpringDamper_, springSpringCoef_, springDamperCoef_);
+                   // static_cast<ndJointHinge*>(newtonConstraint_)->SetAsSpringDamper(enableSpringDamper_, springSpringCoef_, springDamperCoef_);
                 }
             }
             else
@@ -304,7 +241,7 @@ namespace Urho3D {
             {
                 if (powerMode_ == NO_POWER)
                 {
-                    static_cast<dCustomHinge*>(newtonConstraint_)->SetAsSpringDamper(enableSpringDamper_, springSpringCoef_, springDamperCoef_);
+                 //   static_cast<ndJointHinge*>(newtonConstraint_)->SetAsSpringDamper(enableSpringDamper_, springSpringCoef_, springDamperCoef_);
                 }
             }
             else
@@ -323,7 +260,7 @@ namespace Urho3D {
             {
                 if (powerMode_ == NO_POWER)
                 {
-                    static_cast<dCustomHinge*>(newtonConstraint_)->SetAsSpringDamper(enableSpringDamper_, springSpringCoef_, springDamperCoef_);
+                 //   static_cast<ndJointHinge*>(newtonConstraint_)->SetAsSpringDamper(enableSpringDamper_, springSpringCoef_, springDamperCoef_);
                 }
             }
             else
@@ -336,7 +273,7 @@ namespace Urho3D {
     {
         if (newtonConstraint_)
         {
-            return static_cast<dCustomHinge*>(newtonConstraint_)->GetJointOmega();
+            //return static_cast<ndJointHinge*>(newtonConstraint_)->GetJointOmega();
         }
         return 0.0f;
     }
@@ -345,7 +282,7 @@ namespace Urho3D {
     {
         if (newtonConstraint_)
         {
-            return static_cast<dCustomHinge*>(newtonConstraint_)->GetJointAngle();
+          //  return static_cast<ndJointHinge*>(newtonConstraint_)->GetJointAngle();
         }
         return 0.0f;
     }
@@ -361,19 +298,11 @@ namespace Urho3D {
 
         if (powerMode_ == ACTUATOR)
         {
-            newtonConstraint_ = new dCustomHingeActuator(UrhoToNewton(GetOwnBuildWorldFrame()), maxAngularRate_, minAngle_ * dDegreeToRad, maxAngle_ * dDegreeToRad, GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
+            newtonConstraint_ = new ndJointHingeActuator(UrhoToNewton(GetOwnBuildWorldFrame()), maxAngularRate_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad, GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
         }
-        else if (powerMode_ == MOTOR_SPEED)
-        {
-            newtonConstraint_ = new dCustomHinge(UrhoToNewton(GetOwnBuildWorldFrame()), UrhoToNewton(GetOtherBuildWorldFrame()), GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
-        }
-		else if (powerMode_ == MOTOR_TORQUE)
-		{
-			newtonConstraint_ = new dCustomHinge(UrhoToNewton(GetOwnBuildWorldFrame()), UrhoToNewton(GetOtherBuildWorldFrame()), GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
-		}
         else
         {
-            newtonConstraint_ = new dCustomHinge(UrhoToNewton(GetOwnBuildWorldFrame()), UrhoToNewton(GetOtherBuildWorldFrame()), GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
+            newtonConstraint_ = new ndJointHinge(UrhoToNewton(GetOwnBuildWorldFrame()), UrhoToNewton(GetOtherBuildWorldFrame()), GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
         }
 
 
@@ -387,31 +316,17 @@ namespace Urho3D {
         if (powerMode_ == ACTUATOR)
         {
             //static_cast<dCustomHingeActuator*>(newtonJoint_)->EnableLimits(enableLimits_); this breaks.
-            static_cast<dCustomHingeActuator*>(newtonConstraint_)->SetLimits(minAngle_ * dDegreeToRad, maxAngle_ * dDegreeToRad);
-            static_cast<dCustomHingeActuator*>(newtonConstraint_)->SetTargetAngle(targetAngle_* dDegreeToRad);
-            static_cast<dCustomHingeActuator*>(newtonConstraint_)->SetMaxTorque((maxTorque_));
-            static_cast<dCustomHingeActuator*>(newtonConstraint_)->SetAngularRate(maxAngularRate_);
-        }
-        else if (powerMode_ == MOTOR_SPEED)
-        {
-			static_cast<dCustomHinge*>(newtonConstraint_)->EnableLimits(enableLimits_);
-            static_cast<dCustomHinge*>(newtonConstraint_)->SetFriction((maxTorque_));
-            static_cast<dCustomHinge*>(newtonConstraint_)->EnableMotor(true, maxAngularRate_);
-        }
-        else if (powerMode_ == MOTOR_TORQUE)
-        {
-			static_cast<dCustomHinge*>(newtonConstraint_)->EnableLimits(enableLimits_);
-			static_cast<dCustomHinge*>(newtonConstraint_)->EnableMotor(true, 20000);
-			static_cast<dCustomHinge*>(newtonConstraint_)->SetFriction((commandedTorque_));
-
-
+            //static_cast<ndJointHingeActuator*>(newtonConstraint_)->SetLimits(minAngle_ * ndDegreeToRad, maxAngle_ * dDegreeToRad);
+            static_cast<ndJointHingeActuator*>(newtonConstraint_)->SetTargetAngle(targetAngle_* ndDegreeToRad);
+            static_cast<ndJointHingeActuator*>(newtonConstraint_)->SetMaxTorque((maxTorque_));
+            static_cast<ndJointHingeActuator*>(newtonConstraint_)->SetAngularRate(maxAngularRate_);
         }
         else if(powerMode_ == NO_POWER)
         {
-            static_cast<dCustomHinge*>(newtonConstraint_)->EnableLimits(enableLimits_);
-            static_cast<dCustomHinge*>(newtonConstraint_)->SetLimits(minAngle_ * dDegreeToRad, maxAngle_ * dDegreeToRad);
-            static_cast<dCustomHinge*>(newtonConstraint_)->SetFriction((frictionTorque_));
-            static_cast<dCustomHinge*>(newtonConstraint_)->SetAsSpringDamper(enableSpringDamper_,  springSpringCoef_, springDamperCoef_);
+            //static_cast<ndJointHinge*>(newtonConstraint_)->EnableLimits(enableLimits_);
+            //static_cast<ndJointHinge*>(newtonConstraint_)->SetLimits(minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad);
+            static_cast<ndJointHinge*>(newtonConstraint_)->SetFriction((frictionTorque_));
+            //static_cast<ndJointHinge*>(newtonConstraint_)->SetAsSpringDamper(enableSpringDamper_,  springSpringCoef_, springDamperCoef_);
         }
 
 

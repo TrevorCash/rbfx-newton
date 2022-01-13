@@ -47,10 +47,10 @@ namespace Urho3D
 
 
 
-    void NewtonDebug_BodyDrawCollision(NewtonPhysicsWorld* physicsWorld, const NewtonBody* const body, DebugRenderer* debug, bool depthTest = false);
-    void NewtonDebug_DrawCollision(NewtonCollision* collision, const Matrix3x4& transform, const Color& color, DebugRenderer* debug, bool depthTest = false);
+    //void NewtonDebug_BodyDrawCollision(NewtonPhysicsWorld* physicsWorld, const NewtonBody* const body, DebugRenderer* debug, bool depthTest = false);
+    //void NewtonDebug_DrawCollision(NewtonCollision* collision, const Matrix3x4& transform, const Color& color, DebugRenderer* debug, bool depthTest = false);
 
-    void NewtonDebug_ShowGeometryCollisionCallback(void* userData, int vertexCount, const ndFloat32* const faceVertec, int id);
+    //void NewtonDebug_ShowGeometryCollisionCallback(void* userData, int vertexCount, const ndFloat32* const faceVertec, int id);
 
 
 

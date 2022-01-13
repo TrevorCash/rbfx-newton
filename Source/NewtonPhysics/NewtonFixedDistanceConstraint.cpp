@@ -44,7 +44,7 @@ namespace Urho3D {
 
 
     void NewtonFixedDistanceConstraint::buildConstraint()
-{
+	{
         //get own body transform.
         ndVector pivot0 = UrhoToNewton(GetOwnBuildWorldFrame().Translation());
         ndVector pivot1 = UrhoToNewton(GetOtherBuildWorldFrame().Translation());
