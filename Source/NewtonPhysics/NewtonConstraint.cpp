@@ -136,9 +136,9 @@ namespace Urho3D {
         //draw the special joint stuff given to us by newton
         UrhoNewtonDebugDisplay debugDisplay(debug, depthTest);
         debugDisplay.SetDrawScale(1.0f*scale);
-        if (newtonJoint_)
+        if (newtonConstraint_)
         {
-            newtonJoint_->Debug(&debugDisplay);//#todo this sometimes covers up the 2 frames above - maybe alter inside newton instead?
+            newtonConstraint_->Debug(&debugDisplay);//#todo this sometimes covers up the 2 frames above - maybe alter inside newton instead?
         }
     }
 
@@ -304,32 +304,32 @@ namespace Urho3D {
 
     Vector3 NewtonConstraint::GetOwnForce()
     {
-        if(newtonJoint_&& enableForceCalculations_)
-            return NewtonToUrhoVec3(newtonJoint_->GetForce0());
+        if(newtonConstraint_&& enableForceCalculations_)
+            return NewtonToUrhoVec3(newtonConstraint_->GetForce0());
 
         return Vector3();
     }
 
     Vector3 NewtonConstraint::GetOtherForce()
     {
-        if (newtonJoint_ && enableForceCalculations_)
-            return NewtonToUrhoVec3(newtonJoint_->GetForce1());
+        if (newtonConstraint_ && enableForceCalculations_)
+            return NewtonToUrhoVec3(newtonConstraint_->GetForce1());
 
         return Vector3();
     }
 
     Vector3 NewtonConstraint::GetOwnTorque()
     {
-        if (newtonJoint_ && enableForceCalculations_)
-            return NewtonToUrhoVec3(newtonJoint_->GetTorque0());
+        if (newtonConstraint_ && enableForceCalculations_)
+            return NewtonToUrhoVec3(newtonConstraint_->GetTorque0());
 
         return Vector3();
     }
 
     Vector3 NewtonConstraint::GetOtherTorque()
     {
-        if (newtonJoint_ && enableForceCalculations_)
-            return NewtonToUrhoVec3(newtonJoint_->GetTorque1());
+        if (newtonConstraint_ && enableForceCalculations_)
+            return NewtonToUrhoVec3(newtonConstraint_->GetTorque1());
 
         return Vector3();
     }
@@ -626,16 +626,16 @@ namespace Urho3D {
     {
         WakeBodies();
 
-        if (newtonJoint_ == nullptr)
+        if (newtonConstraint_ == nullptr)
             return false;
 
         /// extend in derived classes.
-        NewtonJointSetCollisionState((NewtonJoint*)newtonJoint_, enableBodyCollision_);
-        newtonJoint_->SetStiffness(stiffness_);
-        newtonJoint_->SetJointForceCalculation(enableForceCalculations_);
+        NewtonJointSetCollisionState((NewtonJoint*)newtonConstraint_, enableBodyCollision_);
+        newtonConstraint_->SetStiffness(stiffness_);
+        newtonConstraint_->SetJointForceCalculation(enableForceCalculations_);
 
         if(solveMode_ != SOLVE_MODE_JOINT_DEFAULT)
-            newtonJoint_->SetSolverModel(solveMode_);
+            newtonConstraint_->SetSolverModel(solveMode_);
 
         return true;
     }
@@ -643,9 +643,9 @@ namespace Urho3D {
     void NewtonConstraint::freeInternal()
     {
 
-        if (newtonJoint_ != nullptr) {
-            physicsWorld_->addToFreeQueue(newtonJoint_);
-            newtonJoint_ = nullptr;
+        if (newtonConstraint_ != nullptr) {
+            physicsWorld_->addToFreeQueue(newtonConstraint_);
+            newtonConstraint_ = nullptr;
         }
     }
 

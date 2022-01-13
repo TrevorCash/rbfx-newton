@@ -7,12 +7,11 @@
 #include "Urho3D/Scene/Component.h"
 #include "Urho3D/Scene/Scene.h"
 #include "Urho3D/Core/Context.h"
-
-
-#include "Newton.h"
-#include "dMatrix.h"
-#include "dCustomFixDistance.h"
 #include "Urho3D/IO/Log.h"
+
+
+#include "ndNewton.h"
+
 
 
 
@@ -58,7 +57,7 @@ namespace Urho3D {
 		URHO3D_LOGINFO("Own Body Node: " + GetOwnBody()->GetNode()->GetName());
 
 
-        newtonJoint_ = new dCustomFixDistance(pivot0, pivot1, GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
+        newtonConstraint_ = new dCustomFixDistance(pivot0, pivot1, GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
 
     }
 

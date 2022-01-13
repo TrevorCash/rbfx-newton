@@ -180,7 +180,7 @@ namespace Urho3D {
 
 
         dCustomJoint* GetNewtonJoint() const {
-            return  newtonJoint_;
+            return  newtonConstraint_;
         }
 
         virtual void OnSetEnabled() override;
@@ -203,7 +203,7 @@ namespace Urho3D {
 		WeakPtr<NewtonRigidBody> otherBodyResolved_;
 
         /// Internal newtonJoint.
-        dCustomJoint* newtonJoint_ = nullptr;
+        ndConstraint* newtonConstraint_ = nullptr;
         /// Flag indicating the two bodies should collide with each other.
         bool enableBodyCollision_ = false;
 

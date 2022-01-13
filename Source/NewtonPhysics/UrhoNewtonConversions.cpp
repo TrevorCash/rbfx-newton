@@ -1,7 +1,5 @@
 #include "UrhoNewtonConversions.h"
-#include "dMatrix.h"
-#include "dVector.h"
-#include "dQuaternion.h"
+
 
 #include "Urho3D/Math/Matrix4.h"
 #include "Urho3D/Math/Matrix3x4.h"
@@ -10,10 +8,7 @@
 #include "Urho3D/IO/Log.h"
 
 
-#include "Newton.h"
-
-#include "dgQuaternion.h"
-
+#include "ndNewton.h"
 
 
 namespace Urho3D {

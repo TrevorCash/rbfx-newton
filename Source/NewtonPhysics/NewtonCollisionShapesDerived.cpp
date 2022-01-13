@@ -258,119 +258,119 @@ namespace Urho3D {
 //    }
 
 
-
-    NewtonCollisionShape_ConvexHullCompound::NewtonCollisionShape_ConvexHullCompound(Context* context) : NewtonCollisionShape_Geometry(context)
-    {
-    }
-
-    NewtonCollisionShape_ConvexHullCompound::~NewtonCollisionShape_ConvexHullCompound()
-    {
-    }
-
-    void NewtonCollisionShape_ConvexHullCompound::RegisterObject(Context* context)
-    {
-        context->RegisterFactory<NewtonCollisionShape_ConvexHullCompound>(DEF_PHYSICS_CATEGORY.c_str());
-        URHO3D_COPY_BASE_ATTRIBUTES(NewtonCollisionShape_Geometry);
-    }
-
-
-    bool NewtonCollisionShape_ConvexHullCompound::buildNewtonCollision()
-{
-        NewtonWorld* world = physicsWorld_->GetNewtonWorld();
-
-        if (!resolveOrCreateTriangleMeshFromModel())
-            return false;
-
-        newtonCollision_ = NewtonCreateCompoundCollisionFromMesh(world, newtonMesh_->mesh, hullTolerance_, 0, 0);
-
-        return true;
-    }
-
-
-
-
-    NewtonCollisionShape_ConvexDecompositionCompound::NewtonCollisionShape_ConvexDecompositionCompound(Context* context) : NewtonCollisionShape_Geometry(context)
-    {
-
-    }
-
-
-
-    NewtonCollisionShape_ConvexDecompositionCompound::~NewtonCollisionShape_ConvexDecompositionCompound()
-    {
-
-    }
+//
+//    NewtonCollisionShape_ConvexHullCompound::NewtonCollisionShape_ConvexHullCompound(Context* context) : NewtonCollisionShape_Geometry(context)
+//    {
+//    }
+//
+//    NewtonCollisionShape_ConvexHullCompound::~NewtonCollisionShape_ConvexHullCompound()
+//    {
+//    }
+//
+//    void NewtonCollisionShape_ConvexHullCompound::RegisterObject(Context* context)
+//    {
+//        context->RegisterFactory<NewtonCollisionShape_ConvexHullCompound>(DEF_PHYSICS_CATEGORY.c_str());
+//        URHO3D_COPY_BASE_ATTRIBUTES(NewtonCollisionShape_Geometry);
+//    }
+//
+//
+//    bool NewtonCollisionShape_ConvexHullCompound::buildNewtonCollision()
+//{
+//        NewtonWorld* world = physicsWorld_->GetNewtonWorld();
+//
+//        if (!resolveOrCreateTriangleMeshFromModel())
+//            return false;
+//
+//        newtonCollision_ = NewtonCreateCompoundCollisionFromMesh(world, newtonMesh_->mesh, hullTolerance_, 0, 0);
+//
+//        return true;
+//    }
 
 
 
 
-    void NewtonCollisionShape_ConvexDecompositionCompound::RegisterObject(Context* context)
-    {
-        context->RegisterFactory<NewtonCollisionShape_ConvexDecompositionCompound>(DEF_PHYSICS_CATEGORY.c_str());
-        URHO3D_COPY_BASE_ATTRIBUTES(NewtonCollisionShape_Geometry);
-    }
+    //NewtonCollisionShape_ConvexDecompositionCompound::NewtonCollisionShape_ConvexDecompositionCompound(Context* context) : NewtonCollisionShape_Geometry(context)
+    //{
 
-    bool NewtonCollisionShape_ConvexDecompositionCompound::buildNewtonCollision()
-    {
-        return NewtonCollisionShape_Geometry::buildNewtonCollision();
-
-        //NewtonWorld* world = physicsWorld_->GetNewtonWorld();
+    //}
 
 
-        //String keyData = String(maxConcavity_) + String(backFaceDistanceFactor_) + String(maxCompounds_) + String(maxVertexPerHull_);
 
-        ///// if the newton mesh is in cache already - return that.
-        //StringHash meshKey = UrhoNewtonPhysicsWorld::NewtonMeshKey(model_->GetName(), modelLodLevel_, keyData);
-        //NewtonMeshObject* cachedMesh = physicsWorld_->GetNewtonMesh(meshKey);
-        //if (cachedMesh)
-        //{
-        //    meshDecomposition_ = cachedMesh;
-        //}
-        //else
-        //{
-        //    meshDecomposition_ = physicsWorld_->GetCreateNewtonMesh(meshKey);
-        //    meshDecomposition_->mesh = NewtonMeshApproximateConvexDecomposition(newtonMesh_->mesh, maxConcavity_, backFaceDistanceFactor_, maxCompounds_, maxVertexPerHull_, nullptr, nullptr);
+    //NewtonCollisionShape_ConvexDecompositionCompound::~NewtonCollisionShape_ConvexDecompositionCompound()
+    //{
 
-        //}
-
-        //newtonCollision_ = NewtonCreateCompoundCollisionFromMesh(world, meshDecomposition_->mesh, hullTolerance_, 0, 0);
-    }
-
-    NewtonCollisionShape_ConvexHull::NewtonCollisionShape_ConvexHull(Context* context) : NewtonCollisionShape_Geometry(context)
-    {
-
-    }
-
-    NewtonCollisionShape_ConvexHull::~NewtonCollisionShape_ConvexHull()
-    {
-
-    }
-
-    void NewtonCollisionShape_ConvexHull::RegisterObject(Context* context)
-    {
-        context->RegisterFactory<NewtonCollisionShape_ConvexHull>(DEF_PHYSICS_CATEGORY.c_str());
-        URHO3D_COPY_BASE_ATTRIBUTES(NewtonCollisionShape_Geometry);
-    }
-
-    bool NewtonCollisionShape_ConvexHull::buildNewtonCollision()
-    {
-        if (!NewtonCollisionShape_Geometry::buildNewtonCollision())
-            return false;
-
-        NewtonWorld* world = physicsWorld_->GetNewtonWorld();
-
-        newtonCollision_ = NewtonCreateConvexHullFromMesh(world, newtonMesh_->mesh, hullTolerance_, 0);
-
-        dMatrix offsetMat;
-        NewtonCollisionGetMatrix(newtonCollision_, &offsetMat[0][0]);
-
-        NewtonCollisionSetMatrix(newtonCollision_, &dGetIdentityMatrix()[0][0]);
+    //}
 
 
-        //offset by model geometry center (#todo this may be a quirk of newton - CompoundHulling does not need this.)
-        position_ += NewtonToUrhoVec3(offsetMat.m_posit);//model_->GetGeometryCenter(modelLodLevel_);
-        return true;
-    }
+
+
+    //void NewtonCollisionShape_ConvexDecompositionCompound::RegisterObject(Context* context)
+    //{
+    //    context->RegisterFactory<NewtonCollisionShape_ConvexDecompositionCompound>(DEF_PHYSICS_CATEGORY.c_str());
+    //    URHO3D_COPY_BASE_ATTRIBUTES(NewtonCollisionShape_Geometry);
+    //}
+
+    //bool NewtonCollisionShape_ConvexDecompositionCompound::buildNewtonCollision()
+    //{
+    //    return NewtonCollisionShape_Geometry::buildNewtonCollision();
+
+    //    //NewtonWorld* world = physicsWorld_->GetNewtonWorld();
+
+
+    //    //String keyData = String(maxConcavity_) + String(backFaceDistanceFactor_) + String(maxCompounds_) + String(maxVertexPerHull_);
+
+    //    ///// if the newton mesh is in cache already - return that.
+    //    //StringHash meshKey = UrhoNewtonPhysicsWorld::NewtonMeshKey(model_->GetName(), modelLodLevel_, keyData);
+    //    //NewtonMeshObject* cachedMesh = physicsWorld_->GetNewtonMesh(meshKey);
+    //    //if (cachedMesh)
+    //    //{
+    //    //    meshDecomposition_ = cachedMesh;
+    //    //}
+    //    //else
+    //    //{
+    //    //    meshDecomposition_ = physicsWorld_->GetCreateNewtonMesh(meshKey);
+    //    //    meshDecomposition_->mesh = NewtonMeshApproximateConvexDecomposition(newtonMesh_->mesh, maxConcavity_, backFaceDistanceFactor_, maxCompounds_, maxVertexPerHull_, nullptr, nullptr);
+
+    //    //}
+
+    //    //newtonCollision_ = NewtonCreateCompoundCollisionFromMesh(world, meshDecomposition_->mesh, hullTolerance_, 0, 0);
+    //}
+
+    //NewtonCollisionShape_ConvexHull::NewtonCollisionShape_ConvexHull(Context* context) : NewtonCollisionShape_Geometry(context)
+    //{
+
+    //}
+
+    //NewtonCollisionShape_ConvexHull::~NewtonCollisionShape_ConvexHull()
+    //{
+
+    //}
+
+    //void NewtonCollisionShape_ConvexHull::RegisterObject(Context* context)
+    //{
+    //    context->RegisterFactory<NewtonCollisionShape_ConvexHull>(DEF_PHYSICS_CATEGORY.c_str());
+    //    URHO3D_COPY_BASE_ATTRIBUTES(NewtonCollisionShape_Geometry);
+    //}
+
+    //bool NewtonCollisionShape_ConvexHull::buildNewtonCollision()
+    //{
+    //    if (!NewtonCollisionShape_Geometry::buildNewtonCollision())
+    //        return false;
+
+    //    NewtonWorld* world = physicsWorld_->GetNewtonWorld();
+
+    //    newtonCollision_ = NewtonCreateConvexHullFromMesh(world, newtonMesh_->mesh, hullTolerance_, 0);
+
+    //    dMatrix offsetMat;
+    //    NewtonCollisionGetMatrix(newtonCollision_, &offsetMat[0][0]);
+
+    //    NewtonCollisionSetMatrix(newtonCollision_, &dGetIdentityMatrix()[0][0]);
+
+
+    //    //offset by model geometry center (#todo this may be a quirk of newton - CompoundHulling does not need this.)
+    //    position_ += NewtonToUrhoVec3(offsetMat.m_posit);//model_->GetGeometryCenter(modelLodLevel_);
+    //    return true;
+    //}
 
 
 
@@ -398,8 +398,8 @@ namespace Urho3D {
     bool NewtonCollisionShape_Cylinder::buildNewtonCollision()
     {
         // get a newton collision object (note: the same NewtonCollision could be shared between multiple component so this is not nessecarily a unique pointer)
-        newtonCollision_ = NewtonCreateCylinder(physicsWorld_->GetNewtonWorld(), radius1_, radius2_, length_, 0, nullptr);
-
+        //newtonCollision_ = NewtonCreateCylinder(physicsWorld_->GetNewtonWorld(), radius1_, radius2_, length_, 0, nullptr);
+		newtonCollision_ = new ndShapeCylinder(radius1_, radius2_, length_);
         return true;
     }
 

@@ -147,10 +147,10 @@ namespace Urho3D
         WeakPtr<NewtonPhysicsWorld> physicsWorld_;
 
         /// Internal Newton Collision
-        NewtonCollision* newtonCollision_ = nullptr;
+        ndShape* newtonCollision_ = nullptr;
 
         /// newton Mesh reference
-		WeakPtr<NewtonMeshObject> newtonMesh_;
+		//WeakPtr<NewtonMeshObject> newtonMesh_;
 
 
         float staticFriction_ = COLLISION_SHAPE_DEF_STATIC_FRICTION;

@@ -9,7 +9,7 @@
 #include "Urho3D/IO/Log.h"
 
 
-#include "Newton.h"
+#include "ndNewton.h"
 
 namespace Urho3D {
 

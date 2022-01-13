@@ -38,7 +38,7 @@ namespace Urho3D {
         Matrix3x4 otherFrame = GetOtherBuildWorldFrame();
 
 
-        newtonJoint_ = new dCustomSixdof(UrhoToNewton(ownFrame), UrhoToNewton(otherFrame), GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
+        newtonConstraint_ = new dCustomSixdof(UrhoToNewton(ownFrame), UrhoToNewton(otherFrame), GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
 
     }
 

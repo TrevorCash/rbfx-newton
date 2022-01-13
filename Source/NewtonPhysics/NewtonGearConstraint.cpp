@@ -15,10 +15,7 @@
 #include "Urho3D/IO/Log.h"
 
 
-#include "Newton.h"
-#include "dMatrix.h"
-#include "dCustomJoint.h"
-#include "dCustomGear.h"
+#include "ndNewton.h"
 
 
 
@@ -53,7 +50,7 @@ namespace Urho3D {
 
 	void NewtonGearConstraint::buildConstraint()
 	{
-		newtonJoint_ = new dCustomGear(ratio_, UrhoToNewton(GetOwnBuildWorldFrame().Rotation() * Vector3::RIGHT), 
+		newtonConstraint_ = new dCustomGear(ratio_, UrhoToNewton(GetOwnBuildWorldFrame().Rotation() * Vector3::RIGHT), 
 			UrhoToNewton(GetOtherBuildWorldFrame().Rotation() *  Vector3::RIGHT), GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
 	
 	

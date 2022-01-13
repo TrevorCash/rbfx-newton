@@ -1,7 +1,6 @@
 #include "Urho3D/Core/Context.h"
 
-#include "NewtonMeshObject.h"
-#include "Newton.h"
+#include "ndNewton.h"
 
 namespace Urho3D {
 

@@ -44,11 +44,7 @@
 #include "Urho3D/Graphics/DebugRenderer.h"
 
 
-#include "Newton.h"
-#include "dMatrix.h"
-#include "dQuaternion.h"
-#include "dgQuaternion.h"
-#include "Urho3D/Scene/Serializable.h"
+#include "ndNewton.h"
 
 
 namespace Urho3D {

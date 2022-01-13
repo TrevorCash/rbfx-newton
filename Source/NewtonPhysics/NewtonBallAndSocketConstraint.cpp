@@ -11,11 +11,8 @@
 #include "Urho3D/Graphics/DebugRenderer.h"
 
 
-#include "Newton.h"
-#include "dMatrix.h"
-#include "dCustomBallAndSocket.h"
-#include "dCustomJoint.h"
-#include "dCustomSixdof.h"
+#include "ndNewton.h"
+
 
 
 
@@ -30,9 +27,9 @@ namespace Urho3D {
     {
         if (coneAngle_ != angle) {
             coneAngle_ = angle;
-            if (newtonJoint_)
+            if (newtonConstraint_)
             {
-                static_cast<dCustomBallAndSocket*>(newtonJoint_)->SetConeLimits(coneAngle_ * dDegreeToRad);
+                static_cast<ndJointBallAndSocket*>(newtonConstraint_)->SetConeLimits(coneAngle_ * dDegreeToRad);
             }
             else
                 MarkDirty();
@@ -49,9 +46,9 @@ namespace Urho3D {
         if (twistMaxAngle_ != maxAngle || twistMinAngle_ != minAngle) {
             twistMinAngle_ = minAngle;
             twistMaxAngle_ = maxAngle;
-            if (newtonJoint_)
+            if (newtonConstraint_)
             {
-                static_cast<dCustomBallAndSocket*>(newtonJoint_)->SetTwistLimits(twistMinAngle_* dDegreeToRad, twistMaxAngle_ * dDegreeToRad);
+                static_cast<ndJointBallAndSocket*>(newtonConstraint_)->SetTwistLimits(twistMinAngle_* dDegreeToRad, twistMaxAngle_ * dDegreeToRad);
             }
             else
                 MarkDirty();
@@ -62,9 +59,9 @@ namespace Urho3D {
     {
         if (twistMinAngle_ != minAngle) {
             twistMinAngle_ = minAngle;
-            if (newtonJoint_)
+            if (newtonConstraint_)
             {
-                static_cast<dCustomBallAndSocket*>(newtonJoint_)->SetTwistLimits(twistMinAngle_* dDegreeToRad, twistMaxAngle_ * dDegreeToRad);
+                static_cast<ndJointBallAndSocket*>(newtonConstraint_)->SetTwistLimits(twistMinAngle_* dDegreeToRad, twistMaxAngle_ * dDegreeToRad);
             }
             else
                 MarkDirty();
@@ -75,9 +72,9 @@ namespace Urho3D {
     {
         if (twistMaxAngle_ != maxAngle) {
             twistMaxAngle_ = maxAngle;
-            if (newtonJoint_)
+            if (newtonConstraint_)
             {
-                static_cast<dCustomBallAndSocket*>(newtonJoint_)->SetTwistLimits(twistMinAngle_* dDegreeToRad, twistMaxAngle_ * dDegreeToRad);
+                static_cast<ndJointBallAndSocket*>(newtonConstraint_)->SetTwistLimits(twistMinAngle_* dDegreeToRad, twistMaxAngle_ * dDegreeToRad);
             }
             else
                 MarkDirty();
@@ -103,9 +100,9 @@ namespace Urho3D {
     {
         if (coneEnabled_ != enabled) {
             coneEnabled_ = enabled;
-            if (newtonJoint_)
+            if (newtonConstraint_)
             {
-                static_cast<dCustomBallAndSocket*>(newtonJoint_)->EnableCone(coneEnabled_);
+                static_cast<ndJointBallAndSocket*>(newtonConstraint_)->EnableCone(coneEnabled_);
             }
             else
                 MarkDirty();
@@ -121,9 +118,9 @@ namespace Urho3D {
     {
         if (twistLimitsEnabled_ != enabled) {
             twistLimitsEnabled_ = enabled;
-            if (newtonJoint_)
+            if (newtonConstraint_)
             {
-                static_cast<dCustomBallAndSocket*>(newtonJoint_)->EnableTwist(twistLimitsEnabled_);
+                static_cast<ndJointBallAndSocket*>(newtonConstraint_)->EnableTwist(twistLimitsEnabled_);
             }
             else
                 MarkDirty();
@@ -139,9 +136,9 @@ namespace Urho3D {
     {
         if (frictionTorque != coneFriction_) {
             coneFriction_ = frictionTorque;
-            if (newtonJoint_)
+            if (newtonConstraint_)
             {
-                static_cast<dCustomBallAndSocket*>(newtonJoint_)->SetConeFriction((coneFriction_));
+                static_cast<ndJointBallAndSocket*>(newtonConstraint_)->SetConeFriction((coneFriction_));
             }
             else
                 MarkDirty();
@@ -157,9 +154,9 @@ namespace Urho3D {
     {
         if (twistFriction_ != frictionTorque) {
             twistFriction_ = frictionTorque;
-            if (newtonJoint_)
+            if (newtonConstraint_)
             {
-                static_cast<dCustomBallAndSocket*>(newtonJoint_)->SetTwistFriction((twistFriction_));
+                static_cast<ndJointBallAndSocket*>(newtonConstraint_)->SetTwistFriction((twistFriction_));
             }
             else
                 MarkDirty();
@@ -203,7 +200,7 @@ namespace Urho3D {
     void Urho3D::NewtonBallAndSocketConstraint::buildConstraint()
     {
         // Create a dCustomBallAndSocket
-        newtonJoint_ = new dCustomBallAndSocket(UrhoToNewton(GetOwnBuildWorldFrame()), UrhoToNewton(GetOtherBuildWorldFrame()), GetOwnNewtonBody(), GetOtherNewtonBody());
+        newtonConstraint_ = new ndJointBallAndSocket(UrhoToNewton(GetOwnBuildWorldFrame()), UrhoToNewton(GetOtherBuildWorldFrame()), GetOwnNewtonBody(), GetOtherNewtonBody());
 
         
     }
@@ -212,12 +209,12 @@ namespace Urho3D {
         if (!NewtonConstraint::applyAllJointParams())
             return false;
 
-        static_cast<dCustomBallAndSocket*>(newtonJoint_)->SetConeLimits(coneAngle_ * dDegreeToRad);
-        static_cast<dCustomBallAndSocket*>(newtonJoint_)->EnableCone(coneEnabled_);
-        static_cast<dCustomBallAndSocket*>(newtonJoint_)->EnableTwist(twistLimitsEnabled_);
-        static_cast<dCustomBallAndSocket*>(newtonJoint_)->SetTwistLimits(twistMinAngle_* dDegreeToRad, twistMaxAngle_ * dDegreeToRad);
-        static_cast<dCustomBallAndSocket*>(newtonJoint_)->SetConeFriction((coneFriction_));
-        static_cast<dCustomBallAndSocket*>(newtonJoint_)->SetTwistFriction((twistFriction_));
+        static_cast<ndJointBallAndSocket*>(newtonConstraint_)->SetConeLimits(coneAngle_ * dDegreeToRad);
+        static_cast<ndJointBallAndSocket*>(newtonConstraint_)->EnableCone(coneEnabled_);
+        static_cast<ndJointBallAndSocket*>(newtonConstraint_)->EnableTwist(twistLimitsEnabled_);
+        static_cast<ndJointBallAndSocket*>(newtonConstraint_)->SetTwistLimits(twistMinAngle_* dDegreeToRad, twistMaxAngle_ * dDegreeToRad);
+        static_cast<ndJointBallAndSocket*>(newtonConstraint_)->SetConeFriction((coneFriction_));
+        static_cast<ndJointBallAndSocket*>(newtonConstraint_)->SetTwistFriction((twistFriction_));
 
 
         return true;

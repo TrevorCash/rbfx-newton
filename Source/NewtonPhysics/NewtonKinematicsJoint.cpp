@@ -47,7 +47,7 @@ namespace Urho3D {
     {
         if (linearFrictionalAcceleration != friction) {
             linearFrictionalAcceleration = friction;
-            if(newtonJoint_)
+            if(newtonConstraint_)
                 updateFrictions();
         }
     }
@@ -56,7 +56,7 @@ namespace Urho3D {
     {
         if (angularFrictionalAcceleration != friction) {
             angularFrictionalAcceleration = friction;
-            if (newtonJoint_)
+            if (newtonConstraint_)
                 updateFrictions();
         }
     }
@@ -66,16 +66,16 @@ namespace Urho3D {
         if (constrainRotation_ != enable)
         {
             constrainRotation_ = enable;
-			if (newtonJoint_)
+			if (newtonConstraint_)
 			{
 				if (constrainRotation_)
 				{
-					static_cast<dCustomKinematicController*>(newtonJoint_)->SetControlMode(dCustomKinematicController::m_linear);
+					static_cast<dCustomKinematicController*>(newtonConstraint_)->SetControlMode(dCustomKinematicController::m_linear);
 
 				}
 				else
 				{
-					static_cast<dCustomKinematicController*>(newtonJoint_)->SetControlMode(dCustomKinematicController::m_full6dof);
+					static_cast<dCustomKinematicController*>(newtonConstraint_)->SetControlMode(dCustomKinematicController::m_full6dof);
 
 				}
 
@@ -110,18 +110,18 @@ namespace Urho3D {
 
     void NewtonKinematicsControllerConstraint::buildConstraint()
     {
-        newtonJoint_ = new dCustomKinematicController(GetOwnNewtonBodyBuild(), UrhoToNewton(GetOwnBuildWorldFrame()));
+        newtonConstraint_ = new dCustomKinematicController(GetOwnNewtonBodyBuild(), UrhoToNewton(GetOwnBuildWorldFrame()));
         
 		
 		
 		//#todo support all control modes
 		if (constrainRotation_)
 		{
-			static_cast<dCustomKinematicController*>(newtonJoint_)->SetControlMode(dCustomKinematicController::m_linear);
+			static_cast<dCustomKinematicController*>(newtonConstraint_)->SetControlMode(dCustomKinematicController::m_linear);
 		}
 		else
 		{
-			static_cast<dCustomKinematicController*>(newtonJoint_)->SetControlMode(dCustomKinematicController::m_full6dof);
+			static_cast<dCustomKinematicController*>(newtonConstraint_)->SetControlMode(dCustomKinematicController::m_full6dof);
 		}
 		
 		updateFrictions();
@@ -130,8 +130,8 @@ namespace Urho3D {
 
     void NewtonKinematicsControllerConstraint::updateTarget()
     {
-        if (newtonJoint_) {
-            static_cast<dCustomKinematicController*>(newtonJoint_)->SetTargetMatrix(UrhoToNewton(GetOtherWorldFrame()));
+        if (newtonConstraint_) {
+            static_cast<dCustomKinematicController*>(newtonConstraint_)->SetTargetMatrix(UrhoToNewton(GetOtherWorldFrame()));
         }
     }
 
@@ -148,8 +148,8 @@ namespace Urho3D {
         const dFloat inertia = dMax(Izz, dMax(Ixx, Iyy));
 
 
-        static_cast<dCustomKinematicController*>(newtonJoint_)->SetMaxLinearFriction(mass * linearFrictionalAcceleration);
-        static_cast<dCustomKinematicController*>(newtonJoint_)->SetMaxAngularFriction(inertia * angularFrictionalAcceleration);
+        static_cast<dCustomKinematicController*>(newtonConstraint_)->SetMaxLinearFriction(mass * linearFrictionalAcceleration);
+        static_cast<dCustomKinematicController*>(newtonConstraint_)->SetMaxAngularFriction(inertia * angularFrictionalAcceleration);
     }
 
     void NewtonKinematicsControllerConstraint::HandleUpdate(StringHash event, VariantMap& eventData)

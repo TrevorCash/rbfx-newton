@@ -11,8 +11,7 @@
 #include "Urho3D/Scene/Scene.h"
 
 
-#include "Newton.h"
-#include "dMatrix.h"
+#include "ndNewton.h"
 
 
 namespace Urho3D {
