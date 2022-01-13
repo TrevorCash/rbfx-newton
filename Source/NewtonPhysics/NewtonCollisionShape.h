@@ -25,8 +25,8 @@
 
 #include "Urho3D/Scene/Component.h"
 
-class NewtonCollision;
-class NewtonMesh;
+
+class ndShape;
 namespace Urho3D
 {
 
@@ -132,7 +132,7 @@ namespace Urho3D
         bool IsCompound() const;
 
         /// Returns the internal newton collision
-        const NewtonCollision* GetNewtonCollision();
+        const ndShape* GetNewtonShape();
 
         /// Set draw debug geometry from physics world.
         void SetDrawNewtonDebugGeometry(bool enable);
@@ -147,7 +147,7 @@ namespace Urho3D
         WeakPtr<NewtonPhysicsWorld> physicsWorld_;
 
         /// Internal Newton Collision
-        ndShape* newtonCollision_ = nullptr;
+        ndShape* newtonShape_ = nullptr;
 
         /// newton Mesh reference
 		//WeakPtr<NewtonMeshObject> newtonMesh_;

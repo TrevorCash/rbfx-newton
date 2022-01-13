@@ -52,9 +52,11 @@ namespace Urho3D {
     bool NewtonCollisionShape_Box::buildNewtonCollision()
     {
         // get a newton collision object (note: the same NewtonCollision could be shared between multiple component so this is not nessecarily a unique pointer)
-        newtonCollision_ = NewtonCreateBox(physicsWorld_->GetNewtonWorld(), size_.x_,
-            size_.y_,
-            size_.z_, 0, nullptr);
+        //newtonShape_ = NewtonCreateBox(physicsWorld_->GetNewtonWorld(), size_.x_,
+        //    size_.y_,
+        //    size_.z_, 0, nullptr);
+		newtonShape_ = new ndShapeBox(size_.x_, size_.y_, size_.z_);
+
 
         return true;
     }
@@ -85,7 +87,9 @@ namespace Urho3D {
     bool NewtonCollisionShape_Sphere::buildNewtonCollision()
 {
         // get a newton collision object (note: the same NewtonCollision could be shared between multiple component so this is not nessecarily a unique pointer)
-        newtonCollision_ = NewtonCreateSphere(physicsWorld_->GetNewtonWorld(), radius_, 0, nullptr);
+        //newtonShape_ = NewtonCreateSphere(physicsWorld_->GetNewtonWorld(), radius_, 0, nullptr);
+		newtonShape_ = new ndShapeSphere(radius_);
+
         return true;
     }
 
@@ -399,7 +403,7 @@ namespace Urho3D {
     {
         // get a newton collision object (note: the same NewtonCollision could be shared between multiple component so this is not nessecarily a unique pointer)
         //newtonCollision_ = NewtonCreateCylinder(physicsWorld_->GetNewtonWorld(), radius1_, radius2_, length_, 0, nullptr);
-		newtonCollision_ = new ndShapeCylinder(radius1_, radius2_, length_);
+		newtonShape_ = new ndShapeCylinder(radius1_, radius2_, length_);
         return true;
     }
 
@@ -425,7 +429,8 @@ namespace Urho3D {
     bool NewtonCollisionShape_ChamferCylinder::buildNewtonCollision()
     {
         // get a newton collision object (note: the same NewtonCollision could be shared between multiple component so this is not nessecarily a unique pointer)
-        newtonCollision_ = NewtonCreateChamferCylinder(physicsWorld_->GetNewtonWorld(), radius_, length_, 0, nullptr);
+        //newtonShape_ = NewtonCreateChamferCylinder(physicsWorld_->GetNewtonWorld(), radius_, length_, 0, nullptr);
+		newtonShape_ = new ndShapeChamferCylinder(radius_, length_);
 
         return true;
     }
@@ -452,7 +457,8 @@ namespace Urho3D {
 
     bool NewtonCollisionShape_Capsule::buildNewtonCollision()
 {
-        newtonCollision_ = NewtonCreateCapsule(physicsWorld_->GetNewtonWorld(), radius1_, radius2_, length_, 0, nullptr);
+        //newtonShape_ = NewtonCreateCapsule(physicsWorld_->GetNewtonWorld(), radius1_, radius2_, length_, 0, nullptr);
+		newtonShape_ = new ndShapeCapsule(radius1_, radius2_, length_);
         return true;
     }
 
@@ -475,7 +481,8 @@ namespace Urho3D {
 
     bool NewtonCollisionShape_Cone::buildNewtonCollision()
 {
-        newtonCollision_ = NewtonCreateCone(physicsWorld_->GetNewtonWorld(), radius_, length_, 0, nullptr);
+        //newtonShape_ = NewtonCreateCone(physicsWorld_->GetNewtonWorld(), radius_, length_, 0, nullptr);
+		newtonShape_ = new ndShapeCone(radius_, length_);
         return true;
     }
 
@@ -491,93 +498,93 @@ namespace Urho3D {
 
 
 
-
-
-    NewtonCollisionShape_HeightmapTerrain::NewtonCollisionShape_HeightmapTerrain(Context* context) : NewtonCollisionShape_Geometry(context)
-    {
-        drawPhysicsDebugCollisionGeometry_ = false;//default newton debug lines for geometry is too many.
-    }
-
-    NewtonCollisionShape_HeightmapTerrain::~NewtonCollisionShape_HeightmapTerrain()
-    {
-
-    }
-
-    void NewtonCollisionShape_HeightmapTerrain::RegisterObject(Context* context)
-    {
-        context->RegisterFactory<NewtonCollisionShape_HeightmapTerrain>(DEF_PHYSICS_CATEGORY.c_str());
-        URHO3D_COPY_BASE_ATTRIBUTES(NewtonCollisionShape_Geometry);
-
-    }
-
-    bool NewtonCollisionShape_HeightmapTerrain::buildNewtonCollision()
-    {
-
-
-
-        //find a terrain component
-        Terrain* terrainComponent = node_->GetComponent<Terrain>();
-        if (terrainComponent)
-        {
-
-            int size = terrainComponent->GetHeightMap()->GetHeight();
-			float* heightDataRaw = terrainComponent->GetHeightData().get();
-			dFloat* heightData = (dFloat*)heightDataRaw;
-
-#ifdef _NEWTON_USE_DOUBLE
-            heightData = new dFloat[size*size];
-            for (int i = 0; i < size*size; i++) {
-                heightData[i] = heightDataRaw[i];
-            }
-#endif
-
-
-
-            char* const attibutes = new char[size * size];
-            memset(attibutes, 0, size * size * sizeof(char));
-
-            Vector3 spacing = terrainComponent->GetSpacing();
-            newtonCollision_ = NewtonCreateHeightFieldCollision(physicsWorld_->GetNewtonWorld(), size, size, 0, 0, heightData, attibutes, 1.0f, spacing.x_, spacing.z_, 0);
-
-            delete[] attibutes;
-
-
-            ////set the internal offset correction to match where HeightmapTerrain renders
-            position_ = -Vector3(float(size*spacing.x_)*0.5f - spacing.x_*0.5f, 0, float(size*spacing.z_)*0.5f - spacing.z_*0.5f);
-            return true;
-        }
-        else
-            return false;
-    }
-
-    NewtonCollisionShape_TreeCollision::NewtonCollisionShape_TreeCollision(Context* context) : NewtonCollisionShape_Geometry(context)
-    {
-
-    }
-
-    NewtonCollisionShape_TreeCollision::~NewtonCollisionShape_TreeCollision()
-    {
-
-    }
-
-    void NewtonCollisionShape_TreeCollision::RegisterObject(Context* context)
-    {
-        context->RegisterFactory<NewtonCollisionShape_TreeCollision>(DEF_PHYSICS_CATEGORY.c_str());
-        URHO3D_COPY_BASE_ATTRIBUTES(NewtonCollisionShape_Geometry);
-    }
-
-    bool NewtonCollisionShape_TreeCollision::buildNewtonCollision()
-    {
-        if (!NewtonCollisionShape_Geometry::buildNewtonCollision())
-            return false;
-
-        NewtonWorld* world = physicsWorld_->GetNewtonWorld();
-
-        //newtonCollision_ = NewtonCreateConvexHullFromMesh(world, newtonMesh_->mesh, hullTolerance_, 0);
-        newtonCollision_ = NewtonCreateTreeCollisionFromMesh(world, newtonMesh_->mesh, 0);
-        return true;
-    }
-
+	
+//
+//    NewtonCollisionShape_HeightmapTerrain::NewtonCollisionShape_HeightmapTerrain(Context* context) : NewtonCollisionShape_Geometry(context)
+//    {
+//        drawPhysicsDebugCollisionGeometry_ = false;//default newton debug lines for geometry is too many.
+//    }
+//
+//    NewtonCollisionShape_HeightmapTerrain::~NewtonCollisionShape_HeightmapTerrain()
+//    {
+//
+//    }
+//
+//    void NewtonCollisionShape_HeightmapTerrain::RegisterObject(Context* context)
+//    {
+//        context->RegisterFactory<NewtonCollisionShape_HeightmapTerrain>(DEF_PHYSICS_CATEGORY.c_str());
+//        URHO3D_COPY_BASE_ATTRIBUTES(NewtonCollisionShape_Geometry);
+//
+//    }
+//
+//    bool NewtonCollisionShape_HeightmapTerrain::buildNewtonCollision()
+//    {
+//
+//
+//
+//        //find a terrain component
+//        Terrain* terrainComponent = node_->GetComponent<Terrain>();
+//        if (terrainComponent)
+//        {
+//
+//            int size = terrainComponent->GetHeightMap()->GetHeight();
+//			float* heightDataRaw = terrainComponent->GetHeightData().get();
+//			dFloat* heightData = (dFloat*)heightDataRaw;
+//
+//#ifdef _NEWTON_USE_DOUBLE
+//            heightData = new dFloat[size*size];
+//            for (int i = 0; i < size*size; i++) {
+//                heightData[i] = heightDataRaw[i];
+//            }
+//#endif
+//
+//
+//
+//            char* const attibutes = new char[size * size];
+//            memset(attibutes, 0, size * size * sizeof(char));
+//
+//            Vector3 spacing = terrainComponent->GetSpacing();
+//            newtonShape_ = NewtonCreateHeightFieldCollision(physicsWorld_->GetNewtonWorld(), size, size, 0, 0, heightData, attibutes, 1.0f, spacing.x_, spacing.z_, 0);
+//
+//            delete[] attibutes;
+//
+//
+//            ////set the internal offset correction to match where HeightmapTerrain renders
+//            position_ = -Vector3(float(size*spacing.x_)*0.5f - spacing.x_*0.5f, 0, float(size*spacing.z_)*0.5f - spacing.z_*0.5f);
+//            return true;
+//        }
+//        else
+//            return false;
+//    }
+//
+//    NewtonCollisionShape_TreeCollision::NewtonCollisionShape_TreeCollision(Context* context) : NewtonCollisionShape_Geometry(context)
+//    {
+//
+//    }
+//
+//    NewtonCollisionShape_TreeCollision::~NewtonCollisionShape_TreeCollision()
+//    {
+//
+//    }
+//
+//    void NewtonCollisionShape_TreeCollision::RegisterObject(Context* context)
+//    {
+//        context->RegisterFactory<NewtonCollisionShape_TreeCollision>(DEF_PHYSICS_CATEGORY.c_str());
+//        URHO3D_COPY_BASE_ATTRIBUTES(NewtonCollisionShape_Geometry);
+//    }
+//
+//    bool NewtonCollisionShape_TreeCollision::buildNewtonCollision()
+//    {
+//        if (!NewtonCollisionShape_Geometry::buildNewtonCollision())
+//            return false;
+//
+//        NewtonWorld* world = physicsWorld_->GetNewtonWorld();
+//
+//        //newtonCollision_ = NewtonCreateConvexHullFromMesh(world, newtonMesh_->mesh, hullTolerance_, 0);
+//        newtonShape_ = NewtonCreateTreeCollisionFromMesh(world, newtonMesh_->mesh, 0);
+//        return true;
+//    }
+//
 
 
 }

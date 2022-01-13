@@ -298,9 +298,9 @@ namespace Urho3D
 		void SetNetWorldTorque(Vector3 torque);
 
         ///Get the currently used newton body.
-        NewtonBody* GetNewtonBody() const { return newtonBody_; }
+        ndBodyKinematic* GetNewtonBody() const { return newtonBody_; }
         /// Return the currently used newton collision
-        NewtonCollision* GetEffectiveNewtonCollision() const;
+        ndShape* GetEffectiveNewtonShape() const;
 
 
         Vector3 GetLinearVelocity(TransformSpace space = TS_WORLD) const;
@@ -360,7 +360,7 @@ namespace Urho3D
         /// Internal newton body
         ndBodyKinematic * newtonBody_ = nullptr;
         /// compound collision if needed.
-        NewtonCollision* effectiveCollision_ = nullptr;
+        ndShape* effectiveCollision_ = nullptr;
         /// Physics world.
 		WeakPtr<NewtonPhysicsWorld> physicsWorld_;
         /// all currently used collision shape components.
@@ -408,8 +408,8 @@ namespace Urho3D
 		bool useCOMOffsetOverride_ = false;
 
 
-        dVector netForceNewton_;
-        dVector netTorqueNewton_;
+        ndVector netForceNewton_;
+        ndVector netTorqueNewton_;
 
         ///effective mass
         float mass_ = 0.0f;

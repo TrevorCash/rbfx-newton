@@ -40,10 +40,10 @@ namespace Urho3D {
 
     const char* solveModeNames[] =
     {
-        "SOLVE_MODE_JOINT_DEFAULT",
-        "SOLVE_MODE_EXACT",
-        "SOLVE_MODE_ITERATIVE",
-        "SOLVE_MODE_KINEMATIC_LOOP",
+        "m_jointIterativeSoft",
+        "m_jointkinematicOpenLoop",
+        "m_jointkinematicCloseLoop",
+        "m_jointkinematicAttachment",
         nullptr
     };
 
@@ -63,7 +63,7 @@ namespace Urho3D {
         context->RegisterFactory<NewtonConstraint>(DEF_PHYSICS_CATEGORY.c_str());
         URHO3D_COPY_BASE_ATTRIBUTES(Component);
 
-        URHO3D_ENUM_ACCESSOR_ATTRIBUTE("Solver Iterations", GetSolveMode, SetSolveMode, CONSTRAINT_SOLVE_MODE, solveModeNames, SOLVE_MODE_JOINT_DEFAULT, AM_DEFAULT);
+        URHO3D_ENUM_ACCESSOR_ATTRIBUTE("Solver Iterations", GetSolveMode, SetSolveMode, ndJointBilateralSolverModel, solveModeNames, m_jointkinematicOpenLoop, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Stiffness", GetStiffness, SetStiffness, float, 0.7f, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("ForceCalculationsEnabled", GetEnableForceCalculation, SetEnableForceCalculation, bool, false, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Other Body ID", GetOtherBodyId, SetOtherBodyId, unsigned, 0, AM_DEFAULT | AM_COMPONENTID);
@@ -138,7 +138,7 @@ namespace Urho3D {
         debugDisplay.SetDrawScale(1.0f*scale);
         if (newtonConstraint_)
         {
-            newtonConstraint_->Debug(&debugDisplay);//#todo this sometimes covers up the 2 frames above - maybe alter inside newton instead?
+			newtonConstraint_->GetAsBilateral()->DebugJoint(static_cast<ndConstraintDebugCallback&>(debugDisplay));//#todo this sometimes covers up the 2 frames above - maybe alter inside newton instead?
         }
     }
 
@@ -273,7 +273,7 @@ namespace Urho3D {
         SetOtherRotation(otherBody_->GetWorldRotation().Inverse() * rotation);
     }
 
-    void NewtonConstraint::SetSolveMode(CONSTRAINT_SOLVE_MODE mode)
+    void NewtonConstraint::SetSolveMode(ndJointBilateralSolverModel mode)
     {
         if (solveMode_ != mode) {
             solveMode_ = mode;
@@ -305,7 +305,7 @@ namespace Urho3D {
     Vector3 NewtonConstraint::GetOwnForce()
     {
         if(newtonConstraint_&& enableForceCalculations_)
-            return NewtonToUrhoVec3(newtonConstraint_->GetForce0());
+            return NewtonToUrhoVec3(newtonConstraint_->GetAsBilateral()->GetForceBody0());
 
         return Vector3();
     }
@@ -313,7 +313,7 @@ namespace Urho3D {
     Vector3 NewtonConstraint::GetOtherForce()
     {
         if (newtonConstraint_ && enableForceCalculations_)
-            return NewtonToUrhoVec3(newtonConstraint_->GetForce1());
+            return NewtonToUrhoVec3(newtonConstraint_->GetAsBilateral()->GetForceBody1());
 
         return Vector3();
     }
@@ -321,7 +321,7 @@ namespace Urho3D {
     Vector3 NewtonConstraint::GetOwnTorque()
     {
         if (newtonConstraint_ && enableForceCalculations_)
-            return NewtonToUrhoVec3(newtonConstraint_->GetTorque0());
+            return NewtonToUrhoVec3(newtonConstraint_->GetAsBilateral()->GetTorqueBody0());
 
         return Vector3();
     }
@@ -329,7 +329,7 @@ namespace Urho3D {
     Vector3 NewtonConstraint::GetOtherTorque()
     {
         if (newtonConstraint_ && enableForceCalculations_)
-            return NewtonToUrhoVec3(newtonConstraint_->GetTorque1());
+            return NewtonToUrhoVec3(newtonConstraint_->GetAsBilateral()->GetTorqueBody1());
 
         return Vector3();
     }
@@ -344,12 +344,12 @@ namespace Urho3D {
 			return ownBody_;
 	}
 
-	NewtonBody* NewtonConstraint::GetOwnNewtonBody(bool useResolved /*= true */) const
+	ndBodyKinematic* NewtonConstraint::GetOwnNewtonBody(bool useResolved /*= true */) const
     {
         return GetOwnBody(useResolved)->GetNewtonBody();
     }
 
-	NewtonBody* NewtonConstraint::GetOwnNewtonBodyBuild() const
+	ndBodyKinematic* NewtonConstraint::GetOwnNewtonBodyBuild() const
 	{
 
 		return GetOwnNewtonBody(true);
@@ -363,21 +363,17 @@ namespace Urho3D {
 			return otherBody_;
 	}
 
-	NewtonBody* NewtonConstraint::GetOtherNewtonBody(bool resolved /*= true*/) const
+	ndBodyKinematic* NewtonConstraint::GetOtherNewtonBody(bool resolved /*= true*/) const
     {
         return GetOtherBody(resolved)->GetNewtonBody();
     }
 
-	NewtonBody* NewtonConstraint::GetOtherNewtonBodyBuild() const
+	ndBodyKinematic* NewtonConstraint::GetOtherNewtonBodyBuild() const
 	{
 		return GetOtherNewtonBody(true);
 	}
 
-	void NewtonConstraint::BuildNow()
-    {
-        physicsWorld_->WaitForUpdateFinished();
-        reEvalConstraint();
-    }
+
 
     unsigned NewtonConstraint::GetOtherBodyId() const
     {
@@ -430,8 +426,8 @@ namespace Urho3D {
 	void NewtonConstraint::OnSetAttribute(const AttributeInfo& attr, const Variant& src)
 	{
 		Component::OnSetAttribute(attr, src);
-
 	}
+
 
 	void NewtonConstraint::reEvalConstraint()
 	{
@@ -456,8 +452,6 @@ namespace Urho3D {
 						bool curHasBeenBuilt = hasBeenBuilt_;
 						SetOtherBody(body, false);
 						hasBeenBuilt_ = curHasBeenBuilt;//preserve hasBeenBuilt flag in this case!
-
-
 
 					}
                     else {
@@ -630,12 +624,10 @@ namespace Urho3D {
             return false;
 
         /// extend in derived classes.
-        NewtonJointSetCollisionState((NewtonJoint*)newtonConstraint_, enableBodyCollision_);
-        newtonConstraint_->SetStiffness(stiffness_);
-        newtonConstraint_->SetJointForceCalculation(enableForceCalculations_);
+		newtonConstraint_->GetAsBilateral()->SetCollidable(enableBodyCollision_);
 
         if(solveMode_ != SOLVE_MODE_JOINT_DEFAULT)
-            newtonConstraint_->SetSolverModel(solveMode_);
+            newtonConstraint_->GetAsBilateral()->SetSolverModel(solveMode_);
 
         return true;
     }

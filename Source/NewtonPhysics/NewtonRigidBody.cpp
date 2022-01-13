@@ -551,7 +551,7 @@ namespace Urho3D {
     void NewtonRigidBody::DrawDebugGeometry(DebugRenderer* debug, bool depthTest, bool showAABB /*= true*/, bool showCollisionMesh /*= true*/, bool showCenterOfMass /*= true*/, bool showContactForces /*= true*/, bool showBodyFrame /*= true*/)
     {
         Component::DrawDebugGeometry(debug, depthTest);
-        if (newtonBody_ && GetEffectiveNewtonCollision()) {
+        if (newtonBody_ && GetEffectiveNewtonShape()) {
 
 			float localScale = physicsWorld_->debugScale_ * 0.5f;
             if (showAABB )
@@ -561,7 +561,7 @@ namespace Urho3D {
                     dVector p1(0.0f);
 
                     NewtonBodyGetMatrix(newtonBody_, &matrix[0][0]);
-                    NewtonCollisionCalculateAABB(GetEffectiveNewtonCollision(), &matrix[0][0], &p0[0], &p1[0]);
+                    NewtonCollisionCalculateAABB(GetEffectiveNewtonShape(), &matrix[0][0], &p0[0], &p1[0]);
 
 
                     Vector3 min = (NewtonToUrhoVec3(p0));
@@ -801,7 +801,7 @@ namespace Urho3D {
                         firstCollisionShape = colComp;
 
                     //for each sub collision in the colComp
-                    const NewtonCollision* rootCollision = colComp->GetNewtonCollision();
+                    const NewtonCollision* rootCollision = colComp->GetNewtonShape();
 
                     void* curSubNode = NewtonCompoundCollisionGetFirstNode((NewtonCollision*)rootCollision);
                     NewtonCollision* curSubCollision = nullptr;
@@ -1083,7 +1083,7 @@ namespace Urho3D {
 		ea::vector<NewtonCollisionShape*> filteredList;
         for (NewtonCollisionShape* col : collisionShapes_)
         {
-            if (col->IsEnabledEffective() && col->GetNewtonCollision())
+            if (col->IsEnabledEffective() && col->GetNewtonShape())
                 filteredList.push_back(col);
         }
         enabledCollisionShapes = filteredList;
@@ -1353,7 +1353,7 @@ namespace Urho3D {
 		netTorque_ = torque;
 	}
 
-	NewtonCollision* NewtonRigidBody::GetEffectiveNewtonCollision() const
+	NewtonCollision* NewtonRigidBody::GetEffectiveNewtonShape() const
     {
         if (effectiveCollision_)
             return effectiveCollision_;

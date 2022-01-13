@@ -32,11 +32,11 @@ namespace Urho3D {
 
 #endif
     }
-    dMatrix UrhoToNewton(const Matrix3x4& mat3x4)
+    ndMatrix UrhoToNewton(const Matrix3x4& mat3x4)
     {
 #ifndef _NEWTON_USE_DOUBLE
         Matrix4 asMat4 = mat3x4.ToMatrix4();
-        return dMatrix(asMat4.Transpose().Data());
+        return ndMatrix(asMat4.Transpose().Data());
 #else
         Matrix4 tranposed = mat3x4.ToMatrix4().Transpose();
         const float* dataPtr = tranposed.Data();
@@ -46,14 +46,14 @@ namespace Urho3D {
             data[i] = dataPtr[i];
 
 
-        return dMatrix(data);
+        return ndMatrix(data);
 #endif
     }
-	dMatrix UrhoToNewton(const Matrix3& mat3)
+	ndMatrix UrhoToNewton(const Matrix3& mat3)
 	{
 #ifndef _NEWTON_USE_DOUBLE
 		Matrix4 asMat4 = Matrix4(mat3);
-		return dMatrix(asMat4.Transpose().Data());
+		return ndMatrix(asMat4.Transpose().Data());
 #else
 		Matrix4 tranposed = Matrix4(mat3).Transpose();
 		const float* dataPtr = tranposed.Data();
@@ -63,37 +63,37 @@ namespace Urho3D {
 			data[i] = dataPtr[i];
 
 
-		return dMatrix(data);
+		return ndMatrix(data);
 #endif
 	}
 
-    dVector UrhoToNewton(const Vector4& vec4)
+    ndVector UrhoToNewton(const Vector4& vec4)
     {
-        return dVector(vec4.x_, vec4.y_, vec4.z_, vec4.w_);
+        return ndVector(vec4.x_, vec4.y_, vec4.z_, vec4.w_);
     }
 
-    dVector UrhoToNewton(const Vector3& vec3)
+    ndVector UrhoToNewton(const Vector3& vec3)
     {
-        return dVector(vec3.x_, vec3.y_, vec3.z_);
+        return ndVector(vec3.x_, vec3.y_, vec3.z_);
     }
 
-    dVector UrhoToNewton(const Vector2& vec2)
+    ndVector UrhoToNewton(const Vector2& vec2)
     {
-        return dVector(vec2.x_, vec2.y_, 0.0f);
+        return ndVector(vec2.x_, vec2.y_, 0.0f);
     }
-    dQuaternion UrhoToNewton(const Quaternion& quat)
+    ndQuaternion UrhoToNewton(const Quaternion& quat)
     {
-        return dQuaternion(quat.w_, quat.x_, quat.y_, quat.z_);
+        return ndQuaternion(quat.w_, quat.x_, quat.y_, quat.z_);
     }
 
 
 
 
-    Vector3 NewtonToUrhoVec3(const dVector& vec)
+    Vector3 NewtonToUrhoVec3(const ndVector& vec)
     {
         return Vector3(vec.m_x, vec.m_y, vec.m_z);
     }
-    Vector4 NewtonToUrhoVec4(const dVector& vec)
+    Vector4 NewtonToUrhoVec4(const ndVector& vec)
     {
         return Vector4(vec.m_x, vec.m_y, vec.m_z, vec.m_w);
     }
@@ -177,7 +177,7 @@ namespace Urho3D {
 
 
 	//#todo test after eastl migration
-    void PrintNewtonMatrix(dMatrix mat)
+    void PrintNewtonMatrix(ndMatrix mat)
     {
         const int paddingSize = 10;
         for (int row = 0; row < 4; row++) {

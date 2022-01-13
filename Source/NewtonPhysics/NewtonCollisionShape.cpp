@@ -93,27 +93,27 @@ namespace Urho3D {
             {
 
 
-                //determine if the built collision is a compound.
-                int numSubShapes = 0;
-                void* curSubColNode = NewtonCompoundCollisionGetFirstNode(newtonCollision_);
-                while (curSubColNode) {
-                    numSubShapes++;
+                ////determine if the built collision is a compound.
+                //int numSubShapes = 0;
+                //void* curSubColNode = NewtonCompoundCollisionGetFirstNode(newtonShape_);
+                //while (curSubColNode) {
+                //    numSubShapes++;
 
-                    //set user data on each part.
-                    NewtonCollisionSetUserData(NewtonCompoundCollisionGetCollisionFromNode(newtonCollision_, curSubColNode), (void*)this);
+                //    //set user data on each part.
+                //    NewtonCollisionSetUserData(NewtonCompoundCollisionGetCollisionFromNode(newtonShape_, curSubColNode), (void*)this);
 
-                    curSubColNode = NewtonCompoundCollisionGetNextNode(newtonCollision_, curSubColNode);
-
-
-                }
-
-                if (numSubShapes > 1)
-                    isCompound_ = true;
-                else
-                    isCompound_ = false;
+                //    curSubColNode = NewtonCompoundCollisionGetNextNode(newtonShape_, curSubColNode);
 
 
-                NewtonCollisionSetUserData(newtonCollision_, (void*)this);
+                //}
+
+                //if (numSubShapes > 1)
+                //    isCompound_ = true;
+                //else
+                //    isCompound_ = false;
+				
+
+                //NewtonCollisionSetUserData(newtonShape_, (void*)this);
             }
     }
 
@@ -124,10 +124,10 @@ namespace Urho3D {
 
     void NewtonCollisionShape::freeInternalCollision()
     {
-        if (newtonCollision_) {
+        if (newtonShape_ != nullptr) {
            
-            physicsWorld_->addToFreeQueue(newtonCollision_);
-            newtonCollision_ = nullptr;
+            physicsWorld_->addToFreeQueue(newtonShape_);
+            newtonShape_ = nullptr;
         }
     }
 
@@ -299,9 +299,9 @@ namespace Urho3D {
         return isCompound_;
     }
 
-    const NewtonCollision* NewtonCollisionShape::GetNewtonCollision()
+    const ndShape* NewtonCollisionShape::GetNewtonShape()
     {
-        return newtonCollision_;
+        return newtonShape_;
     }
 
 

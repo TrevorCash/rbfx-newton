@@ -15,7 +15,7 @@ namespace Urho3D
     class UrhoNewtonDebugDisplay : public ndConstraintDebugCallback
     {
     public:
-        UrhoNewtonDebugDisplay(DebugRenderer* debugRenderer, bool depthTest) : ndConstraint::dDebugDisplay(ndMatrix())
+        UrhoNewtonDebugDisplay(DebugRenderer* debugRenderer, bool depthTest) : ndConstraintDebugCallback()
         {
             debugRenderer_ = debugRenderer;
             depthTest_ = depthTest;
@@ -25,15 +25,9 @@ namespace Urho3D
 
         void SetDrawScale(float scale) { worldScale_ = scale; }
 
-        virtual void SetColor(const dVector& color) override;
-        virtual void DrawLine(const dVector& p0, const dVector& p1) override;
+        virtual void SetColor(const ndVector& color);
+        virtual void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32 thickness = ndFloat32(1.0f));
 
-		virtual void DrawPoint(const dVector& p0, ndFloat32 thinckness = 1.0f) override;
-
-
-		virtual void SetOrthRendering() override;
-
-		virtual void ResetOrthRendering() override;
 
 	protected:
         float worldScale_ = 1.0f;

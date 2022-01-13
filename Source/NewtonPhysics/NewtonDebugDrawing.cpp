@@ -84,7 +84,7 @@ namespace Urho3D {
 
            
             matrix = UrhoToNewton(mat);
-            NewtonCollisionForEachPolygonDo(colShapeComp->GetNewtonCollision(), &matrix[0][0], NewtonDebug_ShowGeometryCollisionCallback, (void*)&options);
+            NewtonCollisionForEachPolygonDo(colShapeComp->GetNewtonShape(), &matrix[0][0], NewtonDebug_ShowGeometryCollisionCallback, (void*)&options);
 
         }
     }
@@ -100,29 +100,16 @@ namespace Urho3D {
         NewtonCollisionForEachPolygonDo(collision, &UrhoToNewton(transform)[0][0], NewtonDebug_ShowGeometryCollisionCallback, (void*)&options);
     }
 
-    void UrhoNewtonDebugDisplay::SetColor(const dVector& color)
+    void UrhoNewtonDebugDisplay::SetColor(const ndVector& color)
     {
         currentColor_ = Color(color.m_x, color.m_y, color.m_z);
     }
 
-    void UrhoNewtonDebugDisplay::DrawLine(const dVector& p0, const dVector& p1)
+    void UrhoNewtonDebugDisplay::DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32 thickness = ndFloat32(1.0f))
     {
-        debugRenderer_->AddLine(NewtonToUrhoVec3(p0)*worldScale_, NewtonToUrhoVec3(p1)*worldScale_, currentColor_, depthTest_);
+        debugRenderer_->AddLine(NewtonToUrhoVec3(p0)*worldScale_, NewtonToUrhoVec3(p1)*worldScale_, Color(color[0], color[1], color[2], color[3]), depthTest_);
     }
 
-	void UrhoNewtonDebugDisplay::DrawPoint(const dVector& p0, dFloat thinckness /*= 1.0f*/)
-	{
-		throw std::logic_error("The method or operation is not implemented.");
-	}
 
-	void UrhoNewtonDebugDisplay::SetOrthRendering()
-	{
-		
-	}
-
-	void UrhoNewtonDebugDisplay::ResetOrthRendering()
-	{
-		
-	}
 
 }

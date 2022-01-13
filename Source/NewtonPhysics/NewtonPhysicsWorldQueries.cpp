@@ -17,7 +17,7 @@ namespace Urho3D {
         dVector contact;
         dVector normal;
 
-        NewtonCollision* effectiveCollision = rigidBody->GetEffectiveNewtonCollision();
+        NewtonCollision* effectiveCollision = rigidBody->GetEffectiveNewtonShape();
 
         if (!effectiveCollision)
             return false;
@@ -28,7 +28,7 @@ namespace Urho3D {
         //#todo double check the matrix here may need tweeking to get the true transform of the compound:
         int res = NewtonCollisionPointDistance(newtonWorld_,
             &UrhoToNewton(worldPoint)[0],
-            rigidBody->GetEffectiveNewtonCollision(),
+            rigidBody->GetEffectiveNewtonShape(),
             &UrhoToNewton((rigidBody->GetWorldTransform()) * Matrix3x4(NewtonToUrhoMat4(collisionMatrix)))[0][0], &contact[0], &normal[0], 0);
 
 
@@ -68,7 +68,7 @@ namespace Urho3D {
     {
         dMatrix mat;
         NewtonBodyGetMatrix(body->GetNewtonBody(), &mat[0][0]);
-        NewtonCollision* newtonShape = body->GetEffectiveNewtonCollision();
+        NewtonCollision* newtonShape = body->GetEffectiveNewtonShape();
         int numContacts = DoNewtonCollideTest(&mat[0][0], newtonShape);
 
         GetBodiesInConvexCast(result, numContacts);

@@ -25,21 +25,16 @@
 
 #include "Urho3D/Scene/Component.h"
 
+#include "ndNewton.h"
 
-class dCustomJoint;
-class NewtonBody;
+
 namespace Urho3D {
 
     class Context;
     class NewtonRigidBody;
     class NewtonPhysicsWorld;
 
-    enum CONSTRAINT_SOLVE_MODE {
-        SOLVE_MODE_JOINT_DEFAULT = 0,     //Usually the best option - uses whatever solver mode newton has for the internal joint.
-        SOLVE_MODE_EXACT = 1,             //Always use exact solving.
-        SOLVE_MODE_ITERATIVE = 2,         //iterative solving use for a joint that forms a loop.
-        SOLVE_MODE_KINEMATIC_LOOP = 3     //use this to specify a joint that is a connecting joint in a loop of joints. Only one joint should neeed to be in this solve mode.
-    };
+
     ///Base class for newton constraints.
     class URHONEWTON_API NewtonConstraint : public Component
     {
@@ -133,12 +128,12 @@ namespace Urho3D {
 
 
 
-        void SetSolveMode(CONSTRAINT_SOLVE_MODE mode);
+        void SetSolveMode(ndJointBilateralSolverModel mode);
         void SetSolveMode(int mode) {
-            SetSolveMode(CONSTRAINT_SOLVE_MODE(mode));
+            SetSolveMode(ndJointBilateralSolverModel(mode));
         }
 
-        CONSTRAINT_SOLVE_MODE GetSolveMode() const { return solveMode_; }
+		ndJointBilateralSolverModel GetSolveMode() const { return solveMode_; }
 
 
         void SetStiffness(float stiffness);
@@ -166,20 +161,19 @@ namespace Urho3D {
         /// Return rigid body in own scene node.
         NewtonRigidBody* GetOwnBody(bool resolved = true) const;
 
-        NewtonBody* GetOwnNewtonBody(bool resolved = true) const;
-		NewtonBody* GetOwnNewtonBodyBuild() const;
+		ndBodyKinematic* GetOwnNewtonBody(bool resolved = true) const;
+		ndBodyKinematic* GetOwnNewtonBodyBuild() const;
 
         /// Return the other rigid body. May be null if connected to the static world.
         NewtonRigidBody* GetOtherBody(bool resolved = true) const;
 
-        NewtonBody* GetOtherNewtonBody(bool resolved = true) const;
-		NewtonBody* GetOtherNewtonBodyBuild() const;
-
-        /// Build the constraint immediatly (once the physics loop has ended)
-        void BuildNow();
+		ndBodyKinematic* GetOtherNewtonBody(bool resolved = true) const;
+		ndBodyKinematic* GetOtherNewtonBodyBuild() const;
 
 
-        dCustomJoint* GetNewtonJoint() const {
+
+
+        ndConstraint* GetNewtonJoint() const {
             return  newtonConstraint_;
         }
 
@@ -218,7 +212,7 @@ namespace Urho3D {
 
         float stiffness_ = 0.7f;
 
-        CONSTRAINT_SOLVE_MODE solveMode_ = SOLVE_MODE_JOINT_DEFAULT;
+		ndJointBilateralSolverModel solveMode_ = m_jointkinematicOpenLoop;
 
 
 

@@ -96,7 +96,7 @@ namespace Urho3D
     {
         if (newtonConstraint_)
         {
-            return static_cast<ndJointSlider*>(newtonConstraint_)->GetJointPosit();
+            return static_cast<ndJointSlider*>(newtonConstraint_)->GetPosit();
         }
         else
         {
@@ -222,7 +222,8 @@ namespace Urho3D
             enableUpperTwistLimit_ = enable;
             if (newtonConstraint_)
             {
-                static_cast<ndJointSlider*>(newtonConstraint_)->EnableAngularLimits(enableLowerTwistLimit_ || enableUpperTwistLimit_);
+				//#TODO
+                //static_cast<ndJointSlider*>(newtonConstraint_)->EnableAngularLimits(enableLowerTwistLimit_ || enableUpperTwistLimit_);
             }
             else
                 MarkDirty();
@@ -236,7 +237,8 @@ namespace Urho3D
             enableLowerTwistLimit_ = enable;
             if (newtonConstraint_)
             {
-                static_cast<ndJointSlider*>(newtonConstraint_)->EnableAngularLimits(enableLowerTwistLimit_ || enableUpperTwistLimit_);
+				//#TODO
+				//static_cast<ndJointSlider*>(newtonConstraint_)->EnableAngularLimits(enableLowerTwistLimit_ || enableUpperTwistLimit_);
             }
             else
                 MarkDirty();
@@ -377,7 +379,7 @@ namespace Urho3D
         applyTwistLimits();
 
         //#todo - this springdamper doesnt seem to work.
-        static_cast<dCustomCorkScrew*>(newtonConstraint_)->SetAngularSpringDamper(enableTwistSpringDamper_, twistRelaxation_, twistSpringCoef_, twistDamperCoef_);
+        static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularSpringDamper(enableTwistSpringDamper_, twistRelaxation_, twistSpringCoef_, twistDamperCoef_);
 
 
 

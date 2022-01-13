@@ -22,9 +22,6 @@ namespace Urho3D {
 
 
         ///Set Twist limits
-        void SetTwistLimitsEnabled(bool enabled = false);
-        bool GetTwistLimitsEnabled() const;
- 
         void SetTwistLimits(float minAngle, float maxAngle);
         void SetTwistLimitMin(float minAngle);
         void SetTwistLimitMax(float maxAngle);
@@ -36,11 +33,6 @@ namespace Urho3D {
         void SetTwistFriction(float frictionTorque);
         float GetTwistFriction() const;
 
-
-
-        ///enable or disable limiting cone
-        void SetConeEnabled(bool enabled = true);
-        bool GetConeEnabled() const;
 
         void SetConeAngle(float angle);
         float GetConeAngle() const;
