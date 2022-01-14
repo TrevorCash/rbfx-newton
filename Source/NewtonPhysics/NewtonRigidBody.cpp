@@ -146,8 +146,8 @@ namespace Urho3D {
         {
             Activate();
 
-            dgQuaternion orientation;
-            NewtonBodyGetRotation(newtonBody_, &orientation.m_x);
+            ndQuaternion orientation = newtonBody_->GetRotation();
+
 
             Matrix3x4 transform((position), NewtonToUrhoQuat(orientation), 1.0f);
 
@@ -290,8 +290,8 @@ namespace Urho3D {
 	Urho3D::Matrix3x4 NewtonRigidBody::GetCOMWorldTransform()
 	{
 		if (newtonBody_) {
-			dVector actualCOM;
-			NewtonBodyGetCentreOfMass(newtonBody_, &actualCOM[0]);
+			ndVector actualCOM = newtonBody_->GetCentreOfMass();
+
 			if (NewtonToUrhoVec3(actualCOM) != centerOfMassEffective_) {
 				URHO3D_LOGERROR("center of mass disagreement!");
 				URHO3D_LOGERROR(NewtonToUrhoVec3(actualCOM).ToString() + " vs " + centerOfMassEffective_.ToString());
@@ -336,20 +336,19 @@ namespace Urho3D {
             {
               
 				
-				dVector curWorldVel;
-                NewtonBodyGetVelocity(newtonBody_, &curWorldVel[0]);
+				ndVector curWorldVel = newtonBody_->GetVelocity();
 
-                dVector worldVel = UrhoToNewton((worldVelocity)) - curWorldVel;
+
+                ndVector worldVel = UrhoToNewton((worldVelocity)) - curWorldVel;
                 
 				Vector3 worldPos = GetWorldPosition();
 
-                NewtonBodyAddImpulse(newtonBody_, &worldVel[0], &UrhoToNewton(worldPos)[0], physicsWorld_->timeStepAvg_*GetScene()->GetTimeScale());
-            
+				//#TODO check timeStep
+				newtonBody_->GetAsBodyDynamic()->ApplyImpulsePair(worldVel,ndVector(), physicsWorld_->timeStepAvg_*GetScene()->GetTimeScale());
 			
 			}
 			else {
-				NewtonBodySetVelocity(newtonBody_, &UrhoToNewton(worldVelocity)[0]);
-
+				newtonBody_->SetVelocity(UrhoToNewton(worldVelocity));
 			}
         }
         else
@@ -556,12 +555,11 @@ namespace Urho3D {
 			float localScale = physicsWorld_->debugScale_ * 0.5f;
             if (showAABB )
             {
-                    dMatrix matrix;
-                    dVector p0(0.0f);
-                    dVector p1(0.0f);
+                    ndMatrix matrix = newtonBody_->GetMatrix();
+                    ndVector p0(0.0f);
+                    ndVector p1(0.0f);
 
-                    NewtonBodyGetMatrix(newtonBody_, &matrix[0][0]);
-                    NewtonCollisionCalculateAABB(GetEffectiveNewtonShape(), &matrix[0][0], &p0[0], &p1[0]);
+					newtonBody_->GetAABB(p0, p1);
 
 
                     Vector3 min = (NewtonToUrhoVec3(p0));
@@ -588,50 +586,52 @@ namespace Urho3D {
             if (showContactForces)
             {
 
-                dFloat mass;
-                dFloat Ixx;
-                dFloat Iyy;
-                dFloat Izz;
-                NewtonBodyGetMass(newtonBody_, &mass, &Ixx, &Iyy, &Izz);
+                ndFloat mass;
+                ndFloat Ixx;
+                ndFloat Iyy;
+                ndFloat Izz;
+               
+				newtonBody_->GetMassMatrix(Ixx, Iyy, Izz, mass);
 
                 //draw normal forces in term of acceleration.
                 //this mean that two bodies with same shape but different mass will display the same force
                 if (mass > 0.0f) {
                     float scaleFactor = 0.1f / mass;
-                    for (NewtonJoint* joint = NewtonBodyGetFirstContactJoint(newtonBody_); joint; joint = NewtonBodyGetNextContactJoint(newtonBody_, joint)) {
-                        if (NewtonJointIsActive(joint)) {
-                            for (void* contact = NewtonContactJointGetFirstContact(joint); contact; contact = NewtonContactJointGetNextContact(joint, contact)) {
-                                dVector point(0.0f);
-                                dVector normal(0.0f);
-                                dVector tangentDir0(0.0f);
-                                dVector tangentDir1(0.0f);
-                                dVector contactForce(0.0f);
-                                NewtonMaterial* const material = NewtonContactGetMaterial(contact);
 
-                                NewtonMaterialGetContactForce(material, newtonBody_, &contactForce.m_x);
-                                NewtonMaterialGetContactPositionAndNormal(material, newtonBody_, &point.m_x, &normal.m_x);
-                                dVector normalforce(normal.Scale(contactForce.DotProduct3(normal)));
-                                dVector p0(point);
-                                dVector p1(point + normalforce.Scale(scaleFactor*localScale));
+                    //for (NewtonJoint* joint = NewtonBodyGetFirstContactJoint(newtonBody_); joint; joint = NewtonBodyGetNextContactJoint(newtonBody_, joint)) {
+                    //    if (NewtonJointIsActive(joint)) {
+                    //        for (void* contact = NewtonContactJointGetFirstContact(joint); contact; contact = NewtonContactJointGetNextContact(joint, contact)) {
+                    //            ndVector point(0.0f);
+                    //            ndVector normal(0.0f);
+                    //            ndVector tangentDir0(0.0f);
+                    //            ndVector tangentDir1(0.0f);
+                    //            ndVector contactForce(0.0f);
+                    //            NewtonMaterial* const material = NewtonContactGetMaterial(contact);
 
-                                debug->AddLine((Vector3((p0.m_x), (p0.m_y), (p0.m_z))), (Vector3((p1.m_x), (p1.m_y), (p1.m_z))), Color::GRAY, depthTest);
+                    //            NewtonMaterialGetContactForce(material, newtonBody_, &contactForce.m_x);
+                    //            NewtonMaterialGetContactPositionAndNormal(material, newtonBody_, &point.m_x, &normal.m_x);
+                    //            ndVector normalforce(normal.Scale(contactForce.DotProduct3(normal)));
+                    //            ndVector p0(point);
+                    //            ndVector p1(point + normalforce.Scale(scaleFactor*localScale));
 
-
-
-                                // these are the components of the tangents forces at the contact point, the can be display at the contact position point.
-                                NewtonMaterialGetContactTangentDirections(material, newtonBody_, &tangentDir0[0], &tangentDir1[0]);
-                                dVector tangentForce1(tangentDir0.Scale((contactForce.DotProduct3(tangentDir0)) * scaleFactor * localScale));
-                                dVector tangentForce2(tangentDir1.Scale((contactForce.DotProduct3(tangentDir1)) * scaleFactor * localScale));
-
-                                p1 = point + tangentForce1.Scale(scaleFactor * localScale);
-                                debug->AddLine((Vector3((p0.m_x), (p0.m_y), (p0.m_z))), (Vector3((p1.m_x), (p1.m_y), (p1.m_z))), Color::GRAY, depthTest);
+                    //            debug->AddLine((Vector3((p0.m_x), (p0.m_y), (p0.m_z))), (Vector3((p1.m_x), (p1.m_y), (p1.m_z))), Color::GRAY, depthTest);
 
 
-                                p1 = point + tangentForce2.Scale(scaleFactor * localScale);
-                                debug->AddLine((Vector3((p0.m_x), (p0.m_y), (p0.m_z))), (Vector3((p1.m_x), (p1.m_y), (p1.m_z))), Color::GRAY, depthTest);
-                            }
-                        }
-                    }
+
+                    //            // these are the components of the tangents forces at the contact point, the can be display at the contact position point.
+                    //            NewtonMaterialGetContactTangentDirections(material, newtonBody_, &tangentDir0[0], &tangentDir1[0]);
+                    //            ndVector tangentForce1(tangentDir0.Scale((contactForce.DotProduct3(tangentDir0)) * scaleFactor * localScale));
+                    //            ndVector tangentForce2(tangentDir1.Scale((contactForce.DotProduct3(tangentDir1)) * scaleFactor * localScale));
+
+                    //            p1 = point + tangentForce1.Scale(scaleFactor * localScale);
+                    //            debug->AddLine((Vector3((p0.m_x), (p0.m_y), (p0.m_z))), (Vector3((p1.m_x), (p1.m_y), (p1.m_z))), Color::GRAY, depthTest);
+
+
+                    //            p1 = point + tangentForce2.Scale(scaleFactor * localScale);
+                    //            debug->AddLine((Vector3((p0.m_x), (p0.m_y), (p0.m_z))), (Vector3((p1.m_x), (p1.m_y), (p1.m_z))), Color::GRAY, depthTest);
+                    //        }
+                    //    }
+                    //}
                 }
             }
         }
@@ -777,10 +777,10 @@ namespace Urho3D {
             if (enabledCollisionShapes.size())
             {
 
-                NewtonCollision* resolvedCollision = nullptr;
+                ndShape* resolvedCollision = nullptr;
 
                 if (effectiveCollision_) {
-                    NewtonDestroyCollision(effectiveCollision_);
+					NewtonDestroyCollision(effectiveCollision_);
                     effectiveCollision_ = nullptr;
                 }
 
@@ -812,7 +812,7 @@ namespace Urho3D {
 
                     while (curSubCollision)
                     {
-                        NewtonCollision* curCollisionInstance = NewtonCollisionCreateInstance(curSubCollision);
+                        ndShape* curCollisionInstance = NewtonCollisionCreateInstance(curSubCollision);
                         curSubNode = NewtonCompoundCollisionGetNextNode((NewtonCollision*)rootCollision, curSubNode);//advance
                         if (curSubNode)
                             curSubCollision = NewtonCompoundCollisionGetCollisionFromNode((NewtonCollision*)rootCollision, curSubNode);
@@ -908,8 +908,6 @@ namespace Urho3D {
                         }
                         else
                             resolvedCollision = curCollisionInstance;
-
-
                     }
                 }
                 if (compoundNeeded) {

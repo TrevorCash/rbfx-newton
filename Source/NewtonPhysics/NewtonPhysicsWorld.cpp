@@ -603,7 +603,7 @@ namespace Urho3D {
 
         for (ndShape* col : freeShapeQueue_)
         {
-		
+			col->Release();
         }
         freeShapeQueue_.clear();
 
@@ -620,19 +620,19 @@ namespace Urho3D {
     }
  
 
-    void PrintPhysicsRayCastIntersection(PhysicsRayCastIntersection& intersection)
-    {
-        URHO3D_LOGINFO("body_: " + Urho3D::ToString((void*)intersection.body_));
-        URHO3D_LOGINFO("collision_: " + Urho3D::ToString((void*)intersection.collision_));
-        URHO3D_LOGINFO("subCollision_: " + Urho3D::ToString((void*)intersection.subCollision_));
-        URHO3D_LOGINFO("rayIntersectParameter_: " + ea::to_string(intersection.rayIntersectParameter_));
-        URHO3D_LOGINFO("rigBody_: " + Urho3D::ToString((void*)intersection.rigBody_));
-        URHO3D_LOGINFO("collisionShape_: " + Urho3D::ToString((void*)intersection.collisionShape_));
-        URHO3D_LOGINFO("rayIntersectWorldPosition_: " + intersection.rayIntersectWorldPosition_.ToString());
-        URHO3D_LOGINFO("rayIntersectWorldNormal_: " + intersection.rayIntersectWorldNormal_.ToString());
-        URHO3D_LOGINFO("rayDistance_: " + eastl::to_string(intersection.rayDistance_));
-        URHO3D_LOGINFO("rayOriginWorld_: " + intersection.rayOriginWorld_.ToString());
-    }
+    //void PrintPhysicsRayCastIntersection(PhysicsRayCastIntersection& intersection)
+    //{
+    //    URHO3D_LOGINFO("body_: " + Urho3D::ToString((void*)intersection.body_));
+    //    URHO3D_LOGINFO("collision_: " + Urho3D::ToString((void*)intersection.collision_));
+    //    URHO3D_LOGINFO("subCollision_: " + Urho3D::ToString((void*)intersection.subCollision_));
+    //    URHO3D_LOGINFO("rayIntersectParameter_: " + ea::to_string(intersection.rayIntersectParameter_));
+    //    URHO3D_LOGINFO("rigBody_: " + Urho3D::ToString((void*)intersection.rigBody_));
+    //    URHO3D_LOGINFO("collisionShape_: " + Urho3D::ToString((void*)intersection.collisionShape_));
+    //    URHO3D_LOGINFO("rayIntersectWorldPosition_: " + intersection.rayIntersectWorldPosition_.ToString());
+    //    URHO3D_LOGINFO("rayIntersectWorldNormal_: " + intersection.rayIntersectWorldNormal_.ToString());
+    //    URHO3D_LOGINFO("rayDistance_: " + eastl::to_string(intersection.rayDistance_));
+    //    URHO3D_LOGINFO("rayOriginWorld_: " + intersection.rayOriginWorld_.ToString());
+    //}
 
     eastl::string NewtonThreadProfilerString(int threadIndex)
     {
@@ -641,11 +641,11 @@ namespace Urho3D {
 
     
     //called when the newton update finished.
-    void Newton_PostUpdateCallback(const NewtonWorld* const world, ndFloat32 timestep)
-    {
-        NewtonPhysicsWorld* physicsWorld = (NewtonPhysicsWorld*)NewtonWorldGetUserData(world);
-        physicsWorld->isUpdating_ = false;
-    }
+    //void Newton_PostUpdateCallback(const NewtonWorld* const world, ndFloat32 timestep)
+    //{
+    //    NewtonPhysicsWorld* physicsWorld = (NewtonPhysicsWorld*)NewtonWorldGetUserData(world);
+    //    physicsWorld->isUpdating_ = false;
+    //}
 
 
 
@@ -793,11 +793,11 @@ namespace Urho3D {
 
 
 
-        NewtonMeshObject::RegisterObject(context);
+        //NewtonMeshObject::RegisterObject(context);
         NewtonConstraint::RegisterObject(context);
         NewtonFixedDistanceConstraint::RegisterObject(context);
         NewtonBallAndSocketConstraint::RegisterObject(context);
-        NewtonSixDofConstraint::RegisterObject(context);
+        //NewtonSixDofConstraint::RegisterObject(context);
         NewtonHingeConstraint::RegisterObject(context);
         NewtonSliderConstraint::RegisterObject(context);
         NewtonFullyFixedConstraint::RegisterObject(context);

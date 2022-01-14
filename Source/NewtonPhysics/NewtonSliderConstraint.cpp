@@ -418,7 +418,7 @@ namespace Urho3D
             lowerTwistLimit = twistLimits_.x_;
         if (enableUpperTwistLimit_)
             upperTwistLimit = twistLimits_.y_;
-        static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularLimits(lowerTwistLimit * dDegreeToRad, upperTwistLimit * dDegreeToRad);
+        static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularLimits(lowerTwistLimit * ndDegreeToRad, upperTwistLimit * ndDegreeToRad);
     }
 
 }

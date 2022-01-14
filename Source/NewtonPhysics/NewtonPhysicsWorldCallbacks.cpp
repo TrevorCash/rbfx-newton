@@ -45,7 +45,7 @@ namespace Urho3D {
 
 		virtual void OnContactCallback(ndInt32 thread, const ndContact* const contact, ndFloat32 timestep)
 		{
-			URHO3D_PROFILE_THREAD(NewtonThreadProfilerString(threadIndex).c_str());
+			URHO3D_PROFILE_THREAD(NewtonThreadProfilerString(thread).c_str());
 
 			//Get handles To NewtonBodies and RigidBody Components.
 			const ndBodyKinematic* const body0 = contact->GetBody0();
