@@ -6,7 +6,7 @@
 #include <Urho3D/IO/ArchiveSerialization.h>
 #include <Urho3D/Graphics/DebugRenderer.h>
 #include <VisualDebugger.h>
-
+#include <ImGui/implot.h>
 using namespace Urho3D;
 
 class GYM : public Object
@@ -118,9 +118,22 @@ public:
 
 
 
+
+
 		ui::Begin("Frame Stats");
 		ui::Text("Time Step: %f", timeStep);
 
+		ui::End();
+
+
+		ui::Begin("Episode Rewards");
+		if (ImPlot::BeginPlot("Reward"))
+		{
+			if(episodeRewards.size()>1)
+				ImPlot::PlotLine<float>("Reward", &episodeRewards[1], episodeRewards.size()-1);
+
+			ImPlot::EndPlot();
+		}
 		ui::End();
 
 	}
