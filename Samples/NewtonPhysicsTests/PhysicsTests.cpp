@@ -135,7 +135,7 @@ void PhysicsTests::Start()
     CreateScene();
 
     // Create the UI content
-    CreateInstructions();
+    CreateUI();
 
     // Setup the viewport for displaying the scene
     SetupViewport();
@@ -202,6 +202,13 @@ void PhysicsTests::CreateScene()
 
     CreateScenery(Vector3(0,0,0));
 
+
+	cameraNode_ = new Node(context_);
+	auto* camera = cameraNode_->CreateComponent<Camera>();
+	camera->SetFarClip(500.0f);
+	// Set an initial position for the camera scene node above the floor
+	cameraNode_->SetPosition(Vector3(-5.0f, 5.0f, 0));
+
 	//Node* cylinder = SpawnSamplePhysicsCylinder(scene_, Vector3(-5, 2, 0));
 	//cylinder->SetName("cylinder1");
 	//cylinder->GetComponent<NewtonRigidBody>()->SetCenterOfMassLocalOffset(Vector3(5, 0, 0));
@@ -243,7 +250,7 @@ void PhysicsTests::CreateScene()
     //SpawnCollisionExceptionsTest(Vector3(0, 1, 15));
 
     //SpawnSliderTest(Vector3(0, 10, 10));
-    //SpawnLinearJointedObject(1.0f, Vector3(10 , 2, 10));
+    SpawnLinearJointedObject(1.0f, Vector3(10 , 2, 10));
 
     //SpawnNSquaredJointedObject(Vector3(-20, 20, 10));
 
@@ -259,39 +266,24 @@ void PhysicsTests::CreateScene()
 
 	//SpawnCollisionOffsetTest(Vector3(0, 0, 0));
 
-    //
 
-    // Create the camera. Set far clip to match the fog. Note: now we actually create the camera node outside the scene, because
-    // we want it to be unaffected by scene load / save
-    cameraNode_ = new Node(context_);
-    auto* camera = cameraNode_->CreateComponent<Camera>();
-    camera->SetFarClip(500.0f);
-	
 
-    // Set an initial position for the camera scene node above the floor
-    cameraNode_->SetPosition(Vector3(0.0f, 5.0f, -15.0));
 }
-void PhysicsTests::CreateInstructions()
+void PhysicsTests::CreateUI()
 {
     auto* cache = GetSubsystem<ResourceCache>();
     auto* ui = GetSubsystem<UI>();
+	Graphics* graphics = GetSubsystem<Graphics>();
 
-    // Construct new Text object, set string to display and font to use
-    auto* instructionText = ui->GetRoot()->CreateChild<Text>();
-    instructionText->SetText(
-        "Use WASD keys and mouse/touch to move\n"
-        "LMB to spawn physics objects\n"
-        "F5 to save scene, F7 to load\n"
-        "Space to toggle physics debug geometry"
-    );
-    instructionText->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 15);
-    // The text has multiple rows. Center them in relation to each other
-    instructionText->SetTextAlignment(HA_CENTER);
+	SharedPtr<BorderImage> crossHair = SharedPtr<BorderImage>(ui->GetRoot()->CreateChild<BorderImage>("sdf"));
+	crossHair->SetTexture(GetSubsystem<ResourceCache>()->GetResource<Texture2D>("Textures/UI_Crosshairs.png")); // Set texture
 
-    // Position the text relative to the screen center
-    instructionText->SetHorizontalAlignment(HA_CENTER);
-    instructionText->SetVerticalAlignment(VA_CENTER);
-    instructionText->SetPosition(0, ui->GetRoot()->GetHeight() / 4);
+	crossHair->SetBlendMode(BLEND_ADD);
+	crossHair->SetSize(64, 64);
+	crossHair->SetImageRect(IntRect(128, 0, 64, 64));
+	crossHair->SetPosition((graphics->GetWidth() - crossHair->GetWidth()) / 2, (graphics->GetHeight() - crossHair->GetHeight()) / 2);
+	crossHair->SetName("crossHair");
+
 }
 
 void PhysicsTests::SetupViewport()
@@ -347,8 +339,18 @@ void PhysicsTests::MoveCamera(float timeStep)
     pitch_ = Clamp(pitch_, -90.0f, 90.0f);
 
     // Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
-	if(!GetSubsystem<Input>()->IsMouseVisible())
+	if (!GetSubsystem<Input>()->IsMouseVisible())
+	{
 		cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
+
+
+	}
+
+	float worldPitch = cameraNode_->GetWorldRotation().EulerAngles().x_;
+	float worldYaw = cameraNode_->GetWorldRotation().EulerAngles().y_;
+	Quaternion correctedWorldOrientation;
+	correctedWorldOrientation.FromEulerAngles(worldPitch, worldYaw, 0);
+	cameraNode_->SetWorldRotation(correctedWorldOrientation);
 
     float speedFactor = 1.0f;
     if (input->GetKeyDown(KEY_SHIFT) && !input->GetKeyDown(KEY_CTRL))
@@ -366,6 +368,7 @@ void PhysicsTests::MoveCamera(float timeStep)
         cameraNode_->Translate(Vector3::LEFT * MOVE_SPEED * speedFactor * timeStep);
     if (input->GetKeyDown(KEY_D))
         cameraNode_->Translate(Vector3::RIGHT * MOVE_SPEED * speedFactor *timeStep);
+
 
 
 
@@ -836,7 +839,7 @@ void PhysicsTests::SpawnLinearJointedObject(float size, Vector3 worldPosition)
     //lets joint spheres together with a distance limiting joint.
     const float dist = size;
 
-    const int numSpheres = 2;
+    const int numSpheres = 100;
 
 	ea::vector<Node*> nodes;
     //make lots of spheres
@@ -846,11 +849,13 @@ void PhysicsTests::SpawnLinearJointedObject(float size, Vector3 worldPosition)
 
         if (i > 0) {
             NewtonHingeConstraint* constraint = nodes[i - 1]->CreateComponent<NewtonHingeConstraint>();
+			//constraint->SetSolveMode(SOLVE_MODE_EXACT);
             constraint->SetOtherBody(nodes[i]->GetComponent<NewtonRigidBody>());
             constraint->SetWorldPosition(worldPosition + Vector3(0, i*dist, 0) - Vector3(0, dist, 0)*0.5f);
             //constraint->SetOwnRotation(Quaternion(0, 0, -90));
            // constraint->SetOtherRotation(Quaternion(0,0,-90));
            // constraint->SetTwistLimitsEnabled(true);
+			
             
         }
     }
@@ -1339,6 +1344,8 @@ void PhysicsTests::ResetGYMs()
 
 
 	context_->GetSubsystem<GymClient>()->SetGYMSpec(gyms[0]->actionVec.size(), gyms[0]->stateVec.size());
+
+	EvalOrbitGym();
 	URHO3D_LOGINFO("GYM Reset Finished");
 
 
@@ -1505,6 +1512,7 @@ void PhysicsTests::SpawnSegway(Vector3 worldPosition)
     motor->SetPowerMode(NewtonHingeConstraint::MOTOR_TORQUE);
     motor->SetOtherBody(Wheel->GetComponent<NewtonRigidBody>());
 	motor->SetMotorTorque(1);
+	motor->SetMotorMaxAngularRate(99999.0f);
 
 	//topwiegth
 	Node* top = SpawnSamplePhysicsCylinder(root, Vector3(0, 3, 0), 1);
@@ -1653,11 +1661,11 @@ void PhysicsTests::HandlePostRenderUpdate(StringHash eventType, VariantMap& even
 	// Take the frame time step, which is stored as a float
 	float timeStep = eventData[Update::P_TIMESTEP].GetFloat();
 
-	bool doFrSim = ui::Button("ForwardSim", ImVec2(100, 50));
-	bool openGYM = ui::Button("Open GYM Server", ImVec2(100, 50));
-	bool resetGYM = ui::Button("Reset", ImVec2(100, 50));
+	bool doFrSim = ui::Button("ForwardSim", ImVec2(100, 20));
+	bool openGYM = ui::Button("Connect to GYM Server", ImVec2(100, 20));
+	bool resetGYM = ui::Button("Reset", ImVec2(100, 20));
 
-
+	bool orbitGYMPressed = ui::Checkbox("Orbit GYM", &orbitGYM);
 
 	ui::Text("NumGYMS: %d", context_->GetSubsystem<GymClient>()->numGYMS);
 	if (doFrSim)
@@ -1670,11 +1678,18 @@ void PhysicsTests::HandlePostRenderUpdate(StringHash eventType, VariantMap& even
 
 		context_->GetSubsystem<GymClient>()->Connect();
 	}
+	if (orbitGYMPressed || resetGYM) {
 
+		EvalOrbitGym();
+	}
 	if (resetGYM)
 	{
 		context_->GetSubsystem<GymClient>()->resetPending = true;
+
+
 	}
+
+
 
 	if (gyms.size())
 	{
@@ -1695,6 +1710,24 @@ void PhysicsTests::HandlePostRenderUpdate(StringHash eventType, VariantMap& even
 
 	
 
+}
+
+void PhysicsTests::EvalOrbitGym()
+{
+	if (orbitGYM)
+	{
+		if (cameraNode_->GetParent() != gyms[0]->orbitNode)
+			cameraNode_->SetParent(gyms[0]->orbitNode);
+	}
+	else
+	{
+		if (cameraNode_->GetParent() != scene_)
+			cameraNode_->SetParent(scene_);
+	}
+
+	cameraNode_->SetWorldTransform(Matrix3x4::IDENTITY);
+	cameraNode_->Translate(Vector3(-5, 5, 0), TS_WORLD);
+	cameraNode_->Rotate(Quaternion(90.0f, Vector3(0, 1, 0)), TS_WORLD);
 }
 
 void PhysicsTests::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData)
@@ -1857,8 +1890,12 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
         floorNode->SetScale(Vector3(10000.0f, 1.0f, 10000.0f));
         auto* floorObject = floorNode->CreateComponent<StaticModel>();
         floorObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
-        floorObject->SetMaterial(cache->GetResource<Material>("Materials/StoneSmall.xml"));
-		//floorObject->GetMaterial()->SetShaderParameter("")
+		SharedPtr<Material> floorMat = cache->GetResource<Material>("Materials/Metal.xml")->Clone();
+
+		floorMat->SetUVTransform(Vector2(), 0, 1000);
+		floorMat->SetShaderParameter("MatDiffColor", Vector4(1.0, 1.0, 1.0, 0.1f));
+        floorObject->SetMaterial(floorMat);
+
 
         auto* shape = floorNode->CreateComponent<NewtonCollisionShape_Box>();
 
@@ -1883,7 +1920,7 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
 
 
     //ramps
-    if (0) {
+    if (1) {
 
         for (int i = 0; i < 10; i++) {
       
@@ -1906,7 +1943,7 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
     float range = 200;
     float objectScale = 100;
 
-    for (int i = 0; i < 0; i++)
+    for (int i = 0; i < 10; i++)
     {
         Node* scenePart = scene_->CreateChild("ScenePart" + ea::to_string(i));
         auto* stMdl = scenePart->CreateComponent<StaticModel>();
@@ -2034,7 +2071,7 @@ void PhysicsTests::CreatePickTargetNodeOnPhysics()
 		NewtonKinematicsControllerConstraint* constraint = pickPullNode->CreateComponent<NewtonKinematicsControllerConstraint>();
         constraint->SetWorldPosition(pickPullNode->GetChild("PickPullSurfaceNode")->GetWorldPosition());
         constraint->SetWorldRotation(cameraNode_->GetWorldRotation());
-        constraint->SetConstrainRotation(false);
+        constraint->SetConstrainRotation(true);
         constraint->SetTemporary(true);
     }
 }

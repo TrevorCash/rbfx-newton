@@ -212,5 +212,6 @@ public:
 
 	Vector3 worldPos;
 	SharedPtr<Node> rootNode;
+	SharedPtr<Node> orbitNode;
 	WeakPtr<Scene> scene_;
 };

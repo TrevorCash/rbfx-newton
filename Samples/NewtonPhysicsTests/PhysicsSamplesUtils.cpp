@@ -7,6 +7,8 @@
 #include "NewtonRigidBody.h"
 #include "NewtonCollisionShapesDerived.h"
 
+#define SAMPLE_MATERIAL "Materials/Metal.xml"
+#define SAMPLE_COLOR (Vector4(0.5, 0.5f, 1.0f, 1.0f))
 
 Node* SpawnSamplePhysicsSphere(Node* parentNode, const Vector3& worldPosition, float radius)
 {
@@ -15,13 +17,14 @@ Node* SpawnSamplePhysicsSphere(Node* parentNode, const Vector3& worldPosition, f
         sphereVis->SetScale(Vector3(radius, radius, radius)*2.0f);
 
         Model* sphereMdl = parentNode->GetSubsystem<ResourceCache>()->GetResource<Model>("Models/Sphere.mdl");
-        Material* sphereMat = parentNode->GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Stone.xml");
-        
+		SharedPtr<Material> sphereMat = parentNode->GetSubsystem<ResourceCache>()->GetResource<Material>(SAMPLE_MATERIAL)->Clone();
+		sphereMat->SetShaderParameter("MatDiffColor", SAMPLE_COLOR);
+		sphereMat->SetUVTransform(Vector2(), 0.0f, 1.0f/radius);
+
         StaticModel* sphere1StMdl = sphereVis->CreateComponent<StaticModel>();
         sphere1StMdl->SetCastShadows(true);
         sphere1StMdl->SetModel(sphereMdl);
         sphere1StMdl->SetMaterial(sphereMat);
-
         NewtonRigidBody* s1RigBody = sphere1->CreateComponent<NewtonRigidBody>();
 
         NewtonCollisionShape_Sphere* s1ColShape = sphere1->CreateComponent<NewtonCollisionShape_Sphere>();
@@ -43,7 +46,9 @@ Node* SpawnSamplePhysicsCylinder(Node* parentNode, const Vector3& worldPosition,
     sphereVis->SetScale(Vector3(radius*2.0f, height, radius*2.0f));
 
     Model* sphereMdl = parentNode->GetSubsystem<ResourceCache>()->GetResource<Model>("Models/Cylinder.mdl");
-    Material* sphereMat = parentNode->GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Stone.xml");
+	SharedPtr<Material> sphereMat = parentNode->GetSubsystem<ResourceCache>()->GetResource<Material>(SAMPLE_MATERIAL)->Clone();
+	sphereMat->SetShaderParameter("MatDiffColor", SAMPLE_COLOR);
+	sphereMat->SetUVTransform(Vector2(), 0.0f, 1.0f / height);
 
     StaticModel* sphere1StMdl = sphereVis->CreateComponent<StaticModel>();
     sphere1StMdl->SetCastShadows(true);
@@ -75,7 +80,10 @@ Node* SpawnSamplePhysicsChamferCylinder(Node* parentNode, const Vector3& worldPo
     sphereVis->SetScale(Vector3(radius*2.0f, height, radius*2.0f));
 
     Model* sphereMdl = parentNode->GetSubsystem<ResourceCache>()->GetResource<Model>("Models/Cylinder.mdl");
-    Material* sphereMat = parentNode->GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Stone.xml");
+	SharedPtr<Material> sphereMat = parentNode->GetSubsystem<ResourceCache>()->GetResource<Material>(SAMPLE_MATERIAL)->Clone();
+	sphereMat->SetShaderParameter("MatDiffColor", SAMPLE_COLOR);
+	sphereMat->SetUVTransform(Vector2(), 0.0f, 1.0f / height);
+
 
     StaticModel* sphere1StMdl = sphereVis->CreateComponent<StaticModel>();
     sphere1StMdl->SetCastShadows(true);
@@ -103,7 +111,9 @@ Node* SpawnSamplePhysicsCapsule(Node* parentNode, const Vector3& worldPosition, 
     sphereVis->SetScale(Vector3(radius*2.0f, height, radius*2.0f));
 
     Model* sphereMdl = parentNode->GetSubsystem<ResourceCache>()->GetResource<Model>("Models/Cylinder.mdl");
-    Material* sphereMat = parentNode->GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Stone.xml");
+	SharedPtr<Material> sphereMat = parentNode->GetSubsystem<ResourceCache>()->GetResource<Material>(SAMPLE_MATERIAL)->Clone();
+	sphereMat->SetShaderParameter("MatDiffColor", SAMPLE_COLOR);
+	sphereMat->SetUVTransform(Vector2(), 0.0f, 1.0f / height);
 
     StaticModel* sphere1StMdl = sphereVis->CreateComponent<StaticModel>();
     sphere1StMdl->SetCastShadows(true);
@@ -133,7 +143,9 @@ Node* SpawnSamplePhysicsCone(Node* parentNode, const Vector3& worldPosition, flo
     sphereVis->SetScale(Vector3(radius*2.0f, height, radius*2.0f));
 
     Model* sphereMdl = parentNode->GetSubsystem<ResourceCache>()->GetResource<Model>("Models/Cone.mdl");
-    Material* sphereMat = parentNode->GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Stone.xml");
+	SharedPtr<Material> sphereMat = parentNode->GetSubsystem<ResourceCache>()->GetResource<Material>(SAMPLE_MATERIAL)->Clone();
+	sphereMat->SetShaderParameter("MatDiffColor", SAMPLE_COLOR);
+	sphereMat->SetUVTransform(Vector2(), 0.0f, 1.0f / height);
 
     StaticModel* sphere1StMdl = sphereVis->CreateComponent<StaticModel>();
     sphere1StMdl->SetCastShadows(true);
@@ -163,7 +175,9 @@ Node* SpawnSamplePhysicsBox(Node* parentNode, const Vector3& worldPosition, cons
     boxVis->SetScale(size);
 
     Model* sphereMdl = parentNode->GetSubsystem<ResourceCache>()->GetResource<Model>("Models/Box.mdl");
-    Material* sphereMat = parentNode->GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Stone.xml");
+	SharedPtr<Material> sphereMat = parentNode->GetSubsystem<ResourceCache>()->GetResource<Material>(SAMPLE_MATERIAL)->Clone();
+	sphereMat->SetShaderParameter("MatDiffColor", SAMPLE_COLOR);
+	sphereMat->SetUVTransform(Vector2(), 0.0f, 1.0f / size.z_);
 
     StaticModel* sphere1StMdl = boxVis->CreateComponent<StaticModel>();
     sphere1StMdl->SetCastShadows(true);

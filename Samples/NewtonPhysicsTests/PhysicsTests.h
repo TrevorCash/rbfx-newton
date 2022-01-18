@@ -32,6 +32,14 @@ class Node;
 class Scene;
 class NewtonHingeConstraint;
 
+
+
+
+
+
+
+
+
 }
 /// PhysicsTests example.
 /// This sample demonstrates different types of physics configurations and provides a testing ground for physics functionality.
@@ -50,7 +58,7 @@ public:
 		engineParameters_[EP_WINDOW_HEIGHT] = 768;
 		engineParameters_[EP_WINDOW_WIDTH] = 1024;
 		// Resource prefix path is a list of semicolon-separated paths which will be checked for containing resource directories. They are relative to application executable file.
-		engineParameters_[EP_RESOURCE_PREFIX_PATHS] = ".;..";
+		engineParameters_[EP_RESOURCE_PREFIX_PATHS] = ".;./../../../bin";
 	}
 
 
@@ -91,7 +99,7 @@ private:
 
     void CreateTowerOfLiar(Vector3 position);
     /// Construct an instruction text to the UI.
-    void CreateInstructions();
+    void CreateUI();
     /// Set up a viewport for displaying the scene.
     void SetupViewport();
     /// Subscribe to application-wide logic update and post-render update events.
@@ -139,6 +147,7 @@ private:
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
     /// Handle the post-render update event.
     void HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData);
+	void EvalOrbitGym();
     /// Handle physics pre-step
     void HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData);
 
@@ -255,7 +264,7 @@ private:
 
 
 
-
+	bool orbitGYM = true;
 
 
 
