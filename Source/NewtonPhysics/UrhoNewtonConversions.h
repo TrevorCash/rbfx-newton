@@ -1,4 +1,5 @@
 #pragma once
+#include "ndShape.h"
 
 
 class dMatrix;
@@ -33,16 +34,16 @@ namespace Urho3D {
     Vector3 NewtonToUrhoVec3(const ndVector& vec);
     Vector4 NewtonToUrhoVec4(const ndVector& vec);
     Matrix4 NewtonToUrhoMat4(const ndMatrix& mat);
-    Quaternion NewtonToUrhoQuat(const dQuaternion& quat);
-    Quaternion NewtonToUrhoQuat(const dgQuaternion& quat);
+    //Quaternion NewtonToUrhoQuat(const dQuaternion& quat);
+    Quaternion NewtonToUrhoQuat(const ndQuaternion& quat);
 
 
 
     ///shape conversion
 
     ///return a newton collision from an urho shape - optionally include the translation of the shape in the collision. Remember to NewtonDestroy the NewtonCollision when you are done with it!
-    NewtonCollision* UrhoShapeToNewtonCollision(const NewtonWorld* newtonWorld, const Sphere& sphere, bool includeTranslation = true);
-    NewtonCollision* UrhoShapeToNewtonCollision(const NewtonWorld* newtonWorld, const BoundingBox& box, bool includeTranslation = true);
+    ndShape* UrhoShapeToNewtonCollision(const NewtonWorld* newtonWorld, const Sphere& sphere);
+    ndShape* UrhoShapeToNewtonCollision(const NewtonWorld* newtonWorld, const BoundingBox& box);
 
 
 

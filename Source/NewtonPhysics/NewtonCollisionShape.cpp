@@ -299,7 +299,7 @@ namespace Urho3D {
         return isCompound_;
     }
 
-    const ndShape* NewtonCollisionShape::GetNewtonShape()
+    const ndShapeInstance* NewtonCollisionShape::GetNewtonShape()
     {
         return newtonShape_;
     }

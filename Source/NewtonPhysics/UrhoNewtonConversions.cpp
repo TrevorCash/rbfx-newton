@@ -14,10 +14,10 @@
 namespace Urho3D {
 
 
-    dMatrix UrhoToNewton(const Matrix4& mat4)
+    ndMatrix UrhoToNewton(const Matrix4& mat4)
     {
 #ifndef _NEWTON_USE_DOUBLE
-        return dMatrix(mat4.Transpose().Data());
+        return ndMatrix(mat4.Transpose().Data());
 #else
 
         Matrix4 tranposed = mat4.Transpose();
@@ -69,21 +69,21 @@ namespace Urho3D {
 
     ndVector UrhoToNewton(const Vector4& vec4)
     {
-        return ndVector(vec4.x_, vec4.y_, vec4.z_, vec4.w_);
+        return {vec4.x_, vec4.y_, vec4.z_, vec4.w_};
     }
 
     ndVector UrhoToNewton(const Vector3& vec3)
     {
-        return ndVector(vec3.x_, vec3.y_, vec3.z_);
+        return ndVector(vec3.x_, vec3.y_, vec3.z_, 1.0f);
     }
 
     ndVector UrhoToNewton(const Vector2& vec2)
     {
-        return ndVector(vec2.x_, vec2.y_, 0.0f);
+        return ndVector(vec2.x_, vec2.y_, 0.0f, 1.0f);
     }
     ndQuaternion UrhoToNewton(const Quaternion& quat)
     {
-        return ndQuaternion(quat.w_, quat.x_, quat.y_, quat.z_);
+        return {quat.w_, quat.x_, quat.y_, quat.z_};
     }
 
 
@@ -91,11 +91,11 @@ namespace Urho3D {
 
     Vector3 NewtonToUrhoVec3(const ndVector& vec)
     {
-        return Vector3(vec.m_x, vec.m_y, vec.m_z);
+        return {vec.m_x, vec.m_y, vec.m_z};
     }
     Vector4 NewtonToUrhoVec4(const ndVector& vec)
     {
-        return Vector4(vec.m_x, vec.m_y, vec.m_z, vec.m_w);
+        return {vec.m_x, vec.m_y, vec.m_z, vec.m_w};
     }
 
 
@@ -119,64 +119,38 @@ namespace Urho3D {
 
     Quaternion NewtonToUrhoQuat(const ndQuaternion& quat)
     {
-        return Quaternion(quat.m_w, quat.m_x, quat.m_y, quat.m_z);
+        return {quat.m_w, quat.m_x, quat.m_y, quat.m_z};
     }
-    Quaternion NewtonToUrhoQuat(const dgQuaternion& quat)
-    {
-        return  Quaternion(quat.m_w, quat.m_x, quat.m_y, quat.m_z);
-    }
+    // Quaternion NewtonToUrhoQuat(const dgQuaternion& quat)
+    // {
+    //     return  Quaternion(quat.m_w, quat.m_x, quat.m_y, quat.m_z);
+    // }
 
 
-
-
-    
-    NewtonCollision* UrhoShapeToNewtonCollision(const NewtonWorld* newtonWorld, const Sphere& sphere, bool includePosition /*= true*/)
+    ndShape* UrhoShapeToNewtonCollision(const NewtonWorld* newtonWorld, const Sphere& sphere)
     {
         Matrix3x4 mat;
         mat.SetTranslation(sphere.center_);
-        dMatrix dMat = UrhoToNewton(mat);
+        ndMatrix dMat = UrhoToNewton(mat);
 
-        NewtonCollision* newtonShape;
-
-        if (includePosition) {
-            newtonShape = NewtonCreateSphere(newtonWorld, sphere.radius_, 0, &dMat[0][0]);
-        }
-        else
-        {
-            newtonShape = NewtonCreateSphere(newtonWorld, sphere.radius_, 0, nullptr);
-        }
-
+        ndShape* newtonShape = new ndShapeSphere(sphere.radius_);
+ 
         return newtonShape;
     }
 
 
-
-
-    NewtonCollision* UrhoShapeToNewtonCollision(const NewtonWorld* newtonWorld, const BoundingBox& box, bool includePosition /*= true*/)
+    ndShape* UrhoShapeToNewtonCollision(const NewtonWorld* newtonWorld, const BoundingBox& box)
     {
         Matrix3x4 mat;
         mat.SetTranslation(box.Center());
-        dMatrix dMat = UrhoToNewton(mat);
+        ndMatrix dMat = UrhoToNewton(mat);
 
-        NewtonCollision* newtonShape;
-
-        if (includePosition) {
-            newtonShape = NewtonCreateBox(newtonWorld, box.Size().x_, box.Size().y_, box.Size().z_, 0, &dMat[0][0]);
-        }
-        else
-        {
-            newtonShape = NewtonCreateBox(newtonWorld, box.Size().x_, box.Size().y_, box.Size().z_, 0, nullptr);
-        }
+        ndShape* newtonShape = new ndShapeBox(box.Size().x_, box.Size().y_, box.Size().z_);
 
         return newtonShape;
     }
 
 
-
-
-
-
-	//#todo test after eastl migration
     void PrintNewtonMatrix(ndMatrix mat)
     {
         const int paddingSize = 10;

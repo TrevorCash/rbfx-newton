@@ -242,13 +242,6 @@ namespace Urho3D
 		/// look at all rigid body children and use their momentums.
 		void ApplyMomentumFromRigidBodyChildren(bool clearChildrenVelocities);
 
-        void SetUseGyroscopicTorque(bool enable);
-        bool GetUseGyroscopicTorque() const { return enableGyroTorque_; }
-
-        /// Set continuous collision so that the body will not pass through walls.
-        void SetContinuousCollision(bool sweptCollision);
-
-        bool GetContinuousCollision() const { return continuousCollision_; }
 
         void SetAutoSleep(bool enableAutoSleep);
 
@@ -300,7 +293,7 @@ namespace Urho3D
         ///Get the currently used newton body.
         ndBodyKinematic* GetNewtonBody() const { return newtonBody_; }
         /// Return the currently used newton collision
-        ndShape* GetEffectiveNewtonShape() const;
+        ndShapeInstance& GetEffectiveNewtonShape() const;
 
 
         Vector3 GetLinearVelocity(TransformSpace space = TS_WORLD) const;
@@ -360,7 +353,7 @@ namespace Urho3D
         /// Internal newton body
         ndBodyKinematic * newtonBody_ = nullptr;
         /// compound collision if needed.
-        ndShape* effectiveCollision_ = nullptr;
+        ndShapeInstance effectiveCollision_ = nullptr;
         /// Physics world.
 		WeakPtr<NewtonPhysicsWorld> physicsWorld_;
         /// all currently used collision shape components.
