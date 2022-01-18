@@ -511,7 +511,7 @@ namespace Urho3D {
     void NewtonRigidBody::DrawDebugGeometry(DebugRenderer* debug, bool depthTest, bool showAABB /*= true*/, bool showCollisionMesh /*= true*/, bool showCenterOfMass /*= true*/, bool showContactForces /*= true*/, bool showBodyFrame /*= true*/)
     {
         Component::DrawDebugGeometry(debug, depthTest);
-        if (newtonBody_ && GetEffectiveNewtonShape()) {
+        if (newtonBody_) {
 
 			float localScale = physicsWorld_->debugScale_ * 0.5f;
             if (showAABB )
@@ -667,14 +667,6 @@ namespace Urho3D {
             physicsWorld_->addToFreeQueue(newtonBody_);
             newtonBody_ = nullptr;
         }
-
-
-        //also free the compound collision if there is one
-        if (effectiveCollision_)
-        {
-            physicsWorld_->addToFreeQueue(effectiveCollision_);
-            effectiveCollision_ = nullptr;
-        }
     }
 
 
@@ -777,7 +769,7 @@ namespace Urho3D {
                         firstCollisionShape = colComp;
 
                     //for each sub collision in the colComp
-                    const ndShapeInstance* rootCollision = colComp->GetNewtonShape();
+                    const ndShapeInstance rootCollision = colComp->GetNewtonShape();
 					
 					
                     void* curSubNode = NewtonCompoundCollisionGetFirstNode((NewtonCollision*)rootCollision);
@@ -1426,7 +1418,7 @@ namespace Urho3D {
 			//reset the body's state
 			newtonBody_->SetMatrix(UrhoToNewton(node_->GetWorldTransform()));
 
-			ndVector v = ndVector(0, 0, 0);
+			ndVector v = ndVector(0, 0, 0, 1);
 			newtonBody_->SetVelocity(v);
 			newtonBody_->SetOmega(v);
 

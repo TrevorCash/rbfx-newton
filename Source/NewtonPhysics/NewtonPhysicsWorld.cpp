@@ -247,11 +247,6 @@ namespace Urho3D {
 		collisionComponentList.push_front(WeakPtr<NewtonCollisionShape>(collision));
     }
 
-    void NewtonPhysicsWorld::removeCollisionShape(NewtonCollisionShape* collision)
-    {
-		collisionComponentList.erase_at(collisionComponentList.index_of(WeakPtr<NewtonCollisionShape>(collision)));
-    }
-
     void NewtonPhysicsWorld::addRigidBody(NewtonRigidBody* body)
     {
 		rigidBodyComponentList.push_front(WeakPtr<NewtonRigidBody>(body));
@@ -291,13 +286,6 @@ namespace Urho3D {
             constraint->freeInternal();
         }
         constraintList.clear();
-
-        //free any collision shapes currently in the list
-        for (NewtonCollisionShape* col : collisionComponentList)
-        {
-            col->freeInternalCollision();
-        }
-        collisionComponentList.clear();
 
 
 

@@ -55,7 +55,6 @@ namespace Urho3D {
 
     NewtonCollisionShape::~NewtonCollisionShape()
     {
-        freeInternalCollision();
     }
 
     void NewtonCollisionShape::RegisterObject(Context* context)
@@ -85,9 +84,6 @@ namespace Urho3D {
 
     void NewtonCollisionShape::updateBuild()
     {
-            // first free any reference to an existing collision.
-            freeInternalCollision();
-
             //call the derived class createNewtonCollision function.
             if (buildNewtonCollision())
             {
@@ -122,14 +118,6 @@ namespace Urho3D {
         return true;
     }
 
-    void NewtonCollisionShape::freeInternalCollision()
-    {
-        if (newtonShape_ != nullptr) {
-           
-            physicsWorld_->addToFreeQueue(newtonShape_);
-            newtonShape_ = nullptr;
-        }
-    }
 
 
 
@@ -299,7 +287,7 @@ namespace Urho3D {
         return isCompound_;
     }
 
-    const ndShapeInstance* NewtonCollisionShape::GetNewtonShape()
+    const ndShapeInstance NewtonCollisionShape::GetNewtonShape()
     {
         return newtonShape_;
     }
@@ -358,8 +346,6 @@ namespace Urho3D {
         {
             if (physicsWorld_) {
                 physicsWorld_->WaitForUpdateFinished();
-                physicsWorld_->removeCollisionShape(this);
-                freeInternalCollision();
 
             }
 
