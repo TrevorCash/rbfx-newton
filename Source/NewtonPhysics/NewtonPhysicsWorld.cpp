@@ -316,7 +316,7 @@ namespace Urho3D {
 
 
 
-    void NewtonPhysicsWorld::addToFreeQueue(ndBodyKinematic* newtonBody)
+    void NewtonPhysicsWorld::addToFreeQueue(ndBody* newtonBody)
     {
         freeBodyQueue_.push_front(newtonBody);
     }
@@ -326,9 +326,9 @@ namespace Urho3D {
         freeConstraintQueue_.push_front(newtonConstraint);
     }
 
-    void NewtonPhysicsWorld::addToFreeQueue(ndShape* newtonCollision)
+    void NewtonPhysicsWorld::addToFreeQueue(ndShapeInstance* newtonShape)
     {
-        freeShapeQueue_.push_front(newtonCollision);
+        freeShapeQueue_.push_front(newtonShape);
     }
 
     void NewtonPhysicsWorld::applyNewtonWorldSettings()
@@ -589,14 +589,14 @@ namespace Urho3D {
         freeConstraintQueue_.clear();
 
 
-        for (ndShape* col : freeShapeQueue_)
+        for (ndShapeInstance* shape : freeShapeQueue_)
         {
-			col->Release();
+			delete shape;
         }
         freeShapeQueue_.clear();
 
 
-        for (ndBodyKinematic* body : freeBodyQueue_)
+        for (ndBody* body : freeBodyQueue_)
         {
 			delete body;
         }
@@ -648,6 +648,26 @@ namespace Urho3D {
         //recurse on parent
         if(node->GetParent() && ((node->GetScene() != node->GetParent()) || includeScene))
             GetRootRigidBodies(rigidBodies, node->GetParent(), includeScene);
+    }
+
+
+
+	void NewtonCompoundGetSubShapes(ndShapeCompound* compound, ea::vector<ndShapeInstance*>& subShapes)
+    {
+		compound->BeginAddRemove();
+
+		ndShapeCompound::ndTreeArray tree = compound->GetTree();
+		ndShapeCompound::ndTreeArray::Iterator it(tree);
+		ndShapeCompound::ndTreeArray::Iterator itend(tree);
+		it.Begin();
+		itend.End();
+		while (it.GetNode() != itend.GetNode())
+		{
+			subShapes.push_back(it.GetNode()->GetInfo()->GetShape());
+			it++;
+		}
+
+		compound->EndAddRemove();
     }
 
 
@@ -769,12 +789,12 @@ namespace Urho3D {
         NewtonCollisionShape_ChamferCylinder::RegisterObject(context);
         NewtonCollisionShape_Capsule::RegisterObject(context);
         NewtonCollisionShape_Cone::RegisterObject(context);
-        NewtonCollisionShape_Geometry::RegisterObject(context);
-        NewtonCollisionShape_ConvexHull::RegisterObject(context);
-        NewtonCollisionShape_ConvexHullCompound::RegisterObject(context);
-        NewtonCollisionShape_ConvexDecompositionCompound::RegisterObject(context);
-        NewtonCollisionShape_TreeCollision::RegisterObject(context);
-        NewtonCollisionShape_HeightmapTerrain::RegisterObject(context);
+        //NewtonCollisionShape_Geometry::RegisterObject(context);
+        //NewtonCollisionShape_ConvexHull::RegisterObject(context);
+        //NewtonCollisionShape_ConvexHullCompound::RegisterObject(context);
+        //NewtonCollisionShape_ConvexDecompositionCompound::RegisterObject(context);
+        //NewtonCollisionShape_TreeCollision::RegisterObject(context);
+        //NewtonCollisionShape_HeightmapTerrain::RegisterObject(context);
 
         NewtonRigidBody::RegisterObject(context);
 		//NewtonRigidBody::CollisionOverrideEntry::RegisterObject(context);

@@ -344,12 +344,12 @@ namespace Urho3D {
 			return ownBody_;
 	}
 
-	ndBodyKinematic* NewtonConstraint::GetOwnNewtonBody(bool useResolved /*= true */) const
+	ndBody* NewtonConstraint::GetOwnNewtonBody(bool useResolved /*= true */) const
     {
         return GetOwnBody(useResolved)->GetNewtonBody();
     }
 
-	ndBodyKinematic* NewtonConstraint::GetOwnNewtonBodyBuild() const
+	ndBody* NewtonConstraint::GetOwnNewtonBodyBuild() const
 	{
 
 		return GetOwnNewtonBody(true);
@@ -363,12 +363,12 @@ namespace Urho3D {
 			return otherBody_;
 	}
 
-	ndBodyKinematic* NewtonConstraint::GetOtherNewtonBody(bool resolved /*= true*/) const
+	ndBody* NewtonConstraint::GetOtherNewtonBody(bool resolved /*= true*/) const
     {
         return GetOtherBody(resolved)->GetNewtonBody();
     }
 
-	ndBodyKinematic* NewtonConstraint::GetOtherNewtonBodyBuild() const
+	ndBody* NewtonConstraint::GetOtherNewtonBodyBuild() const
 	{
 		return GetOtherNewtonBody(true);
 	}

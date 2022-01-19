@@ -71,7 +71,7 @@ namespace Urho3D
             enableUpperSliderLimit_ = enable;
             if (newtonConstraint_)
             {
-                static_cast<ndJointSlider*>(newtonConstraint_)->EnableLimits(enableLowerSliderLimit_ || enableUpperSliderLimit_);
+ //               static_cast<ndJointSlider*>(newtonConstraint_)->EnableLimits(enableLowerSliderLimit_ || enableUpperSliderLimit_);
             }
             else
                 MarkDirty();
@@ -85,7 +85,7 @@ namespace Urho3D
             enableLowerSliderLimit_ = enable;
             if (newtonConstraint_)
             {
-                static_cast<ndJointSlider*>(newtonConstraint_)->EnableLimits(enableLowerSliderLimit_ || enableUpperSliderLimit_);
+ //               static_cast<ndJointSlider*>(newtonConstraint_)->EnableLimits(enableLowerSliderLimit_ || enableUpperSliderLimit_);
             }
             else
                 MarkDirty();
@@ -287,7 +287,7 @@ namespace Urho3D
             enableTwistSpringDamper_ = enable;
             if (newtonConstraint_)
             {
-                static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularSpringDamper(enableTwistSpringDamper_, twistRelaxation_, twistSpringCoef_, twistDamperCoef_);
+ //               static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularSpringDamper(enableTwistSpringDamper_, twistRelaxation_, twistSpringCoef_, twistDamperCoef_);
 
             }
             else
@@ -303,7 +303,7 @@ namespace Urho3D
             twistSpringCoef_ = springCoef;
             if (newtonConstraint_)
             {
-                static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularSpringDamper(enableTwistSpringDamper_, twistRelaxation_, twistSpringCoef_, twistDamperCoef_);
+ //               static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularSpringDamper(enableTwistSpringDamper_, twistRelaxation_, twistSpringCoef_, twistDamperCoef_);
             }
             else
                 MarkDirty();
@@ -317,7 +317,7 @@ namespace Urho3D
             twistDamperCoef_ = damperCoef;
             if (newtonConstraint_)
             {
-                static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularSpringDamper(enableTwistSpringDamper_, twistRelaxation_, twistSpringCoef_, twistDamperCoef_);
+  //              static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularSpringDamper(enableTwistSpringDamper_, twistRelaxation_, twistSpringCoef_, twistDamperCoef_);
             }
             else
                 MarkDirty();
@@ -331,7 +331,7 @@ namespace Urho3D
             twistRelaxation_ = relaxation;
             if (newtonConstraint_)
             {
-                static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularSpringDamper(enableTwistSpringDamper_, twistRelaxation_, twistSpringCoef_, twistDamperCoef_);
+ //               static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularSpringDamper(enableTwistSpringDamper_, twistRelaxation_, twistSpringCoef_, twistDamperCoef_);
             }
             else
                 MarkDirty();
@@ -345,7 +345,7 @@ namespace Urho3D
 			twistFriction_ = friction;
 			if (newtonConstraint_)
 			{
-				static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularFriction(twistFriction_);
+//				static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularFriction(twistFriction_);
 			}
 			else
 				MarkDirty();
@@ -359,7 +359,7 @@ namespace Urho3D
 
     void Urho3D::NewtonSliderConstraint::buildConstraint()
     {
-        newtonConstraint_ = new ndJointSlider(UrhoToNewton(GetOwnBuildWorldFrame()), UrhoToNewton(GetOtherBuildWorldFrame()), GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
+ //       newtonConstraint_ = new ndJointSlider(UrhoToNewton(GetOwnBuildWorldFrame()), UrhoToNewton(GetOtherBuildWorldFrame()), GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
     }
 
     bool Urho3D::NewtonSliderConstraint::applyAllJointParams()
@@ -373,18 +373,8 @@ namespace Urho3D
 
 
 
-
-        static_cast<ndJointSlider*>(newtonConstraint_)->EnableAngularLimits(enableLowerTwistLimit_ || enableUpperTwistLimit_);
-		static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularFriction(twistFriction_);
         applyTwistLimits();
 
-        //#todo - this springdamper doesnt seem to work.
-        static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularSpringDamper(enableTwistSpringDamper_, twistRelaxation_, twistSpringCoef_, twistDamperCoef_);
-
-
-
-
-        static_cast<ndJointSlider*>(newtonConstraint_)->EnableLimits(enableLowerSliderLimit_ || enableUpperSliderLimit_);
         static_cast<ndJointSlider*>(newtonConstraint_)->SetFriction(sliderFriction_);
         applySliderLimits();
 
@@ -406,7 +396,7 @@ namespace Urho3D
         if (enableUpperSliderLimit_)
             upperSlideLimit = sliderLimits_.y_;
 
-        static_cast<ndJointSlider*>(newtonConstraint_)->SetLimits(lowerSlideLimit, upperSlideLimit);
+//        static_cast<ndJointSlider*>(newtonConstraint_)->SetLimits(lowerSlideLimit, upperSlideLimit);
     }
 
     void NewtonSliderConstraint::applyTwistLimits()
@@ -418,7 +408,7 @@ namespace Urho3D
             lowerTwistLimit = twistLimits_.x_;
         if (enableUpperTwistLimit_)
             upperTwistLimit = twistLimits_.y_;
-        static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularLimits(lowerTwistLimit * ndDegreeToRad, upperTwistLimit * ndDegreeToRad);
+ //       static_cast<ndJointSlider*>(newtonConstraint_)->SetAngularLimits(lowerTwistLimit * ndDegreeToRad, upperTwistLimit * ndDegreeToRad);
     }
 
 }

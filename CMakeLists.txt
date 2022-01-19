@@ -52,32 +52,24 @@ include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dCollision)
 
 
 target_link_libraries(rbfx-newton PUBLIC 
-    dAnimation
-    dContainers
-    dCustomJoints
-    dgCore
-    dgPhysics
-    dNewton
-    dMath
-    newton
+    ndCore
+    ndTiny
+    ndNewton
+    ndCollision
 )
 
 #newton plugins
-if(NEWTON_WITH_AVX_PLUGIN)
-	target_link_libraries(rbfx-newton PUBLIC 
-	    dgNewtonAvx
-	)
-endif()
-if(NEWTON_WITH_AVX2_PLUGIN)
-	target_link_libraries(rbfx-newton PUBLIC 
-	    dgNewtonAvx2
-	)
-endif()
-if(NEWTON_WITH_SSE4_PLUGIN)
-	target_link_libraries(rbfx-newton PUBLIC 
-	    dgNewtonSse4
-	)
-endif()
+#if(NEWTON_WITH_AVX_PLUGIN)
+#	target_link_libraries(rbfx-newton PUBLIC 
+#	    ndSolverAvx
+#	)
+#endif()
+#if(NEWTON_WITH_AVX2_PLUGIN)
+#	target_link_libraries(rbfx-newton PUBLIC 
+#	    ndSolverAvx
+#	)
+#endif()
+
 
 
 

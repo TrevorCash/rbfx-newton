@@ -55,6 +55,21 @@ namespace Urho3D {
 	};
 
 
+	void NewtonBodyNotifications::OnTransform(ndInt32 threadIndex, const ndMatrix& matrix)
+	{
+		
+	}
+
+	void NewtonBodyNotifications::Save(const ndLoadSaveBase::ndSaveDescriptor& desc) const
+	{
+		
+	}
+
+	void NewtonBodyNotifications::OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep)
+	{
+		
+	}
+
    // void Newton_ApplyForceAndTorqueCallback(const NewtonBody* body, dFloat timestep, int threadIndex)
    // {
    //     //URHO3D_PROFILE_THREAD(NewtonThreadProfilerString(threadIndex).c_str());

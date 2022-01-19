@@ -1,11 +1,9 @@
 #pragma once
 #include "ndShape.h"
+#include "ndShapeCompound.h"
+#include "ndShapeInstance.h"
+#include "ndTree.h"
 
-
-class dMatrix;
-class dVector;
-class dQuaternion;
-class dgQuaternion;
 
 class NewtonCollision;
 class NewtonWorld;
@@ -25,7 +23,7 @@ namespace Urho3D {
     ndMatrix UrhoToNewton(const Matrix4& mat);
     ndMatrix UrhoToNewton(const Matrix3x4& mat);
 	ndMatrix UrhoToNewton(const Matrix3& mat3);
-    ndVector UrhoToNewton(const Vector3& vec4);
+    ndVector UrhoToNewton(const Vector4& vec4);
     ndVector UrhoToNewton(const Vector3& vec3);
     ndVector UrhoToNewton(const Vector2& vec2);
     ndQuaternion UrhoToNewton(const Quaternion& quat);
@@ -48,6 +46,11 @@ namespace Urho3D {
 
 
 
+	//void* NewtonCompoundCollisionGetFirstNode(ndShapeInstance* const compoundCollision);
+	//void* NewtonCompoundCollisionGetNextNode(ndShapeInstance* const compoundCollision, const void* const node);
+	//void* NewtonCompoundCollisionGetNodeByIndex(ndShapeInstance* const compoundCollision, int index);
+	//int NewtonCompoundCollisionGetNodeIndex(ndShapeInstance* const compoundCollision, const void* const node);
+	//ndShapeInstance* NewtonCompoundCollisionGetCollisionFromNode(ndShapeInstance* const compoundCollision, const void* const node);
 
 
 

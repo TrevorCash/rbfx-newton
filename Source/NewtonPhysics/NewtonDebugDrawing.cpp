@@ -38,67 +38,64 @@ namespace Urho3D {
 
     //}
 
-    //void NewtonDebug_BodyDrawCollision(NewtonPhysicsWorld* physicsWorld, const NewtonBody* const body, DebugRenderer* debug, bool depthTest /*= false*/)
-    //{
-    //    debugRenderOptions options;
-    //    options.debug = debug;
-    //    options.depthTest = depthTest;
+    void NewtonDebug_BodyDrawCollision(NewtonRigidBody* rigidBodyComp, ndBody* newtonBody, DebugRenderer* debug, bool depthTest /*= false*/)
+    {
+        debugRenderOptions options;
+        options.debug = debug;
+        options.depthTest = depthTest;
 
 
-    //    switch (NewtonBodyGetType(body))
-    //    {
-    //    case NEWTON_DYNAMIC_BODY:
-    //    {
-    //        int sleepState = NewtonBodyGetSleepState(body);
-    //        if (sleepState == 1) {
-    //            // indicate when body is sleeping
-    //            options.color = Color::BLUE;
-    //        }
-    //        else {
-    //            // body is active
-    //            options.color = Color::RED;
-    //        }
-    //        break;
-    //    }
 
-    //    case NEWTON_KINEMATIC_BODY:
-    //        options.color = Color::WHITE;
-    //        break;
-    //    }
-
-    //    NewtonRigidBody* rigBodyComp = (NewtonRigidBody*)NewtonBodyGetUserData(body);
-    //    if (!rigBodyComp)
-    //        return;
-
-    //    for (NewtonCollisionShape* colShapeComp : rigBodyComp->GetCollisionShapes())
-    //    {
-
-    //        if (!colShapeComp->GetDrawNewtonDebugGeometry())
-    //            continue;
+        if(newtonBody->GetAsBodyDynamic())
+        {
+            int sleepState = newtonBody->GetAsBodyDynamic()->GetSleepState();
+			
+            if (sleepState == 1) {
+                // indicate when body is sleeping
+                options.color = Color::BLUE;
+            }
+            else {
+                // body is active
+                options.color = Color::RED;
+            }
+        }
+		else if (newtonBody->GetAsBodyKinematic())
+		{
+			options.color = Color::WHITE;
+		}
 
 
-    //        dMatrix matrix;
-    //        NewtonBodyGetMatrix(body, &matrix[0][0]);
-    //        Matrix3x4 mat = Matrix3x4(NewtonToUrhoMat4(matrix));
-    //        mat = colShapeComp->GetWorldTransform();
 
-    //       
-    //        matrix = UrhoToNewton(mat);
-    //        NewtonCollisionForEachPolygonDo(colShapeComp->GetNewtonShape(), &matrix[0][0], NewtonDebug_ShowGeometryCollisionCallback, (void*)&options);
+        for (NewtonCollisionShape* colShapeComp : rigidBodyComp->GetCollisionShapes())
+        {
 
-    //    }
-    //}
+            if (!colShapeComp->GetDrawNewtonDebugGeometry())
+                continue;
 
 
-    //void NewtonDebug_DrawCollision(NewtonCollision* collision, const Matrix3x4& transform, const Color& color, DebugRenderer* debug, bool depthTest /*= false*/)
-    //{
-    //    debugRenderOptions options;
-    //    options.debug = debug;
-    //    options.color = color;
-    //    options.depthTest = depthTest;
+			ndMatrix matrix = newtonBody->GetMatrix();
+			
+            Matrix3x4 mat = Matrix3x4(NewtonToUrhoMat4(matrix));
+            mat = colShapeComp->GetWorldTransform();
 
-    //    NewtonCollisionForEachPolygonDo(collision, &UrhoToNewton(transform)[0][0], NewtonDebug_ShowGeometryCollisionCallback, (void*)&options);
-    //}
+           
+            matrix = UrhoToNewton(mat);
+			
+            //NewtonCollisionForEachPolygonDo(colShapeComp->GetNewtonShape(), &matrix[0][0], NewtonDebug_ShowGeometryCollisionCallback, (void*)&options);
+
+        }
+    }
+
+
+    void NewtonDebug_DrawCollision(ndShape* newtonShape, const Matrix3x4& transform, const Color& color, DebugRenderer* debug, bool depthTest /*= false*/)
+    {
+        debugRenderOptions options;
+        options.debug = debug;
+        options.color = color;
+        options.depthTest = depthTest;
+
+        //NewtonCollisionForEachPolygonDo(collision, &UrhoToNewton(transform)[0][0], NewtonDebug_ShowGeometryCollisionCallback, (void*)&options);
+    }
 
     void UrhoNewtonDebugDisplay::SetColor(const ndVector& color)
     {

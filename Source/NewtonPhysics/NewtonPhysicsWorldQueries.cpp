@@ -14,6 +14,7 @@ namespace Urho3D {
 
     bool NewtonPhysicsWorld::RigidBodyContainsPoint(NewtonRigidBody* rigidBody, const Vector3&worldPoint)
     {
+		return false;
         //ndVector contact;
         //ndVector normal;
 

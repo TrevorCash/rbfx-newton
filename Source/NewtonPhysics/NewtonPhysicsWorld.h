@@ -50,6 +50,21 @@ namespace Urho3D
     static const int DEF_PHYSICS_MAX_CONTACT_POINTS = 512;//maximum number of contacts per contact entry.
 
 
+	class NewtonBodyNotifications : public ndBodyNotify
+	{
+	public:
+		D_CLASS_REFLECTION(NewtonBodyNotifications);
+		NewtonBodyNotifications() : ndBodyNotify(ndVector(0.0f,0.0f,-9.81f,1.0f))
+		{}
+		virtual ~NewtonBodyNotifications(){}
+
+
+		virtual void OnTransform(ndInt32 threadIndex, const ndMatrix& matrix);
+
+		D_COLLISION_API virtual void Save(const ndLoadSaveBase::ndSaveDescriptor& desc) const;
+
+		D_COLLISION_API virtual void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep);
+	};
     
 
     //struct PhysicsRayCastIntersection {
@@ -108,7 +123,7 @@ namespace Urho3D
 
 
 
-   //     bool RigidBodyContainsPoint(NewtonRigidBody* rigidBody, const Vector3&worldPoint);
+        bool RigidBodyContainsPoint(NewtonRigidBody* rigidBody, const Vector3&worldPoint);
    //     /// Return rigid bodies by a ray query. bodies are returned in order from closest to farthest along the ray.
    //     void RayCast(
    //         eastl::vector<PhysicsRayCastIntersection>& intersections,
@@ -230,19 +245,19 @@ namespace Urho3D
 
         void freeWorld();
 
-        void addToFreeQueue(ndBodyKinematic* newtonBody);
+        void addToFreeQueue(ndBody* newtonBody);
         void addToFreeQueue(ndConstraint* newtonConstraint);
-        void addToFreeQueue(ndShape* newtonShape);
+        void addToFreeQueue(ndShapeInstance* newtonShape);
 
 
-		eastl::vector<ndBodyKinematic*> freeBodyQueue_;
+		eastl::vector<ndBody*> freeBodyQueue_;
 		eastl::vector<ndConstraint*> freeConstraintQueue_;
-		eastl::vector<ndShape*> freeShapeQueue_;
+		eastl::vector<ndShapeInstance*> freeShapeQueue_;
 
 
         void applyNewtonWorldSettings();
 
-
+		NewtonBodyNotifications newtonBodyNotifications;
 
 
         bool contactMapLocked_ = false;
@@ -266,7 +281,7 @@ namespace Urho3D
 
         ///convex casts
         //int DoNewtonCollideTest(const dFloat* const matrix, const NewtonCollision* shape);
-		//void GetBodiesInConvexCast(eastl::vector<NewtonRigidBody*>& result, int numContacts);
+		void GetBodiesInConvexCast(eastl::vector<NewtonRigidBody*>& result, int numContacts);
 
         ///newton mesh caching
 		//eastl::hash_map <StringHash, SharedPtr<NewtonMeshObject>> newtonMeshCache_;
@@ -289,6 +304,7 @@ namespace Urho3D
 
 
     /// newtwon body callbacks
+
     //void Newton_ApplyForceAndTorqueCallback(const NewtonBody* body, dFloat timestep, int threadIndex);
     //void Newton_SetTransformCallback(const NewtonBody* body, const dFloat* matrix, int threadIndex);
     //void Newton_DestroyBodyCallback(const NewtonBody* body);
@@ -311,6 +327,10 @@ namespace Urho3D
 
 
 	URHONEWTON_API void  GetRootRigidBodies(eastl::vector<NewtonRigidBody*>& rigidBodies, Node* node, bool includeScene);
+
+	URHONEWTON_API void NewtonCompoundGetSubShapes(ndShapeCompound* compound, ea::vector<ndShapeInstance*>& subShapes);
+
+
 	URHONEWTON_API void  GetNextChildRigidBodies(eastl::vector<NewtonRigidBody*>& rigidBodies, Node* node);
 	URHONEWTON_API void  GetAloneCollisionShapes(eastl::vector<NewtonCollisionShape*>& colShapes, Node* startingNode, bool includeStartingNodeShapes);
 

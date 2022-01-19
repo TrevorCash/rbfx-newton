@@ -161,14 +161,14 @@ namespace Urho3D {
         /// Return rigid body in own scene node.
         NewtonRigidBody* GetOwnBody(bool resolved = true) const;
 
-		ndBodyKinematic* GetOwnNewtonBody(bool resolved = true) const;
-		ndBodyKinematic* GetOwnNewtonBodyBuild() const;
+		ndBody* GetOwnNewtonBody(bool resolved = true) const;
+		ndBody* GetOwnNewtonBodyBuild() const;
 
         /// Return the other rigid body. May be null if connected to the static world.
         NewtonRigidBody* GetOtherBody(bool resolved = true) const;
 
-		ndBodyKinematic* GetOtherNewtonBody(bool resolved = true) const;
-		ndBodyKinematic* GetOtherNewtonBodyBuild() const;
+		ndBody* GetOtherNewtonBody(bool resolved = true) const;
+		ndBody* GetOtherNewtonBodyBuild() const;
 
 
 

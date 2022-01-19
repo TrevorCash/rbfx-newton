@@ -142,7 +142,7 @@ namespace Urho3D {
         ndFloat32 Iyy;
         ndFloat32 Izz;
         ndFloat32 mass;
-		ownBody_->GetNewtonBody()->GetMassMatrix(Ixx, Iyy, Izz, mass);
+		ownBody_->GetNewtonBody()->GetAsBodyDynamic()->GetMassMatrix(Ixx, Iyy, Izz, mass);
 
         const ndFloat32 inertia = dMax(Izz, dMax(Ixx, Iyy));
 

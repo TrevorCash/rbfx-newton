@@ -298,11 +298,15 @@ namespace Urho3D {
 
         if (powerMode_ == ACTUATOR)
         {
-            newtonConstraint_ = new ndJointHingeActuator(UrhoToNewton(GetOwnBuildWorldFrame()), maxAngularRate_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad, GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
+            newtonConstraint_ = new ndJointHingeActuator(UrhoToNewton(GetOwnBuildWorldFrame()), maxAngularRate_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad, 
+				GetOwnNewtonBodyBuild()->GetAsBodyKinematic(), 
+				GetOtherNewtonBodyBuild()->GetAsBodyKinematic());
         }
         else
         {
-            newtonConstraint_ = new ndJointHinge(UrhoToNewton(GetOwnBuildWorldFrame()), UrhoToNewton(GetOtherBuildWorldFrame()), GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
+            newtonConstraint_ = new ndJointHinge(UrhoToNewton(GetOwnBuildWorldFrame()), UrhoToNewton(GetOtherBuildWorldFrame()),
+				GetOwnNewtonBodyBuild()->GetAsBodyKinematic(),
+				GetOtherNewtonBodyBuild()->GetAsBodyKinematic());
         }
 
 
