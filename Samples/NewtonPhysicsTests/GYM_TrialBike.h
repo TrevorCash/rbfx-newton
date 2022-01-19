@@ -289,13 +289,16 @@ public:
 
 		ui::Begin("Stats");
 		
-		ImPlot::BeginPlot("Stats");
+		if(ImPlot::BeginPlot("Stats"))
+		{
+			ImPlot::SetupAxes("time", "torque", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
+			ImPlot::PlotLine("Back Motor Torque", &motorTorques[0], motorTorques.size());
+			ImPlot::PlotLine("Front Hinge Motor Torque", &frontHingeTorques[0], frontHingeTorques.size());
 
-		ImPlot::SetupAxes("time", "torque", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
-		ImPlot::PlotLine("Back Motor Torque", &motorTorques[0], motorTorques.size());
-		ImPlot::PlotLine("Front Hinge Motor Torque", &frontHingeTorques[0], frontHingeTorques.size());
+			ImPlot::EndPlot();
+		}
 
-		ImPlot::EndPlot();
+
 		ui::End();
 	}
 
