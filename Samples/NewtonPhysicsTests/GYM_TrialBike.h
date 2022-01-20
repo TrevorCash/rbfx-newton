@@ -214,19 +214,19 @@ public:
 		GYM::Update(timeStep);
 		float curVel = bodyNode->GetComponent<NewtonRigidBody>()->GetLinearVelocity(TS_LOCAL).x_;
 		int numJoysticks = GetSubsystem<Input>()->GetNumJoysticks();
+		float throttleTorque = 0.0f;
 		if (numJoysticks) {
 			JoystickState* joyState = GetSubsystem<Input>()->GetJoystickByIndex(numJoysticks-1);
 			targetAngularVel.y_ += 1.0f*timeStep*joyState->GetAxisPosition(0);
 			targetAngularVel.y_ = Clamp(targetAngularVel.y_, -0.5f, 0.5f);
 
-			if((targetVel - curVel) < 10.0f)
-				targetVel += 10.0f*timeStep*joyState->GetAxisPosition(5);
-			
-			if ((targetVel - curVel) > -10.0f)
-			targetVel -= 10.0f*timeStep*joyState->GetAxisPosition(4);
 
+			throttleTorque = 20.0f*joyState->GetAxisPosition(5) - 15.0f*joyState->GetAxisPosition(4);
 
-			targetVel = Clamp(targetVel, 0.0f, 1000.0f);
+			if(joyState->GetButtonPress(0))
+			{
+				Reset();
+			}
 		}
 
 
@@ -253,10 +253,13 @@ public:
 		else
 			angleSharpFactor = (baseVelFactorParam / curVel);
 
-		float targetSteerAngle = angleSharpFactor*tiltError;
+		float dTerm = 0.1f*bodyNode->GetComponent<NewtonRigidBody>()->GetAngularVelocity(TS_LOCAL).x_;
+		float targetSteerAngle = angleSharpFactor*tiltError + dTerm;
 		float curSteerAngle = motors[0]->GetCurrentAngle();
+
+
 		float steerError = targetSteerAngle - curSteerAngle;
-		float hingeTorque = hingeTorquePParam * steerError;
+		float hingeTorque = hingeTorquePParam * steerError - 1.0f*motors[0]->GetCurrentAngularRate();
 		motors[0]->SetMotorTorque(hingeTorque);
 		frontHingeTorques.push_back(hingeTorque);
 
@@ -264,18 +267,20 @@ public:
 		float forwardAngVel = bodyNode->GetComponent<NewtonRigidBody>()->GetAngularVelocity(TS_LOCAL).z_;
 		float targetForwardTilt = 0.0f;
 		float forwardTiltError = targetForwardTilt - curForwardTilt;
-		float throttleTorque = Clamp(10.0f * velError, -15.0f, 30.0f) + 0.0f*forwardTiltError;
+		//float throttleTorque = Clamp(10.0f * velError, -15.0f, 30.0f) + 0.0f*forwardTiltError;
 		motors[1]->SetMotorTorque(throttleTorque);
 
 		motorTorques.push_back(throttleTorque);
 
-		ui::Begin("Control Model");
-			
+		if (1) {
+			ui::Begin("Control Model");
+
 
 			ui::Text("angleSharpFactor: %f", angleSharpFactor);
 			ui::Text("curAngularVel: %f", curAngularVel);
+			ui::Text("targetSteerAngle: %f", targetSteerAngle);
 			ui::Separator();
-			
+
 			ui::DragFloat("Target Angular Vel", &targetAngularVel.y_, 0.01f, -0.5f, 0.5f);
 			ui::DragFloat("Target Tilt", &targetTilt, 0.01f, -0.5f, 0.5f);
 			ui::DragFloat("Target Vel", &targetVel, 0.01f, 5.0f, 1000.0f);
@@ -285,21 +290,20 @@ public:
 			ui::DragFloat("baseVelFactorParam", &baseVelFactorParam, 0.01f, 1.0f, 50.0f);
 			ui::DragFloat("hingeTorquePParam", &hingeTorquePParam, 0.01f, 10.0f, 1000.0f);
 
-		ui::End();
+			ui::End();
 
-		ui::Begin("Stats");
-		
-		if(ImPlot::BeginPlot("Stats"))
-		{
-			ImPlot::SetupAxes("time", "torque", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
-			ImPlot::PlotLine("Back Motor Torque", &motorTorques[0], motorTorques.size());
-			ImPlot::PlotLine("Front Hinge Motor Torque", &frontHingeTorques[0], frontHingeTorques.size());
+			ui::Begin("Stats");
 
-			ImPlot::EndPlot();
+			if (ImPlot::BeginPlot("Stats"))
+			{
+				ImPlot::SetupAxes("time", "torque", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
+				ImPlot::PlotLine("Back Motor Torque", &motorTorques[0], motorTorques.size());
+				ImPlot::PlotLine("Front Hinge Motor Torque", &frontHingeTorques[0], frontHingeTorques.size());
+
+				ImPlot::EndPlot();
+			}
+			ui::End();
 		}
-
-
-		ui::End();
 	}
 
 	virtual void ApplyActionVec(float timeStep)

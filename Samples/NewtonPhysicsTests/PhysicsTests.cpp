@@ -130,6 +130,8 @@ void PhysicsTests::Start()
 	context_->RegisterFactory<GYM_ATRT>();
 	context_->RegisterFactory<GYM_UniCycle>();
 	
+	GetSubsystem<Engine>()->SetMinFps(60);
+
 
     // Create the scene content
     CreateScene();
@@ -250,7 +252,7 @@ void PhysicsTests::CreateScene()
     //SpawnCollisionExceptionsTest(Vector3(0, 1, 15));
 
     //SpawnSliderTest(Vector3(0, 10, 10));
-    SpawnLinearJointedObject(1.0f, Vector3(10 , 2, 10));
+    //SpawnLinearJointedObject(1.0f, Vector3(10 , 2, 10));
 
     //SpawnNSquaredJointedObject(Vector3(-20, 20, 10));
 
@@ -332,6 +334,8 @@ void PhysicsTests::MoveCamera(float timeStep)
     // Mouse sensitivity as degrees per pixel
     const float MOUSE_SENSITIVITY = 0.1f;
 
+
+
     // Use this frame's mouse motion to adjust camera node yaw and pitch. Clamp the pitch between -90 and 90 degrees
     IntVector2 mouseMove = input->GetMouseMove();
     yaw_ += MOUSE_SENSITIVITY * mouseMove.x_;
@@ -339,12 +343,25 @@ void PhysicsTests::MoveCamera(float timeStep)
     pitch_ = Clamp(pitch_, -90.0f, 90.0f);
 
     // Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
-	if (!GetSubsystem<Input>()->IsMouseVisible())
+
+	if (orbitGYM)
+	{
+		cameraNode_->LookAt(gyms[0]->orbitNode->GetWorldPosition());
+		Vector3 delta = (cameraNode_->GetWorldPosition() - gyms[0]->orbitNode->GetWorldPosition());
+
+		Vector3 curPos = cameraNode_->GetWorldPosition();
+		curPos.y_ += 0.1f*timeStep*(curPos.y_ + 5.0 - curPos.y_);
+		cameraNode_->SetWorldPosition(curPos);
+
+		cameraNode_->Translate(Vector3(0, 0, 100.0*timeStep*(delta.Length() - 20.0f)));
+		
+	}
+	else if(!GetSubsystem<Input>()->IsMouseVisible())
 	{
 		cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
-
-
 	}
+
+
 
 	float worldPitch = cameraNode_->GetWorldRotation().EulerAngles().x_;
 	float worldYaw = cameraNode_->GetWorldRotation().EulerAngles().y_;
@@ -1660,7 +1677,7 @@ void PhysicsTests::HandlePostRenderUpdate(StringHash eventType, VariantMap& even
 {
 	// Take the frame time step, which is stored as a float
 	float timeStep = eventData[Update::P_TIMESTEP].GetFloat();
-
+if (drawDebug_) {
 	bool doFrSim = ui::Button("ForwardSim", ImVec2(100, 20));
 	bool openGYM = ui::Button("Connect to GYM Server", ImVec2(100, 20));
 	bool resetGYM = ui::Button("Reset", ImVec2(100, 20));
@@ -1689,24 +1706,21 @@ void PhysicsTests::HandlePostRenderUpdate(StringHash eventType, VariantMap& even
 
 	}
 
-
-
 	if (gyms.size())
 	{
 
 		gyms[0]->DrawUIStats(timeStep);
 	}
 
-	// If draw debug mode is enabled, draw physics debug geometry. Use depth test to make the result easier to interpret
-	if (drawDebug_) {
-		scene_->GetComponent<NewtonPhysicsWorld>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
-		GetSubsystem<VisualDebugger>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>());
 
-		for (int i = 0; i < gyms.size(); i++)
-		{
-			gyms[i]->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>());
-		}
+	scene_->GetComponent<NewtonPhysicsWorld>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
+	GetSubsystem<VisualDebugger>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>());
+
+	for (int i = 0; i < gyms.size(); i++)
+	{
+		gyms[i]->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>());
 	}
+}
 
 	
 
@@ -1714,20 +1728,7 @@ void PhysicsTests::HandlePostRenderUpdate(StringHash eventType, VariantMap& even
 
 void PhysicsTests::EvalOrbitGym()
 {
-	if (orbitGYM)
-	{
-		if (cameraNode_->GetParent() != gyms[0]->orbitNode)
-			cameraNode_->SetParent(gyms[0]->orbitNode);
-	}
-	else
-	{
-		if (cameraNode_->GetParent() != scene_)
-			cameraNode_->SetParent(scene_);
-	}
 
-	cameraNode_->SetWorldTransform(Matrix3x4::IDENTITY);
-	cameraNode_->Translate(Vector3(-5, 5, 0), TS_WORLD);
-	cameraNode_->Rotate(Quaternion(90.0f, Vector3(0, 1, 0)), TS_WORLD);
 }
 
 void PhysicsTests::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData)
@@ -1883,7 +1884,7 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
 
-    if (1) {
+    if (0) {
         // Create a floor object, 1000 x 1000 world units. Adjust position so that the ground is at zero Y
         Node* floorNode = scene_->CreateChild("Floor");
         floorNode->SetPosition(worldPosition - Vector3(0, 0.5f, 0));
@@ -1903,7 +1904,7 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
     else {
         //Create heightmap terrain with collision
         Node* terrainNode = scene_->CreateChild("Terrain");
-        terrainNode->SetPosition(worldPosition);
+        terrainNode->SetPosition(worldPosition - Vector3(0,1, 0));
         auto* terrain = terrainNode->CreateComponent<Terrain>();
         terrain->SetPatchSize(64);
         terrain->SetSpacing(Vector3(2.0f, 0.2f, 2.0f)); // Spacing between vertices and vertical resolution of the height map
