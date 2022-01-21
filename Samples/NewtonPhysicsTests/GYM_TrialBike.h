@@ -142,7 +142,10 @@ public:
 
 		targetAngularVel.y_ = 0.0f;
 		targetVel= 0.0f;
-
+		motorTorques.clear();
+		frontHingeTorques.clear();
+		stat3.clear();
+		stat4.clear();
 
 	}
 
@@ -254,14 +257,17 @@ public:
 			angleSharpFactor = (baseVelFactorParam / curVel);
 
 		float dTerm = 0.1f*bodyNode->GetComponent<NewtonRigidBody>()->GetAngularVelocity(TS_LOCAL).x_;
+		stat3.push_back(dTerm);
 		float targetSteerAngle = angleSharpFactor*tiltError + dTerm;
 		float curSteerAngle = motors[0]->GetCurrentAngle();
 
 
 		float steerError = targetSteerAngle - curSteerAngle;
-		float hingeTorque = hingeTorquePParam * steerError - 1.0f*motors[0]->GetCurrentAngularRate();
+		stat4.push_back(steerError);
+		float hingeTorque = hingeTorquePParam * steerError - 0.0f*motors[0]->GetCurrentAngularRate();
 		motors[0]->SetMotorTorque(hingeTorque);
 		frontHingeTorques.push_back(hingeTorque);
+
 
 		float velError = targetVel - curVel;
 		float forwardAngVel = bodyNode->GetComponent<NewtonRigidBody>()->GetAngularVelocity(TS_LOCAL).z_;
@@ -278,7 +284,6 @@ public:
 
 			ui::Text("angleSharpFactor: %f", angleSharpFactor);
 			ui::Text("curAngularVel: %f", curAngularVel);
-			ui::Text("targetSteerAngle: %f", targetSteerAngle);
 			ui::Separator();
 
 			ui::DragFloat("Target Angular Vel", &targetAngularVel.y_, 0.01f, -0.5f, 0.5f);
@@ -299,6 +304,8 @@ public:
 				ImPlot::SetupAxes("time", "torque", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
 				ImPlot::PlotLine("Back Motor Torque", &motorTorques[0], motorTorques.size());
 				ImPlot::PlotLine("Front Hinge Motor Torque", &frontHingeTorques[0], frontHingeTorques.size());
+				ImPlot::PlotLine("dTerm", &stat3[0], stat3.size());
+				ImPlot::PlotLine("steerError", &stat4[0], stat4.size());
 
 				ImPlot::EndPlot();
 			}
@@ -338,6 +345,8 @@ public:
 
 	ea::vector<float> motorTorques;
 	ea::vector<float> frontHingeTorques;
+	ea::vector<float> stat3;
+	ea::vector<float> stat4;
 
 	float targetTilt = 0.0f;
 	float targetVel = 0.0f;

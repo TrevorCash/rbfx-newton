@@ -23,7 +23,6 @@ if (NOT URHO3D_WIN32_CONSOLE)
     set (TARGET_TYPE WIN32)
 endif ()
 
-find_package(Torch REQUIRED)
 
 
 file (GLOB_RECURSE SOURCE_FILES *.cpp *.h)
@@ -37,20 +36,10 @@ endif ()
 
 # Define executable name.
 add_executable(NewtonPhysicsTests ${TARGET_TYPE} ${SOURCE_FILES})
-target_link_libraries(NewtonPhysicsTests PUBLIC rbfx-newton rbfx-visualdebugger Urho3D "${TORCH_LIBRARIES}")
+target_link_libraries(NewtonPhysicsTests PUBLIC rbfx-newton rbfx-visualdebugger Urho3D)
 
 
 
 
-# The following code block is suggested to be used on Windows.
-# According to https://github.com/pytorch/pytorch/issues/25457,
-# the DLLs need to be copied to avoid memory errors.
-if (MSVC)
-  file(GLOB TORCH_DLLS "${TORCH_INSTALL_PREFIX}/lib/*.dll")
-  add_custom_command(TARGET NewtonPhysicsTests
-                     POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                     ${TORCH_DLLS}
-                     $<TARGET_FILE_DIR:NewtonPhysicsTests>)
-endif (MSVC)
+
 

@@ -73,8 +73,6 @@
 #include "GYM_ATRT.h"
 #include "GYM_UniCycle.h"
 
-#include <torch/torch.h>
-
 #include <iostream>
 
 PhysicsTests::PhysicsTests(Context* context) : Application(context),
