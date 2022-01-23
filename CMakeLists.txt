@@ -43,6 +43,7 @@ Source/NewtonPhysics
 
 include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dCore)
 include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton)
+include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dParticles)
 include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dJoints)
 include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dModels)
 include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dModels/dVehicle)
