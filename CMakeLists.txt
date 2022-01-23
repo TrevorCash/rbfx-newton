@@ -54,7 +54,7 @@ include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dCollision)
 
 target_link_libraries(rbfx-newton PUBLIC 
     ndCore
-    ndTiny
+    ndTinyxml
     ndNewton
     ndCollision
 )
