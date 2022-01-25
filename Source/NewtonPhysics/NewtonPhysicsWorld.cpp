@@ -506,9 +506,9 @@ namespace Urho3D {
 
 
         //rebuild dirty collision shapes
-        for (NewtonCollisionShape* colShape : collisionComponentList)
+        for (WeakPtr<NewtonCollisionShape> colShape : collisionComponentList)
         {
-            if (colShape->GetDirty()) {
+            if (!colShape.Expired() && colShape->GetDirty()) {
                 colShape->updateBuild();
                 colShape->MarkDirty(false);
             }
@@ -584,6 +584,8 @@ namespace Urho3D {
     {
         for (ndConstraint* constraint : freeConstraintQueue_)
         {
+			if(constraint->GetAsBilateral())
+				newtonWorld_->RemoveJoint(constraint->GetAsBilateral());
             delete constraint;
         }
         freeConstraintQueue_.clear();
@@ -591,6 +593,7 @@ namespace Urho3D {
 
         for (ndShapeInstance* shape : freeShapeQueue_)
         {
+
 			delete shape;
         }
         freeShapeQueue_.clear();
@@ -598,6 +601,7 @@ namespace Urho3D {
 
         for (ndBody* body : freeBodyQueue_)
         {
+			newtonWorld_->RemoveBody(body);
 			delete body;
         }
         freeBodyQueue_.clear();

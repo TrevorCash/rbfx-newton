@@ -24,7 +24,9 @@ namespace Urho3D {
         enum PoweredMode
         {
             NO_POWER = 0,
-            ACTUATOR
+            ACTUATOR,
+			MOTOR_SPEED,
+			MOTOR_TORQUE
         };
 
 

@@ -1042,7 +1042,7 @@ void PhysicsTests::SpawnRandomObjects()
 
 
         node->GetComponent<NewtonRigidBody>()->SetLinearVelocity(cameraNode_->GetWorldDirection() * 10.0f);
-        node->GetComponent<NewtonRigidBody>()->SetContinuousCollision(false);
+        //node->GetComponent<NewtonRigidBody>()->SetContinuousCollision(false);
         //node->GetComponent<RigidBody>()->SetLinearDamping(0.01f);
         //node->GetComponent<RigidBody>()->SetMassScale(Random(1.0f, 10.0f));
         node->GetComponent<NewtonRigidBody>()->SetGenerateContacts(false);
@@ -1276,7 +1276,7 @@ void PhysicsTests::SpawnTrialBike(Vector3 worldPosition, Quaternion orientation,
     Node* backWheel = SpawnSamplePhysicsChamferCylinder(root, Vector3::ZERO + backWheelOffset, 0.8f,0.2f);
     backWheel->SetWorldRotation(Quaternion(90,0,0));
     backWheel->GetComponent<NewtonRigidBody>()->SetCollisionOverride(C->GetComponent<NewtonRigidBody>(), false);
-    backWheel->GetComponent<NewtonRigidBody>()->SetUseGyroscopicTorque(enableGyroOnWheels);
+    //backWheel->GetComponent<NewtonRigidBody>()->SetUseGyroscopicTorque(enableGyroOnWheels);
     backWheel->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(wheelFriction);
 
 
@@ -1285,7 +1285,7 @@ void PhysicsTests::SpawnTrialBike(Vector3 worldPosition, Quaternion orientation,
     motor->SetOtherBody(C->GetComponent<NewtonRigidBody>());
     motor->SetWorldPosition(Vector3::ZERO + backWheelOffset);
     motor->SetWorldRotation(Quaternion(0, 90, 0));
-    motor->SetMotorTargetAngularRate(10);
+    //motor->SetMotorTargetAngularRate(10);
     motor->SetMaxTorque(motor->GetMaxTorque()*0.00125f);
 
 
@@ -1297,7 +1297,7 @@ void PhysicsTests::SpawnTrialBike(Vector3 worldPosition, Quaternion orientation,
     frontWheel->SetWorldRotation(Quaternion(90, 0, 0));
     frontWheel->GetComponent<NewtonRigidBody>()->SetCollisionOverride(E->GetComponent<NewtonRigidBody>(), false);
     frontWheel->GetComponent<NewtonRigidBody>()->SetCollisionOverride(F->GetComponent<NewtonRigidBody>(), false);
-    frontWheel->GetComponent<NewtonRigidBody>()->SetUseGyroscopicTorque(enableGyroOnWheels);
+    //frontWheel->GetComponent<NewtonRigidBody>()->SetUseGyroscopicTorque(enableGyroOnWheels);
     frontWheel->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(wheelFriction);
 
 
@@ -1526,8 +1526,8 @@ void PhysicsTests::SpawnSegway(Vector3 worldPosition)
     motor->SetEnableLimits(false);
     motor->SetPowerMode(NewtonHingeConstraint::MOTOR_TORQUE);
     motor->SetOtherBody(Wheel->GetComponent<NewtonRigidBody>());
-	motor->SetMotorTorque(1);
-	motor->SetMotorMaxAngularRate(99999.0f);
+	//motor->SetMotorTorque(1);
+	//motor->SetMotorMaxAngularRate(99999.0f);
 
 	//topwiegth
 	Node* top = SpawnSamplePhysicsCylinder(root, Vector3(0, 3, 0), 1);
@@ -1539,7 +1539,7 @@ void PhysicsTests::SpawnSegway(Vector3 worldPosition)
 	topMotor->SetEnableLimits(false);
 	topMotor->SetPowerMode(NewtonHingeConstraint::MOTOR_TORQUE);
 	topMotor->SetOtherBody(top->GetComponent<NewtonRigidBody>());
-	topMotor->SetMotorTorque(1);
+	//topMotor->SetMotorTorque(1);
 
 
     root->SetWorldPosition(worldPosition);

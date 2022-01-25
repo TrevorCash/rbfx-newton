@@ -53,10 +53,7 @@ include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dCollision)
 
 
 target_link_libraries(rbfx-newton PUBLIC 
-    ndCore
-    ndTinyxml
     ndNewton
-    ndCollision
 )
 
 #newton plugins
@@ -73,17 +70,13 @@ target_link_libraries(rbfx-newton PUBLIC
 
 
 if(NEWTON_BUILD_SHARED_LIBS)
-    add_definitions(-D_D_CORE_DLL)
-    add_definitions(-D_D_TINY_DLL)
     add_definitions(-D_D_NEWTON_DLL)
-    add_definitions(-D_D_COLLISION_DLL)
 endif(NEWTON_BUILD_SHARED_LIBS)
 
 
 #copy application media if sandbox is included
 if(NEWTON_BUILD_SANDBOX_DEMOS)
     if(MSVC)
-
         #All 3 visual studio configurations:
         file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin/Debug/applications)
         file(COPY ThirdParty/newton-dynamics/newton-4.00/applications/media DESTINATION ${CMAKE_BINARY_DIR}/bin/Debug/applications)

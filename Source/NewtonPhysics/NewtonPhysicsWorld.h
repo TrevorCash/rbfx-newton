@@ -65,19 +65,20 @@ namespace Urho3D
 
     
 
-    //struct PhysicsRayCastIntersection {
-    //    NewtonBody* body_ = nullptr;
-    //    NewtonCollision* collision_ = nullptr;
-    //    NewtonCollision* subCollision_ = nullptr;
-    //    float rayIntersectParameter_ = -1.0f;
+    struct PhysicsRayCastIntersection {
+        ndBody* body_ = nullptr;
+        ndShapeInstance* collision_ = nullptr;
+		ndShapeInstance* subCollision_ = nullptr;
+        float rayIntersectParameter_ = -1.0f;
 
-    //    NewtonRigidBody* rigBody_ = nullptr;
-    //    NewtonCollisionShape* collisionShape_ = nullptr;
-    //    Vector3 rayIntersectWorldPosition_;
-    //    Vector3 rayIntersectWorldNormal_;
-    //    float rayDistance_ = -1.0f;
-    //    Vector3 rayOriginWorld_;
-    //};
+
+        NewtonRigidBody* rigBody_ = nullptr;
+        NewtonCollisionShape* collisionShape_ = nullptr;
+        Vector3 rayIntersectWorldPosition_;
+        Vector3 rayIntersectWorldNormal_;
+        float rayDistance_ = -1.0f;
+        Vector3 rayOriginWorld_;
+    };
 
    /* URHONEWTON_API void PrintPhysicsRayCastIntersection(PhysicsRayCastIntersection& intersection);
 
@@ -122,18 +123,18 @@ namespace Urho3D
 
 
         bool RigidBodyContainsPoint(NewtonRigidBody* rigidBody, const Vector3&worldPoint);
-   //     /// Return rigid bodies by a ray query. bodies are returned in order from closest to farthest along the ray.
-   //     void RayCast(
-   //         eastl::vector<PhysicsRayCastIntersection>& intersections,
-   //         const Ray& ray, float maxDistance = M_LARGE_VALUE,
-   //         unsigned maxBodyIntersections = M_MAX_UNSIGNED,
-   //         unsigned collisionMask = M_MAX_UNSIGNED);
-   //     /// Return rigid bodies by a ray query.
-   //     void RayCast(
-			//eastl::vector<PhysicsRayCastIntersection>& intersections,
-   //         const Vector3& pointOrigin, const Vector3& pointDestination,
-   //         unsigned maxBodyIntersections = M_MAX_UNSIGNED,
-   //         unsigned collisionMask = M_MAX_UNSIGNED);
+        /// Return rigid bodies by a ray query. bodies are returned in order from closest to farthest along the ray.
+        void RayCast(
+            eastl::vector<PhysicsRayCastIntersection>& intersections,
+            const Ray& ray, float maxDistance = M_LARGE_VALUE,
+            unsigned maxBodyIntersections = M_MAX_UNSIGNED,
+            unsigned collisionMask = M_MAX_UNSIGNED);
+        /// Return rigid bodies by a ray query.
+        void RayCast(
+			eastl::vector<PhysicsRayCastIntersection>& intersections,
+            const Vector3& pointOrigin, const Vector3& pointDestination,
+            unsigned maxBodyIntersections = M_MAX_UNSIGNED,
+            unsigned collisionMask = M_MAX_UNSIGNED);
 
 
         /// Return rigid bodies by a sphere query.

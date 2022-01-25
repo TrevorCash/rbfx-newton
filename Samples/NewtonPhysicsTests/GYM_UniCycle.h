@@ -42,7 +42,7 @@ public:
 		motor->SetEnableLimits(false);
 		motor->SetPowerMode(NewtonHingeConstraint::MOTOR_TORQUE);
 		motor->SetOtherBody(Wheel->GetComponent<NewtonRigidBody>());
-		motor->SetMotorTorque(1);
+		//motor->SetMotorTorque(1);
 
 
 		motors.push_back(motor);
@@ -104,7 +104,7 @@ public:
 		GYM::ApplyActionVec(timeStep);
 
 
-		motors[0]->SetMotorTorque(actionVec[0] * 20);
+		//motors[0]->SetMotorTorque(actionVec[0] * 20);
 	}
 
 

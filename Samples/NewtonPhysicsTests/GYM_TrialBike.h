@@ -48,7 +48,7 @@ public:
 		hingeConstraint->SetNoPowerSpringCoefficient(1000.0f);
 		hingeConstraint->SetWorldRotation(Quaternion(90, 0, 90));
 		hingeConstraint->SetWorldPosition(bodyNode->GetWorldPosition() + Vector3(0, -0.5, 0));
-		hingeConstraint->SetSolveMode(SOLVE_MODE_EXACT);
+		//hingeConstraint->SetSolveMode(SOLVE_MODE_EXACT);
 
 
 		Node* D = SpawnSamplePhysicsBox(bodyNode, Vector3::ZERO + Vector3(0.7, 0.5, 0), Vector3(1, 0.5, 0.5));
@@ -66,13 +66,13 @@ public:
 		hinge->SetOtherBody(bodyNode->GetComponent<NewtonRigidBody>());
 		hinge->SetWorldPosition(Vector3::ZERO + Vector3(1.2, 0.8, 0));
 		hinge->SetWorldRotation(Quaternion(0, 0, -90 + 20));
-		hinge->SetSolveMode(SOLVE_MODE_EXACT);
+		//hinge->SetSolveMode(SOLVE_MODE_EXACT);
 
 		NewtonHingeConstraint* hingelimits = E->CreateComponent<NewtonHingeConstraint>();
 		hingelimits->SetOtherBody(bodyNode->GetComponent<NewtonRigidBody>());
 		hingelimits->SetWorldPosition(Vector3::ZERO + Vector3(1.2, 0.8, 0));
 		hingelimits->SetWorldRotation(Quaternion(0, 0, -90 + 20));
-		hingelimits->SetSolveMode(SOLVE_MODE_EXACT);
+		//hingelimits->SetSolveMode(SOLVE_MODE_EXACT);
 
 
 		Node* F = SpawnSamplePhysicsBox(rootNode, Vector3::ZERO + Vector3(1.5, 0, 0), Vector3(0.2, 2.5, 0.5));
@@ -90,7 +90,7 @@ public:
 		frontSuspension->SetTwistLimits(0, 0);
 		frontSuspension->SetEnableSliderLimits(true, true);
 		frontSuspension->SetSliderLimits(-0.5, 0.5);
-		frontSuspension->SetSolveMode(SOLVE_MODE_EXACT);
+		//frontSuspension->SetSolveMode(SOLVE_MODE_EXACT);
 
 
 		float wheelFriction = 20.0f;
@@ -100,7 +100,7 @@ public:
 		Node* backWheel = SpawnSamplePhysicsChamferCylinder(rootNode, Vector3::ZERO + backWheelOffset, 0.8f, 0.2f);
 		backWheel->SetWorldRotation(Quaternion(90, 0, 0));
 		backWheel->GetComponent<NewtonRigidBody>()->SetCollisionOverride(C->GetComponent<NewtonRigidBody>(), false);
-		backWheel->GetComponent<NewtonRigidBody>()->SetUseGyroscopicTorque(enableGyroOnWheels);
+		//backWheel->GetComponent<NewtonRigidBody>()->SetUseGyroscopicTorque(enableGyroOnWheels);
 		backWheel->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(wheelFriction);
 
 
@@ -109,8 +109,8 @@ public:
 		motor->SetOtherBody(C->GetComponent<NewtonRigidBody>());
 		motor->SetWorldPosition(Vector3::ZERO + backWheelOffset);
 		motor->SetWorldRotation(Quaternion(0, 90, 0));
-		motor->SetSolveMode(SOLVE_MODE_EXACT);
-		motor->SetMotorTorque(5.0f);
+		//motor->SetSolveMode(SOLVE_MODE_EXACT);
+		//motor->SetMotorTorque(5.0f);
 
 
 		Vector3 frontWheelOffset = Vector3(1.8, -1, 0);
@@ -118,7 +118,7 @@ public:
 		frontWheel->SetWorldRotation(Quaternion(90, 0, 0));
 		frontWheel->GetComponent<NewtonRigidBody>()->SetCollisionOverride(E->GetComponent<NewtonRigidBody>(), false);
 		frontWheel->GetComponent<NewtonRigidBody>()->SetCollisionOverride(F->GetComponent<NewtonRigidBody>(), false);
-		frontWheel->GetComponent<NewtonRigidBody>()->SetUseGyroscopicTorque(enableGyroOnWheels);
+		//frontWheel->GetComponent<NewtonRigidBody>()->SetUseGyroscopicTorque(enableGyroOnWheels);
 		frontWheel->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(wheelFriction);
 
 
@@ -128,7 +128,7 @@ public:
 		frontAxle->SetWorldPosition(Vector3::ZERO + frontWheelOffset);
 		frontAxle->SetWorldRotation(Quaternion(0, 90, 0));
 		frontAxle->SetEnableLimits(false);
-		frontAxle->SetSolveMode(SOLVE_MODE_EXACT);
+		//frontAxle->SetSolveMode(SOLVE_MODE_EXACT);
 		//frontAxle->SetMotorTargetAngularRate(10);
 
 		motors.clear();
@@ -269,7 +269,7 @@ public:
 		float steerError = targetSteerAngle - curSteerAngle;
 		stat4.push_back(steerError);
 		float hingeTorque = hingeTorquePParam * steerError - 0.0f*motors[0]->GetCurrentAngularRate();
-		motors[0]->SetMotorTorque(hingeTorque);
+		//motors[0]->SetMotorTorque(hingeTorque);
 		frontHingeTorques.push_back(hingeTorque);
 
 
@@ -278,7 +278,7 @@ public:
 		float targetForwardTilt = 0.0f;
 		float forwardTiltError = targetForwardTilt - curForwardTilt;
 		//float throttleTorque = Clamp(10.0f * velError, -15.0f, 30.0f) + 0.0f*forwardTiltError;
-		motors[1]->SetMotorTorque(throttleTorque);
+		//motors[1]->SetMotorTorque(throttleTorque);
 
 		motorTorques.push_back(throttleTorque);
 
@@ -325,7 +325,7 @@ public:
 
 
 
-		motors[0]->SetMotorTorque(actionVec[0]*3);
+		//motors[0]->SetMotorTorque(actionVec[0]*3);
 		//motors[1]->SetMotorTorque(actionVec[1]*10);
 	}
 

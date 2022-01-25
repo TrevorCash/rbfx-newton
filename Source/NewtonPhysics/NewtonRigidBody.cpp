@@ -760,6 +760,7 @@ namespace Urho3D {
 
                     }
                 }
+
                 float accumMass = 0.0f;
 
                 NewtonCollisionShape* firstCollisionShape = nullptr;
@@ -768,13 +769,13 @@ namespace Urho3D {
                     if (firstCollisionShape == nullptr)
                         firstCollisionShape = colComp;
 
-
+					resolvedCollision = colComp->GetNewtonShape();
 
                 	ndShapeInstance rootCollision = colComp->GetNewtonShape();
 					//for each sub collision in the colComp
 					ea::vector<ndShapeInstance*> subShapes;
-					NewtonCompoundGetSubShapes(rootCollision.GetShape()->GetAsShapeCompound(), subShapes);
-
+					if(rootCollision.GetShape()->GetAsShapeCompound() != nullptr)
+						NewtonCompoundGetSubShapes(rootCollision.GetShape()->GetAsShapeCompound(), subShapes);
 
                     for(ndShapeInstance* curSubCollision : subShapes)
                     {

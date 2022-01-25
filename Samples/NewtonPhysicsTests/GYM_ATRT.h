@@ -266,8 +266,8 @@ public:
 	{
 		GYM::ApplyActionVec(timeStep);
 
-		for(int m = 0; m < motors.size(); m++ )
-			motors[m]->SetMotorTorque(actionVec[m] * 10);
+		//for(int m = 0; m < motors.size(); m++ )
+			//motors[m]->SetMotorTorque(actionVec[m] * 10);
 
 	}
 
