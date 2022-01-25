@@ -74,12 +74,12 @@ namespace Urho3D {
 
     ndVector UrhoToNewton(const Vector3& vec3)
     {
-        return ndVector(vec3.x_, vec3.y_, vec3.z_, 1.0f);
+        return ndVector(vec3.x_, vec3.y_, vec3.z_, 0.0f);
     }
 
     ndVector UrhoToNewton(const Vector2& vec2)
     {
-        return ndVector(vec2.x_, vec2.y_, 0.0f, 1.0f);
+        return ndVector(vec2.x_, vec2.y_, 0.0f, 0.0f);
     }
     ndQuaternion UrhoToNewton(const Quaternion& quat)
     {

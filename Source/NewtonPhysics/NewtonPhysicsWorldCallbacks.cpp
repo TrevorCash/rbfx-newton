@@ -17,23 +17,6 @@ namespace Urho3D {
 
 
 
-	NewtonBodyNotifications::NewtonBodyNotifications() : ndBodyNotify(ndVector(ndFloat32(0.0f),ndFloat32(-9.81f),ndFloat32(0.0f),ndFloat32(1.0f)))
-	{
-	}
-
-	void NewtonBodyNotifications::OnTransform(ndInt32 threadIndex, const ndMatrix& matrix)
-	{
-	}
-
-	void NewtonBodyNotifications::Save(const ndLoadSaveBase::ndSaveDescriptor& desc) const
-	{
-		
-	}
-
-	void NewtonBodyNotifications::OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep)
-	{
-		//ndBodyNotify::OnApplyExternalForce(threadIndex, timestep);
-	}
 
 
 	// void Newton_ApplyForceAndTorqueCallback(const NewtonBody* body, dFloat timestep, int threadIndex)

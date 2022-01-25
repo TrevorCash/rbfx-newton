@@ -42,7 +42,7 @@ namespace Urho3D
     class NewtonPhysicsWorld;
     class NewtonCollisionShape;
     class NewtonRigidBodyContactEntry;
-
+	class NewtonBodyNotifications;
 
     static const char* RigidBodyCollisionEventModeNames[] =
     {
@@ -61,6 +61,7 @@ namespace Urho3D
         unsigned rigidBodyComponentId_ = M_MAX_UNSIGNED;
         bool enableCollisions_ = false;
     };
+
 
 
 
@@ -352,6 +353,11 @@ namespace Urho3D
 
         /// Internal newton body
         ndBody * newtonBody_ = nullptr;
+
+		/// notifications objects
+		NewtonBodyNotifications* newtonNotifications_ = nullptr;
+
+
         /// compound collision if needed.
         ndShapeInstance effectiveCollision_ = nullptr;
         /// Physics world.
@@ -515,6 +521,24 @@ namespace Urho3D
 
     };
 
+
+	class NewtonBodyNotifications : public ndBodyNotify
+	{
+	public:
+		D_CLASS_REFLECTION(NewtonBodyNotifications);
+
+		NewtonBodyNotifications();
+
+
+		virtual void OnTransform(ndInt32 threadIndex, const ndMatrix& matrix);
+
+		virtual void Save(const ndLoadSaveBase::ndSaveDescriptor& desc) const;
+
+		virtual void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep);
+
+
+		NewtonRigidBody* rigidBodyComponent;
+	};
 
 	inline bool RigidBodySceneDepthCompare(const WeakPtr<NewtonRigidBody>& body1, const WeakPtr<NewtonRigidBody>& body2) {
         return (body1->GetSceneDepth() < body2->GetSceneDepth());

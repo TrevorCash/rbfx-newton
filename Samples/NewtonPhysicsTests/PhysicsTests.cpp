@@ -200,7 +200,7 @@ void PhysicsTests::CreateScene()
 
 
 
-    CreateScenery(Vector3(0,0,0));
+    //CreateScenery(Vector3(0,0,0));
 
 
 	cameraNode_ = new Node(context_);
@@ -214,7 +214,7 @@ void PhysicsTests::CreateScene()
 	//cylinder->GetComponent<NewtonRigidBody>()->SetCenterOfMassLocalOffset(Vector3(5, 0, 0));
 
     //SpawnSamplePhysicsCylinder(scene_, Vector3(5, 2, 0), 0.25f,4);
-
+	SpawnSamplePhysicsBox(scene_, Vector3(5, 2, 0), Vector3(1,1,1));
 
     //SpawnMaterialsTest(Vector3(0,-25,100));
 
@@ -232,7 +232,7 @@ void PhysicsTests::CreateScene()
 
 	//SpawnATRT(Vector3(5, 5, 0));
 
-	ResetGYMs();	
+	//ResetGYMs();	
 
 	//SpawnSegway(Vector3(0,5,0));
 
@@ -342,7 +342,7 @@ void PhysicsTests::MoveCamera(float timeStep)
 
     // Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
 
-	if (orbitGYM)
+	if (orbitGYM && gyms.size())
 	{
 		cameraNode_->LookAt(gyms[0]->orbitNode->GetWorldPosition());
 		Vector3 delta = (cameraNode_->GetWorldPosition() - gyms[0]->orbitNode->GetWorldPosition());

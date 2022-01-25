@@ -47,20 +47,7 @@ namespace Urho3D
     static const int DEF_PHYSICS_MAX_CONTACT_POINTS = 512;//maximum number of contacts per contact entry.
 
 
-	class NewtonBodyNotifications  : public ndBodyNotify
-	{
-	public:
-		D_CLASS_REFLECTION(NewtonBodyNotifications);
 
-		NewtonBodyNotifications();
-
-
-		virtual void OnTransform(ndInt32 threadIndex, const ndMatrix& matrix);
-
-		virtual void Save(const ndLoadSaveBase::ndSaveDescriptor& desc) const;
-
-		virtual void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep);
-	};
 
 
     
@@ -256,7 +243,6 @@ namespace Urho3D
 
         void applyNewtonWorldSettings();
 
-		NewtonBodyNotifications newtonBodyNotifications;
 
 
         bool contactMapLocked_ = false;
