@@ -24,7 +24,7 @@
 
 #include "Samples/Sample.h"
 #include "NewtonConstraint.h"
-#include "GYM.h"
+#include <Urho3D/MLControl/Gym.h>
 
 namespace Urho3D
 {
@@ -60,6 +60,7 @@ public:
 		engineParameters_[EP_WINDOW_RESIZABLE] = true;
 		// Resource prefix path is a list of semicolon-separated paths which will be checked for containing resource directories. They are relative to application executable file.
 		engineParameters_[EP_RESOURCE_PREFIX_PATHS] = ".;./../../../bin";
+		engineParameters_[EP_WORKER_THREADS] = 4;
 	}
 
 

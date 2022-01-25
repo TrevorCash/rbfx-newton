@@ -1,5 +1,5 @@
 #pragma once
-#include "GYM.h"
+#include <Urho3D/MLControl/Gym.h>
 
 
 
@@ -216,6 +216,8 @@ public:
 	{
 		GYM::Update(timeStep);
 		float curVel = bodyNode->GetComponent<NewtonRigidBody>()->GetLinearVelocity(TS_LOCAL).x_;
+		stat5.push_back(curVel);
+
 		int numJoysticks = GetSubsystem<Input>()->GetNumJoysticks();
 		float throttleTorque = 0.0f;
 		if (numJoysticks) {
@@ -238,7 +240,9 @@ public:
 		float curForwardTilt = bodyNode->GetWorldRight().y_;
 		float angVelError = (targetAngularVel.y_ - curAngularVel);
 
-		targetTilt += 5.0f*timeStep*(targetAngularVel.y_ - targetTilt);
+
+		//targetTilt += 5.0f*timeStep*(targetAngularVel.y_ - targetTilt);
+		targetTilt = targetAngularVel.y_;
 
 		//targetVel -= 100.0f*timeStep*angVelError*angVelError;
 		//if (targetVel < baseVelFactorParam)
@@ -306,6 +310,7 @@ public:
 				ImPlot::PlotLine("Front Hinge Motor Torque", &frontHingeTorques[0], frontHingeTorques.size());
 				ImPlot::PlotLine("dTerm", &stat3[0], stat3.size());
 				ImPlot::PlotLine("steerError", &stat4[0], stat4.size());
+				ImPlot::PlotLine("forward Vel", &stat5[0], stat5.size());
 
 				ImPlot::EndPlot();
 			}
@@ -347,6 +352,7 @@ public:
 	ea::vector<float> frontHingeTorques;
 	ea::vector<float> stat3;
 	ea::vector<float> stat4;
+	ea::vector<float> stat5;
 
 	float targetTilt = 0.0f;
 	float targetVel = 0.0f;

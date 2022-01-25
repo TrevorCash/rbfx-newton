@@ -46,7 +46,7 @@
 #include "Urho3D/UI/Text3D.h"
 #include <Urho3D/RmlUI/RmlUI.h>
 #include <Urho3D/SystemUI/SystemUI.h>
-#include <Urho3D/Network/GymClient.h>
+#include <Urho3D/MLControl/GymClient.h>
 
 #include "Urho3D/Graphics/Terrain.h"
 #include "Urho3D/Scene/Node.h"

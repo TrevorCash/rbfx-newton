@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GYM.h"
+#include <Urho3D/MLControl/Gym.h>
 
 
 
