@@ -23,15 +23,12 @@
 #pragma once
 #include "UrhoNewtonApi.h"
 
-#include "ndNewton.h"
 #include "Urho3D/Scene/Component.h"
-
 #include "NewtonCollisionShape.h"
 
-class NewtonWorld;
-class dMatrix;
-class dCustomJoint;
-class dVehicleManager;
+#include "ndNewton.h"
+
+
 
 namespace Urho3D
 {
@@ -50,21 +47,22 @@ namespace Urho3D
     static const int DEF_PHYSICS_MAX_CONTACT_POINTS = 512;//maximum number of contacts per contact entry.
 
 
-	class NewtonBodyNotifications : public ndBodyNotify
+	class NewtonBodyNotifications  : public ndBodyNotify
 	{
 	public:
 		D_CLASS_REFLECTION(NewtonBodyNotifications);
-		NewtonBodyNotifications() : ndBodyNotify(ndVector(0.0f,0.0f,-9.81f,1.0f))
-		{}
-		virtual ~NewtonBodyNotifications(){}
+
+		NewtonBodyNotifications();
 
 
 		virtual void OnTransform(ndInt32 threadIndex, const ndMatrix& matrix);
 
-		D_COLLISION_API virtual void Save(const ndLoadSaveBase::ndSaveDescriptor& desc) const;
+		virtual void Save(const ndLoadSaveBase::ndSaveDescriptor& desc) const;
 
-		D_COLLISION_API virtual void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep);
+		virtual void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep);
 	};
+
+
     
 
     //struct PhysicsRayCastIntersection {

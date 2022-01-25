@@ -311,7 +311,7 @@ namespace Urho3D {
 
 	Urho3D::Vector3 NewtonRigidBody::GetAngularMomentum() const
 	{
-		return NewtonToUrhoVec3(newtonBody_->GetAsBodyDynamic()->CalculateAngularMomentum());
+		return NewtonToUrhoVec3(newtonBody_->GetAsBodyDynamic()->GetAsBodyKinematic()->CalculateAngularMomentum());
 	}
 
 	void NewtonRigidBody::SetLinearVelocity(const Vector3& worldVelocity, bool useForces)

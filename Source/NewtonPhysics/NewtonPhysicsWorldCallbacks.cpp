@@ -11,53 +11,18 @@
 
 #include "ndNewton.h"
 
+
 namespace Urho3D {
 
 
-	class NewtonContactNotifications : public ndContactNotify
+
+
+	NewtonBodyNotifications::NewtonBodyNotifications() : ndBodyNotify(ndVector(ndFloat32(0.0f),ndFloat32(-9.81f),ndFloat32(0.0f),ndFloat32(1.0f)))
 	{
-	public:
-		virtual void OnBodyAdded(ndBodyKinematic* const) const
-		{
-
-		}
-
-		virtual void OnBodyRemoved(ndBodyKinematic* const) const
-		{
-		}
-
-		virtual ndMaterial GetMaterial(const ndContact* const, const ndShapeInstance&, const ndShapeInstance&) const
-		{
-			return ndMaterial();
-		}
-
-		//bool OnCompoundSubShapeOverlap(const ndContact* const contact, ndFloat32 timestep, const ndShapeInstance* const subShapeA, const ndShapeInstance* const subShapeB);
-		bool OnCompoundSubShapeOverlap(const ndContact* const, ndFloat32, const ndShapeInstance* const, const ndShapeInstance* const)
-		{
-			return true;
-		}
-
-		//virtual bool OnAabbOverlap(const ndContact* const contact, ndFloat32 timestep)
-		virtual bool OnAabbOverlap(const ndContact* const, ndFloat32)
-		{
-			return true;
-		}
-
-		virtual void OnContactCallback(ndInt32 thread, const ndContact* const contact, ndFloat32 timestep)
-		{
-			URHO3D_PROFILE_THREAD(NewtonThreadProfilerString(thread).c_str());
-
-			//Get handles To NewtonBodies and RigidBody Components.
-			const ndBodyKinematic* const body0 = contact->GetBody0();
-			const ndBodyKinematic* const body1 = contact->GetBody1();
-
-		}
-	};
-
+	}
 
 	void NewtonBodyNotifications::OnTransform(ndInt32 threadIndex, const ndMatrix& matrix)
 	{
-		
 	}
 
 	void NewtonBodyNotifications::Save(const ndLoadSaveBase::ndSaveDescriptor& desc) const
@@ -67,10 +32,11 @@ namespace Urho3D {
 
 	void NewtonBodyNotifications::OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep)
 	{
-		
+		//ndBodyNotify::OnApplyExternalForce(threadIndex, timestep);
 	}
 
-   // void Newton_ApplyForceAndTorqueCallback(const NewtonBody* body, dFloat timestep, int threadIndex)
+
+	// void Newton_ApplyForceAndTorqueCallback(const NewtonBody* body, dFloat timestep, int threadIndex)
    // {
    //     //URHO3D_PROFILE_THREAD(NewtonThreadProfilerString(threadIndex).c_str());
    //     URHO3D_PROFILE_FUNCTION()

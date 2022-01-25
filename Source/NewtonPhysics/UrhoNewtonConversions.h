@@ -1,12 +1,15 @@
 #pragma once
-#include "ndShape.h"
-#include "ndShapeCompound.h"
-#include "ndShapeInstance.h"
-#include "ndTree.h"
+
+
 
 
 class NewtonCollision;
 class NewtonWorld;
+
+class ndVector;
+class ndShape;
+class ndMatrix;
+class ndQuaternion;
 
 namespace Urho3D {
     class Matrix4;

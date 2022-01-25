@@ -148,7 +148,7 @@ namespace Urho3D
         WeakPtr<NewtonPhysicsWorld> physicsWorld_;
 
         /// Internal Newton Collision instance
-        ndShapeInstance newtonShape_ = nullptr;
+        ndShapeInstance newtonShape_;
 
         /// newton Mesh reference
 		//WeakPtr<NewtonMeshObject> newtonMesh_;

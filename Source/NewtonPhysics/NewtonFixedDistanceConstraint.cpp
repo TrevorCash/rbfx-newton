@@ -50,7 +50,7 @@ namespace Urho3D {
         ndVector pivot1 = UrhoToNewton(GetOtherBuildWorldFrame().Translation());
         
 
-        newtonConstraint_ = new ndJointFixDistance(pivot0, pivot1, GetOwnNewtonBodyBuild()->GetAsBodyKinematic(), GetOtherNewtonBodyBuild()->GetAsBodyKinematic());
+        //newtonConstraint_ = new ndJointFixDistance(pivot0, pivot1, GetOwnNewtonBodyBuild()->GetAsBodyKinematic(), GetOtherNewtonBodyBuild()->GetAsBodyKinematic());
 
     }
 

@@ -56,13 +56,13 @@
 #include "NewtonHingeConstraint.h"
 #include "NewtonSliderConstraint.h"
 #include "Newton6DOFConstraint.h"
+#include "NewtonGearConstraint.h"
 
 
-
-
+#include "ndNewton.h"
 
 #include "EASTL/sort.h"
-#include "NewtonGearConstraint.h"
+
 
 
 namespace Urho3D {

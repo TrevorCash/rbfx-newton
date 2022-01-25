@@ -36,7 +36,7 @@ file(GLOB all_SRCS
         )
 
 add_library(rbfx-newton ${all_SRCS})
-target_compile_definitions(rbfx-newton PRIVATE URHONEWTON_EXPORTS)
+target_compile_definitions(rbfx-newton PRIVATE URHONEWTON_EXPORTS )
 target_include_directories(rbfx-newton PUBLIC 
 Source/NewtonPhysics
 )
@@ -72,8 +72,29 @@ target_link_libraries(rbfx-newton PUBLIC
 #endif()
 
 
+if(NEWTON_BUILD_SHARED_LIBS)
+    add_definitions(-D_D_CORE_DLL)
+    add_definitions(-D_D_TINY_DLL)
+    add_definitions(-D_D_NEWTON_DLL)
+    add_definitions(-D_D_COLLISION_DLL)
+endif(NEWTON_BUILD_SHARED_LIBS)
 
 
+#copy application media if sandbox is included
+if(NEWTON_BUILD_SANDBOX_DEMOS)
+    if(MSVC)
+
+        #All 3 visual studio configurations:
+        file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin/Debug/applications)
+        file(COPY ThirdParty/newton-dynamics/newton-4.00/applications/media DESTINATION ${CMAKE_BINARY_DIR}/bin/Debug/applications)
+
+        file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin/RelWithDebInfo/applications)
+        file(COPY ThirdParty/newton-dynamics/newton-4.00/applications/media DESTINATION ${CMAKE_BINARY_DIR}/bin/RelWithDebInfo/applications)
+
+        file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin/Release/applications)
+        file(COPY ThirdParty/newton-dynamics/newton-4.00/applications/media DESTINATION ${CMAKE_BINARY_DIR}/bin/Release/applications)
+    endif()
+endif()
 
 
 

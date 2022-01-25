@@ -47,7 +47,8 @@ namespace Urho3D {
 
 
 
-    NewtonCollisionShape::NewtonCollisionShape(Context* context) : Component(context)
+    NewtonCollisionShape::NewtonCollisionShape(Context* context) : Component(context),
+	newtonShape_(nullptr)
     {
         SubscribeToEvent(E_NODEADDED, URHO3D_HANDLER(NewtonCollisionShape, HandleNodeAdded));
         SubscribeToEvent(E_NODEREMOVED, URHO3D_HANDLER(NewtonCollisionShape, HandleNodeRemoved));

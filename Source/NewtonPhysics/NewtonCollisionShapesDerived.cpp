@@ -25,8 +25,8 @@
 #include "Urho3D/Math/StringHash.h"
 
 
-
-
+#include "ndNewton.h"
+#include "ndShapeBox.h"
 
 
 namespace Urho3D {
@@ -51,11 +51,10 @@ namespace Urho3D {
 
     bool NewtonCollisionShape_Box::buildNewtonCollision()
     {
-        // get a newton collision object (note: the same NewtonCollision could be shared between multiple component so this is not nessecarily a unique pointer)
         //newtonShape_ = NewtonCreateBox(physicsWorld_->GetNewtonWorld(), size_.x_,
         //    size_.y_,
         //    size_.z_, 0, nullptr);
-		newtonShape_ = new ndShapeBox(size_.x_, size_.y_, size_.z_);
+		newtonShape_ = ndShapeInstance(new ndShapeBox(static_cast<ndFloat32>(size_.x_), static_cast<ndFloat32>(size_.y_), static_cast<ndFloat32>(size_.z_)));
 
 
         return true;
