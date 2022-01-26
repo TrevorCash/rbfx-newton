@@ -11,19 +11,25 @@ namespace Urho3D
     class NewtonPhysicsWorld;
 
 
-    //class enabling native newton debug calls using Urho3D::DebugRenderer.
-    class UrhoNewtonDebugDisplay : public ndConstraintDebugCallback
+
+
+	class NewtonShapeDebugNotify : public ndShapeDebugNotify
+	{
+		public:
+		virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceArray, const ndEdgeType* const edgeType);
+		DebugRenderer* debugRenderer_ = nullptr;
+	};
+
+
+
+
+    class NewtonConstraintDebugCallback : public ndConstraintDebugCallback
     {
     public:
-        UrhoNewtonDebugDisplay(DebugRenderer* debugRenderer, bool depthTest) : ndConstraintDebugCallback()
-        {
-            debugRenderer_ = debugRenderer;
-            depthTest_ = depthTest;
-            SetScale(0.5f);
-        }
-        virtual ~UrhoNewtonDebugDisplay() {}
+        NewtonConstraintDebugCallback(DebugRenderer* debugRenderer, bool depthTest);
+        virtual ~NewtonConstraintDebugCallback();
 
-        void SetDrawScale(float scale) { worldScale_ = scale; }
+        void SetDrawScale(float scale);
 
         virtual void SetColor(const ndVector& color);
         virtual void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32 thickness = ndFloat32(1.0f));
@@ -46,11 +52,6 @@ namespace Urho3D
     };
 
 
-
-    void NewtonDebug_BodyDrawCollision(NewtonRigidBody* rigidBodyComp, ndBody* newtonBody, DebugRenderer* debug, bool depthTest = false);
-    void NewtonDebug_DrawCollision(ndShape* newtonShape, const Matrix3x4& transform, const Color& color, DebugRenderer* debug, bool depthTest = false);
-
-    //void NewtonDebug_ShowGeometryCollisionCallback(void* userData, int vertexCount, const ndFloat32* const faceVertec, int id);
 
 
 

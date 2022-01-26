@@ -329,6 +329,8 @@ namespace Urho3D
 			bool showContactForces = true, 
 			bool showBodyFrame = true);
 
+    	void DrawCollision(DebugRenderer* debug, bool depthTest /*= false*/);
+
         /// mark the rigid body as dirty causing the newton rigid body to be rebuilt by the physics world
         void MarkDirty(bool dirty = true);
 
@@ -356,7 +358,6 @@ namespace Urho3D
 
 		/// notifications objects
 		NewtonBodyNotifications* newtonNotifications_ = nullptr;
-
 
         /// compound collision if needed.
         ndShapeInstance effectiveCollision_ = nullptr;

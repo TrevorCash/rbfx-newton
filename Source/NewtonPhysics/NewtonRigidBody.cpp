@@ -555,20 +555,15 @@ namespace Urho3D {
 
             }
             if (showCollisionMesh) 
-				NewtonDebug_BodyDrawCollision(this, newtonBody_, debug, depthTest);
+				DrawCollision(debug, depthTest);
 
             if (showCenterOfMass) {
-
-
 				debug->AddFrame(GetCOMWorldTransform(), 1.2f*localScale, Color::MAGENTA, Color::YELLOW, Color::CYAN, depthTest);
-
             }
 			if (showBodyFrame)
 			{
 				ndMatrix matrix = newtonBody_->GetMatrix();
 				debug->AddFrame(Matrix3x4(NewtonToUrhoMat4(matrix)), 1.0f*localScale, Color::RED, Color::GREEN, Color::BLUE, depthTest);
-
-
 			}
             if (showContactForces)
             {
@@ -622,6 +617,51 @@ namespace Urho3D {
                 }
             }
         }
+    }
+
+    void NewtonRigidBody::DrawCollision(DebugRenderer* debug, bool depthTest)
+    {
+	    debugRenderOptions options;
+	    options.debug = debug;
+	    options.depthTest = depthTest;
+
+
+	    if (newtonBody_->GetAsBodyDynamic())
+	    {
+		    int sleepState = newtonBody_->GetAsBodyDynamic()->GetSleepState();
+
+		    if (sleepState == 1) {
+			    // indicate when body is sleeping
+			    options.color = Color::BLUE;
+		    }
+		    else {
+			    // body is active
+			    options.color = Color::RED;
+		    }
+	    }
+	    else if (newtonBody_->GetAsBodyKinematic())
+	    {
+		    options.color = Color::WHITE;
+	    }
+
+
+	    for (NewtonCollisionShape* colShapeComp : GetCollisionShapes())
+	    {
+		    if (!colShapeComp->GetDrawNewtonDebugGeometry())
+			    continue;
+
+		    ndMatrix matrix = newtonBody_->GetMatrix();
+
+		    Matrix3x4 mat = Matrix3x4(NewtonToUrhoMat4(matrix));
+		    mat = colShapeComp->GetWorldTransform();
+
+
+		    matrix = UrhoToNewton(mat);
+
+
+			colShapeComp->newtonShapeDebugNotify_.debugRenderer_ = options.debug;
+	    	colShapeComp->GetNewtonShape().DebugShape(matrix, colShapeComp->newtonShapeDebugNotify_);
+	    }
     }
 
 
@@ -768,6 +808,8 @@ namespace Urho3D {
 
 		effectiveCollision_.SetShape(new ndShapeBox(1,1,1));
 		mass_ = 1.0f;
+		if (GetIsSceneRootBody())
+			mass_ = 0.0f;
 
 
 		newtonBody_->GetAsBodyKinematic()->SetCollisionShape(effectiveCollision_);

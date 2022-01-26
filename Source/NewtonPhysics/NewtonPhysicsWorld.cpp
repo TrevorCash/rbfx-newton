@@ -372,9 +372,6 @@ namespace Urho3D {
         URHO3D_PROFILE_FUNCTION();
 		float physicsTimeStep = timestep*GetScene()->GetTimeScale()*timeScale_;
 
- 
-
-		//URHO3D_LOGINFO("updating");
 
         if (simulationStarted_) {
             URHO3D_PROFILE("Wait For ASync Update To finish.");

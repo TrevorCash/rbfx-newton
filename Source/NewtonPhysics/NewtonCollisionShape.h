@@ -26,6 +26,7 @@
 #include "Urho3D/Scene/Component.h"
 
 #include "ndNewton.h"
+#include "NewtonDebugDrawing.h"
 
 
 namespace Urho3D
@@ -149,6 +150,9 @@ namespace Urho3D
 
         /// Internal Newton Collision instance
         ndShapeInstance newtonShape_;
+
+		NewtonShapeDebugNotify newtonShapeDebugNotify_;
+
 
         /// newton Mesh reference
 		//WeakPtr<NewtonMeshObject> newtonMesh_;

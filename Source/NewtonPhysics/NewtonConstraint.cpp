@@ -134,7 +134,7 @@ namespace Urho3D {
 
 
         //draw the special joint stuff given to us by newton
-        UrhoNewtonDebugDisplay debugDisplay(debug, depthTest);
+        NewtonConstraintDebugCallback debugDisplay(debug, depthTest);
         debugDisplay.SetDrawScale(1.0f*scale);
         if (newtonConstraint_)
         {

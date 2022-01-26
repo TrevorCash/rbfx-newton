@@ -91,8 +91,6 @@ paused_(false)
 void PhysicsTests::Start(const ea::vector<ea::string>& args)
 {
 	PhysicsTests::Start(args);
-
-
 }
 
 void PhysicsTests::Start()
@@ -200,7 +198,7 @@ void PhysicsTests::CreateScene()
 
 
 
-    //CreateScenery(Vector3(0,0,0));
+    CreateScenery(Vector3(0,0,0));
 
 
 	cameraNode_ = new Node(context_);
@@ -1882,7 +1880,7 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
 
-    if (0) {
+    if (1) {
         // Create a floor object, 1000 x 1000 world units. Adjust position so that the ground is at zero Y
         Node* floorNode = scene_->CreateChild("Floor");
         floorNode->SetPosition(worldPosition - Vector3(0, 0.5f, 0));
@@ -1919,7 +1917,7 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
 
 
     //ramps
-    if (1) {
+    if (0) {
 
         for (int i = 0; i < 10; i++) {
       
@@ -1942,7 +1940,7 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
     float range = 200;
     float objectScale = 100;
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 0; i++)
     {
         Node* scenePart = scene_->CreateChild("ScenePart" + ea::to_string(i));
         auto* stMdl = scenePart->CreateComponent<StaticModel>();

@@ -38,71 +38,38 @@ namespace Urho3D {
 
     //}
 
-    void NewtonDebug_BodyDrawCollision(NewtonRigidBody* rigidBodyComp, ndBody* newtonBody, DebugRenderer* debug, bool depthTest /*= false*/)
+    
+
+
+
+    void NewtonShapeDebugNotify::DrawPolygon(ndInt32 vertexCount, const ndVector* const faceArray,
+	    const ndEdgeType* const edgeType)
     {
-        debugRenderOptions options;
-        options.debug = debug;
-        options.depthTest = depthTest;
-
-
-
-        if(newtonBody->GetAsBodyDynamic())
-        {
-            int sleepState = newtonBody->GetAsBodyDynamic()->GetSleepState();
-			
-            if (sleepState == 1) {
-                // indicate when body is sleeping
-                options.color = Color::BLUE;
-            }
-            else {
-                // body is active
-                options.color = Color::RED;
-            }
-        }
-		else if (newtonBody->GetAsBodyKinematic())
-		{
-			options.color = Color::WHITE;
-		}
-
-
-
-        for (NewtonCollisionShape* colShapeComp : rigidBodyComp->GetCollisionShapes())
-        {
-
-            if (!colShapeComp->GetDrawNewtonDebugGeometry())
-                continue;
-
-
-			ndMatrix matrix = newtonBody->GetMatrix();
-			
-            Matrix3x4 mat = Matrix3x4(NewtonToUrhoMat4(matrix));
-            mat = colShapeComp->GetWorldTransform();
-
-           
-            matrix = UrhoToNewton(mat);
-			
-            //NewtonCollisionForEachPolygonDo(colShapeComp->GetNewtonShape(), &matrix[0][0], NewtonDebug_ShowGeometryCollisionCallback, (void*)&options);
-
-        }
+	    for(int v = 0; v < vertexCount; v++)
+	    {
+		    debugRenderer_->AddLine(NewtonToUrhoVec3(faceArray[v - 1]), NewtonToUrhoVec3(faceArray[v]), Color::RED);
+	    }
     }
 
-
-    void NewtonDebug_DrawCollision(ndShape* newtonShape, const Matrix3x4& transform, const Color& color, DebugRenderer* debug, bool depthTest /*= false*/)
+    NewtonConstraintDebugCallback::NewtonConstraintDebugCallback(DebugRenderer* debugRenderer, bool depthTest): ndConstraintDebugCallback()
     {
-        debugRenderOptions options;
-        options.debug = debug;
-        options.color = color;
-        options.depthTest = depthTest;
-
-        //NewtonCollisionForEachPolygonDo(collision, &UrhoToNewton(transform)[0][0], NewtonDebug_ShowGeometryCollisionCallback, (void*)&options);
+	    debugRenderer_ = debugRenderer;
+	    depthTest_ = depthTest;
+	    SetScale(0.5f);
     }
 
-    void UrhoNewtonDebugDisplay::SetColor(const ndVector& color)
+    NewtonConstraintDebugCallback::~NewtonConstraintDebugCallback()
+    {}
+
+    void NewtonConstraintDebugCallback::SetDrawScale(float scale)
+    { worldScale_ = scale; }
+
+    void NewtonConstraintDebugCallback::SetColor(const ndVector& color)
     {
         currentColor_ = Color(color.m_x, color.m_y, color.m_z);
     }
 
-    void UrhoNewtonDebugDisplay::DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32 thickness )
+    void NewtonConstraintDebugCallback::DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32 thickness )
     {
         debugRenderer_->AddLine(NewtonToUrhoVec3(p0)*worldScale_, NewtonToUrhoVec3(p1)*worldScale_, Color(color[0], color[1], color[2], color[3]), depthTest_);
     }
