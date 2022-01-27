@@ -66,7 +66,6 @@ namespace Urho3D {
         URHO3D_ACCESSOR_ATTRIBUTE("Position Offset", GetPositionOffset, SetPositionOffset, Vector3, Vector3::ZERO, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Rotational Offset", GetRotationOffset, SetRotationOffset, Quaternion, Quaternion::IDENTITY, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Scale Factor", GetScaleFactor, SetScaleFactor, Vector3, Vector3::ONE, AM_DEFAULT);
-        URHO3D_ACCESSOR_ATTRIBUTE("Inherit Collision Node Scales", GetInheritNodeScale, SetInheritNodeScale, bool, true, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Static Friction Coefficient", GetStaticFriction, SetStaticFriction, float, COLLISION_SHAPE_DEF_STATIC_FRICTION, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Kinetic Friction Coefficient", GetKineticFriction, SetKineticFriction, float, COLLISION_SHAPE_DEF_KINETIC_FRICTION, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Elasticity", GetElasticity, SetElasticity, float, COLLISION_SHAPE_DEF_ELASTICITY, AM_DEFAULT);
@@ -147,12 +146,9 @@ namespace Urho3D {
 
         }
 
-        if(GetInheritNodeScale())
-            return node_->GetWorldTransform() * GetOffsetMatrix();
-        else
-        {
-            return Matrix3x4(node_->GetWorldTransform().Translation(), node_->GetWorldTransform().Rotation(), 1.0f) * GetOffsetMatrix();
-        }
+
+    	return node_->GetWorldTransform() * GetOffsetMatrix();
+
     }
 
 
@@ -251,21 +247,7 @@ namespace Urho3D {
         return rotation_;
     }
 
-    void NewtonCollisionShape::SetInheritNodeScale(bool enable /*= true*/)
-    {
-        if (inheritCollisionNodeScales_ != enable) {
-            inheritCollisionNodeScales_ = enable;
-            MarkDirty();//we need to rebuild for this change
-        }
 
-    }
-
-
-
-    bool NewtonCollisionShape::GetInheritNodeScale() const
-    {
-        return inheritCollisionNodeScales_;
-    }
 
     void NewtonCollisionShape::MarkDirty(bool dirty /*= true*/)
     {
@@ -288,7 +270,7 @@ namespace Urho3D {
         return isCompound_;
     }
 
-    const ndShapeInstance NewtonCollisionShape::GetNewtonShape()
+	ndShapeInstance NewtonCollisionShape::GetNewtonShape()
     {
         return newtonShape_;
     }

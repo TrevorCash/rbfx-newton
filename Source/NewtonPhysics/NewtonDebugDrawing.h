@@ -11,13 +11,18 @@ namespace Urho3D
     class NewtonPhysicsWorld;
 
 
+	struct debugRenderOptions {
+		Color color = Color::GRAY;
+		DebugRenderer* debug;
+		bool depthTest = false;
+	};
 
 
 	class NewtonShapeDebugNotify : public ndShapeDebugNotify
 	{
 		public:
 		virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceArray, const ndEdgeType* const edgeType);
-		DebugRenderer* debugRenderer_ = nullptr;
+		debugRenderOptions options;
 	};
 
 
@@ -45,11 +50,6 @@ namespace Urho3D
 
 
 
-    struct debugRenderOptions {
-        Color color = Color::GRAY;
-        DebugRenderer* debug;
-        bool depthTest = false;
-    };
 
 
 

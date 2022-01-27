@@ -108,11 +108,6 @@ namespace Urho3D
         Quaternion GetRotationOffset() const;
 
 
-        /// Set whether the collision size should be effected by the node scale.
-        void SetInheritNodeScale(bool enable = true);
-        bool GetInheritNodeScale() const;
-
-
 
 
         /// get local offset matrix.
@@ -134,7 +129,7 @@ namespace Urho3D
         bool IsCompound() const;
 
         /// Returns the internal newton collision
-        const ndShapeInstance GetNewtonShape();
+    	ndShapeInstance GetNewtonShape();
 
         /// Set draw debug geometry from physics world.
         void SetDrawNewtonDebugGeometry(bool enable);
@@ -178,9 +173,6 @@ namespace Urho3D
         Vector3 scale_ = Vector3::ONE;
         /// Offset rotation.
         Quaternion rotation_;
-
-        ///inherit node scale.
-        bool inheritCollisionNodeScales_ = true;
 
         bool drawPhysicsDebugCollisionGeometry_ = true;
 

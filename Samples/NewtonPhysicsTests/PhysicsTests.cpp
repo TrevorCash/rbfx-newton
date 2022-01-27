@@ -162,7 +162,7 @@ void PhysicsTests::CreateScene()
     // Finally, create a DebugRenderer component so that we can draw physics debug geometry
     scene_->CreateComponent<Octree>();
     NewtonPhysicsWorld* newtonWorld = scene_->CreateComponent<NewtonPhysicsWorld>();
-    newtonWorld->SetGravity(Vector3(0, -9.81f, 0));
+    newtonWorld->SetGravity(Vector3(0, 0, 0));
     //newtonWorld->SetGravity(Vector3(0, 0, 0));
 	
     //scene_->CreateComponent<NewtonCollisionShape_SceneCollision>();
@@ -212,12 +212,12 @@ void PhysicsTests::CreateScene()
 	//cylinder->GetComponent<NewtonRigidBody>()->SetCenterOfMassLocalOffset(Vector3(5, 0, 0));
 
     //SpawnSamplePhysicsCylinder(scene_, Vector3(5, 2, 0), 0.25f,4);
-	SpawnSamplePhysicsBox(scene_, Vector3(5, 2, 0), Vector3(1,1,1));
+	//SpawnSamplePhysicsBox(scene_, Vector3(5, 5, 0), Vector3(1,1,1));
 
     //SpawnMaterialsTest(Vector3(0,-25,100));
 
 
-    //SpawnCompoundedRectTest2(Vector3(0, 2, 0));
+    SpawnCompoundedRectTest(Vector3(0, 2, 0));
 
     //SpawnBallSocketTest(Vector3(50, 10, 0));
     //SpawnHingeActuatorTest(Vector3(52, 10, 0));
@@ -319,26 +319,26 @@ void PhysicsTests::SubscribeToEvents()
 
 void PhysicsTests::MoveCamera(float timeStep)
 {
-    // Do not move if the UI has a focused element (the console)
-    if (GetSubsystem<UI>()->GetFocusElement())
-        return;
+	// Do not move if the UI has a focused element (the console)
+	if (GetSubsystem<UI>()->GetFocusElement())
+		return;
 
-    auto* input = GetSubsystem<Input>();
+	auto* input = GetSubsystem<Input>();
 
-    // Movement speed as world units per second
-    const float MOVE_SPEED = 20.0f;
-    // Mouse sensitivity as degrees per pixel
-    const float MOUSE_SENSITIVITY = 0.1f;
+	// Movement speed as world units per second
+	const float MOVE_SPEED = 20.0f;
+	// Mouse sensitivity as degrees per pixel
+	const float MOUSE_SENSITIVITY = 0.1f;
 
 
 
-    // Use this frame's mouse motion to adjust camera node yaw and pitch. Clamp the pitch between -90 and 90 degrees
-    IntVector2 mouseMove = input->GetMouseMove();
-    yaw_ += MOUSE_SENSITIVITY * mouseMove.x_;
-    pitch_ += MOUSE_SENSITIVITY * mouseMove.y_;
-    pitch_ = Clamp(pitch_, -90.0f, 90.0f);
+	// Use this frame's mouse motion to adjust camera node yaw and pitch. Clamp the pitch between -90 and 90 degrees
+	IntVector2 mouseMove = input->GetMouseMove();
+	yaw_ += MOUSE_SENSITIVITY * mouseMove.x_;
+	pitch_ += MOUSE_SENSITIVITY * mouseMove.y_;
+	pitch_ = Clamp(pitch_, -90.0f, 90.0f);
 
-    // Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
+	// Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
 
 	if (orbitGYM && gyms.size())
 	{
@@ -350,21 +350,22 @@ void PhysicsTests::MoveCamera(float timeStep)
 		cameraNode_->SetWorldPosition(curPos);
 
 		cameraNode_->Translate(Vector3(0, 0, 100.0*timeStep*(delta.Length() - 20.0f)));
-		
+
 	}
-	else if(!GetSubsystem<Input>()->IsMouseVisible())
+	else if (!GetSubsystem<Input>()->IsMouseVisible())
 	{
 		cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
 	}
 
 
-
-	float worldPitch = cameraNode_->GetWorldRotation().EulerAngles().x_;
-	float worldYaw = cameraNode_->GetWorldRotation().EulerAngles().y_;
-	Quaternion correctedWorldOrientation;
-	correctedWorldOrientation.FromEulerAngles(worldPitch, worldYaw, 0);
-	cameraNode_->SetWorldRotation(correctedWorldOrientation);
-
+	if (orbitGYM && gyms.size())
+	{
+		float worldPitch = cameraNode_->GetWorldRotation().EulerAngles().x_;
+		float worldYaw = cameraNode_->GetWorldRotation().EulerAngles().y_;
+		Quaternion correctedWorldOrientation;
+		correctedWorldOrientation.FromEulerAngles(worldPitch, worldYaw, 0);
+		cameraNode_->SetWorldRotation(correctedWorldOrientation);
+	}	
     float speedFactor = 1.0f;
     if (input->GetKeyDown(KEY_SHIFT) && !input->GetKeyDown(KEY_CTRL))
         speedFactor *= 0.25f;
@@ -1051,34 +1052,81 @@ void PhysicsTests::SpawnRandomObjects()
 
 void PhysicsTests::SpawnCompoundedRectTest(Vector3 worldPosition)
 {
-    //make 2 1x1x1 physics rectangles. 1 with just one shape and 1 with 2 smaller compounds.
-    Node* regularRect = SpawnSamplePhysicsBox(scene_, worldPosition + Vector3(-2, 0, 0), Vector3(1, 1, 2));
+    //make 2 1x1x1 physics boxes side by side in one rigid body with 1 collision shape rotated
 
-    Node* compoundRootRect = scene_->CreateChild();
+	{
+		Node* root1 = scene_->CreateChild();
+		root1->SetWorldPosition(worldPosition + Vector3(0, 0, 0));
+		root1->SetScale(Vector3(1, 1, 1));
 
-    Model* sphereMdl = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/Box.mdl");
-    Material* sphereMat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Stone.xml");
+		Model* sphereMdl = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/Box.mdl");
+		Material* sphereMat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Stone.xml");
 
-    Node* visualNode = compoundRootRect->CreateChild();
+		Node* visualNode = root1->CreateChild();
 
-    visualNode->SetPosition(Vector3(0, 0, 0.5));
-    visualNode->SetScale(Vector3(1, 1, 2));
-    StaticModel* sphere1StMdl = visualNode->CreateComponent<StaticModel>();
-    sphere1StMdl->SetCastShadows(true);
-    sphere1StMdl->SetModel(sphereMdl);
-    sphere1StMdl->SetMaterial(sphereMat);
-
-    compoundRootRect->SetWorldPosition(worldPosition + Vector3(2, 0, 0));
-    compoundRootRect->CreateComponent<NewtonRigidBody>();
-    NewtonCollisionShape_Box* box1 = compoundRootRect->CreateComponent<NewtonCollisionShape_Box>();
-	NewtonCollisionShape_Box* box2 = compoundRootRect->CreateComponent<NewtonCollisionShape_Box>();
-
-    //Test different collision parts having different physical properties:
-    box1->SetElasticity(1.0f);
-    box2->SetElasticity(0.0f);
+		visualNode->SetPosition(Vector3(0, 0, 0.5));
+		visualNode->SetScale(Vector3(1, 1, 2));
+		StaticModel* sphere1StMdl = visualNode->CreateComponent<StaticModel>();
+		sphere1StMdl->SetCastShadows(true);
+		sphere1StMdl->SetModel(sphereMdl);
+		sphere1StMdl->SetMaterial(sphereMat);
 
 
-    box1->SetPositionOffset(Vector3(0, 0, 1));
+		root1->CreateComponent<NewtonRigidBody>();
+		NewtonCollisionShape_Box* box1 = root1->CreateComponent<NewtonCollisionShape_Box>();
+		NewtonCollisionShape_Box* box2 = root1->CreateComponent<NewtonCollisionShape_Box>();
+
+		//Test different collision parts having different physical properties:
+		box1->SetElasticity(1.0f);
+		box2->SetElasticity(0.0f);
+
+		box2->SetRotationOffset(Quaternion(30, Vector3::RIGHT));
+
+		box1->SetPositionOffset(Vector3(0, 0, 1));
+	}
+
+	//make 2 1x1x1 physics boxes side by side in one rigid body with 1 shape rotated using child nodes
+	{
+		Node* root2 = scene_->CreateChild();
+		root2->SetWorldPosition(worldPosition + Vector3(2, 0, 0));
+		root2->SetScale(Vector3(1, 1, 1));
+
+		Node* box1Node = root2->CreateChild();
+		Node* box2Node = root2->CreateChild();
+		box2Node->SetPosition(Vector3(0, 0, -1));
+		box2Node->Rotate(Quaternion(30, Vector3(1, 0, 0)));
+		box2Node->SetScale(Vector3(1, 1, 1.5));
+		NewtonCollisionShape_Box* box1 = box1Node->CreateComponent<NewtonCollisionShape_Box>();
+		NewtonCollisionShape_Box* box2 = box2Node->CreateComponent<NewtonCollisionShape_Box>();
+
+
+		Model* mdl = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/Box.mdl");
+		Material* mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Stone.xml");
+
+		Node* visualNode1 = box1Node->CreateChild();
+		Node* visualNode2 = box2Node->CreateChild();
+
+
+		StaticModel* stmdl = visualNode1->CreateComponent<StaticModel>();
+		stmdl->SetCastShadows(true);
+		stmdl->SetModel(mdl);
+		stmdl->SetMaterial(mat);
+
+    	stmdl = visualNode2->CreateComponent<StaticModel>();
+		stmdl->SetCastShadows(true);
+		stmdl->SetModel(mdl);
+		stmdl->SetMaterial(mat);
+
+
+
+		root2->CreateComponent<NewtonRigidBody>();
+
+		//Test different collision parts having different physical properties:
+		box1->SetElasticity(1.0f);
+		box2->SetElasticity(0.0f);
+
+	}
+
 
 }
 
@@ -1087,7 +1135,7 @@ void PhysicsTests::SpawnCompoundedRectTest2(Vector3 worldPosition)
     //make 2 1x1x1 physics rectangles. 1 with just one shape and 1 with 2 smaller compounds.
 
    // Node* regularRect = SpawnSamplePhysicsBox(scene_, worldPosition + Vector3(-2, 0, 0), Vector3(1, 1, 2));
-    if(0){
+    if(1){
         Node* compoundRootRect = scene_->CreateChild();
         compoundRootRect->SetWorldPosition(worldPosition + Vector3(2, 0, 0));
         compoundRootRect->CreateComponent<NewtonRigidBody>();
@@ -1124,7 +1172,6 @@ void PhysicsTests::SpawnCompoundedRectTest2(Vector3 worldPosition)
 
         compoundRootRect->Rotate(Quaternion(90, Vector3(1, 1, 0)));
     }
-
 
 
     Node* outerNode = scene_->CreateChild();
@@ -1677,8 +1724,10 @@ if (drawDebug_) {
 	bool doFrSim = ui::Button("ForwardSim", ImVec2(100, 20));
 	bool openGYM = ui::Button("Connect to GYM Server", ImVec2(100, 20));
 	bool resetGYM = ui::Button("Reset", ImVec2(100, 20));
+	bool saveNewtonPressed = ui::Button("Save Newton Scene", ImVec2(100, 20));
 
 	bool orbitGYMPressed = ui::Checkbox("Orbit GYM", &orbitGYM);
+
 
 	ui::Text("NumGYMS: %d", context_->GetSubsystem<GymClient>()->numGYMS);
 	if (doFrSim)
@@ -1698,9 +1747,18 @@ if (drawDebug_) {
 	if (resetGYM)
 	{
 		context_->GetSubsystem<GymClient>()->resetPending = true;
+	}
+	if(saveNewtonPressed)
+	{
+		ndLoadSave loadScene;
 
+		ndWorld* newtonWorld = scene_->GetComponent<NewtonPhysicsWorld>()->GetNewtonWorld();
+		ndWordSettings setting;
+
+		loadScene.SaveScene("compoundTransforms", newtonWorld, &setting);
 
 	}
+
 
 	if (gyms.size())
 	{
@@ -1884,17 +1942,36 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
         // Create a floor object, 1000 x 1000 world units. Adjust position so that the ground is at zero Y
         Node* floorNode = scene_->CreateChild("Floor");
         floorNode->SetPosition(worldPosition - Vector3(0, 0.5f, 0));
-        floorNode->SetScale(Vector3(10000.0f, 1.0f, 10000.0f));
+        floorNode->SetScale(Vector3(100.0f, 1.0f, 100.0f));
         auto* floorObject = floorNode->CreateComponent<StaticModel>();
         floorObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
 		SharedPtr<Material> floorMat = cache->GetResource<Material>("Materials/Metal.xml")->Clone();
 
-		floorMat->SetUVTransform(Vector2(), 0, 1000);
+		floorMat->SetUVTransform(Vector2(), 0, 10);
 		floorMat->SetShaderParameter("MatDiffColor", Vector4(1.0, 1.0, 1.0, 0.1f));
         floorObject->SetMaterial(floorMat);
-
+		//floorNode->SetRotation(Quaternion(10, Vector3(1, 0, 0)));
 
         auto* shape = floorNode->CreateComponent<NewtonCollisionShape_Box>();
+
+		if(1){
+			Node* boxNode = floorNode->CreateChild("StaticBox");
+			boxNode->SetRotation(Quaternion(10, Vector3(1, 0, 0)));
+			boxNode->SetScale(Vector3(1, 1, 1));
+
+			boxNode->SetPosition(Vector3(0, 10, 0));
+			auto* boxShape = boxNode->CreateComponent<NewtonCollisionShape_Box>();
+
+			auto* boxObject = boxNode->CreateComponent<StaticModel>();
+			boxObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
+			SharedPtr<Material> boxMat = cache->GetResource<Material>("Materials/Metal.xml")->Clone();
+
+			boxMat->SetUVTransform(Vector2(), 0, 10);
+			boxMat->SetShaderParameter("MatDiffColor", Vector4(1.0, 1.0, 1.0, 0.1f));
+			boxObject->SetMaterial(boxMat);
+		}
+
+
 
     }
     else {

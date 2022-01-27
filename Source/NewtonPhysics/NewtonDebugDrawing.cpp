@@ -47,7 +47,8 @@ namespace Urho3D {
     {
 	    for(int v = 0; v < vertexCount; v++)
 	    {
-		    debugRenderer_->AddLine(NewtonToUrhoVec3(faceArray[v - 1]), NewtonToUrhoVec3(faceArray[v]), Color::RED);
+			if(v > 0)
+				options.debug->AddLine(NewtonToUrhoVec3(faceArray[v - 1]), NewtonToUrhoVec3(faceArray[v]), Color::RED, options.depthTest);
 	    }
     }
 

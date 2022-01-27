@@ -89,11 +89,6 @@ namespace Urho3D
         bool canCollide = true;
 
 
-
-
-
-
-
         //first check excpections because they have highest priority.
         bool exceptionsSpecified = false;
         if (noCollideOverride_)

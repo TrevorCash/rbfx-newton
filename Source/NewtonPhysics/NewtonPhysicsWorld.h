@@ -30,6 +30,7 @@
 
 
 
+
 namespace Urho3D
 {
     class Component;
@@ -77,6 +78,31 @@ namespace Urho3D
         unsigned bodyIntersectionCounter_ = M_MAX_UNSIGNED;
     };
 */
+
+
+	class NewtonWorldContactNotify : public ndContactNotify
+	{
+	public:
+		NewtonWorldContactNotify();
+
+		virtual ~NewtonWorldContactNotify();
+
+		virtual void OnBodyAdded(ndBodyKinematic* const) const;
+
+		virtual void OnBodyRemoved(ndBodyKinematic* const) const;
+
+		virtual ndMaterial GetMaterial(const ndContact* const contact, const ndShapeInstance& shape1,  ndShapeInstance& shape2) const;
+
+		virtual bool OnCompoundSubShapeOverlap(const ndContact* const contact, ndFloat32 timestep, const ndShapeInstance* const subShapeA, const ndShapeInstance* const subShapeB);
+
+		virtual bool OnAabbOverlap(const ndContact* const contact, ndFloat32 timestep);
+
+		virtual void OnContactCallback(ndInt32 threadIndex, const ndContact* const contact, ndFloat32 timestep);
+	};
+
+
+
+
 
     class URHONEWTON_API NewtonPhysicsWorld : public Component
     {
@@ -206,7 +232,7 @@ namespace Urho3D
 
 		float maxTimeStep_ = 1.0f / 60.0f;
 
-		float timeStepAvg_ = 0.0f;
+		float timeStep_ = 0.0f;
 
         virtual void OnSceneSet(Scene* scene) override;
 
@@ -243,7 +269,7 @@ namespace Urho3D
 
         void applyNewtonWorldSettings();
 
-
+		NewtonWorldContactNotify newtonContactNotify_;
 
         bool contactMapLocked_ = false;
 

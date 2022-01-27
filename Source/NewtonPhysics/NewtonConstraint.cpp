@@ -133,7 +133,7 @@ namespace Urho3D {
         debug->AddFrame(GetOtherWorldFrame(), axisLengths*scale, xAxisDark, yAxisDark, zAxisDark, depthTest);
 
 
-        //draw the special joint stuff given to us by newton
+        //draw the special joint stuff given by newton
         NewtonConstraintDebugCallback debugDisplay(debug, depthTest);
         debugDisplay.SetDrawScale(1.0f*scale);
         if (newtonConstraint_)

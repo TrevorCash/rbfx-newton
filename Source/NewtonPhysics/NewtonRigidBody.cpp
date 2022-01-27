@@ -56,7 +56,7 @@ namespace Urho3D {
 
 	void NewtonBodyNotifications::OnTransform(ndInt32 threadIndex, const ndMatrix& matrix)
 	{
-		rigidBodyComponent->MarkInternalTransformDirty();
+		rigidBodyComponent_->MarkInternalTransformDirty();
 	}
 
 	void NewtonBodyNotifications::Save(const ndLoadSaveBase::ndSaveDescriptor& desc) const
@@ -67,13 +67,18 @@ namespace Urho3D {
 	void NewtonBodyNotifications::OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep)
 	{
 		ndBodyDynamic* const dynamicBody = GetBody()->GetAsBodyDynamic();
-		if (dynamicBody)
-		{
-			ndVector massMatrix(dynamicBody->GetMassMatrix());
-			ndVector force(ndVector(0.0f, -9.81f, 0.0f, 1.0f).Scale(massMatrix.m_w));
-			dynamicBody->SetForce(force);
-			dynamicBody->SetTorque(ndVector(0,0,0,1));
-		}
+
+		Vector3 netForce = Vector3::ZERO;
+		Vector3 netTorque = Vector3::ZERO;
+
+		rigidBodyComponent_->GetForceAndTorque(netForce, netTorque);
+
+
+		Vector3 gravityForce = newtonPhysicsWorld_->GetGravity() * rigidBodyComponent_->GetEffectiveMass();
+		netForce += gravityForce;
+
+		dynamicBody->SetForce(UrhoToNewton(netForce));
+		dynamicBody->SetTorque(UrhoToNewton(netTorque));
 	}
 
 
@@ -353,8 +358,7 @@ namespace Urho3D {
                 
 				Vector3 worldPos = GetWorldPosition();
 
-				//#TODO check timeStep
-				newtonBody_->GetAsBodyDynamic()->ApplyImpulsePair(worldVel,ndVector(), physicsWorld_->timeStepAvg_*GetScene()->GetTimeScale());
+				newtonBody_->GetAsBodyDynamic()->ApplyImpulsePair(worldVel,ndVector(0,0,0,0), physicsWorld_->timeStep_*GetScene()->GetTimeScale());
 			
 			}
 			else {
@@ -645,23 +649,10 @@ namespace Urho3D {
 	    }
 
 
-	    for (NewtonCollisionShape* colShapeComp : GetCollisionShapes())
-	    {
-		    if (!colShapeComp->GetDrawNewtonDebugGeometry())
-			    continue;
+		NewtonShapeDebugNotify tmpNotify;
+		tmpNotify.options = options;
 
-		    ndMatrix matrix = newtonBody_->GetMatrix();
-
-		    Matrix3x4 mat = Matrix3x4(NewtonToUrhoMat4(matrix));
-		    mat = colShapeComp->GetWorldTransform();
-
-
-		    matrix = UrhoToNewton(mat);
-
-
-			colShapeComp->newtonShapeDebugNotify_.debugRenderer_ = options.debug;
-	    	colShapeComp->GetNewtonShape().DebugShape(matrix, colShapeComp->newtonShapeDebugNotify_);
-	    }
+		newtonBody_->GetAsBodyKinematic()->GetCollisionShape().DebugShape(newtonBody_->GetMatrix(), tmpNotify);
     }
 
 
@@ -729,6 +720,7 @@ namespace Urho3D {
     void NewtonRigidBody::freeBody()
     {
         if (newtonBody_ != nullptr) {
+			physicsWorld_->GetNewtonWorld()->RemoveBody(newtonBody_);
             physicsWorld_->addToFreeQueue(newtonBody_);
             newtonBody_ = nullptr;
         }
@@ -800,22 +792,80 @@ namespace Urho3D {
 		}
 
 		newtonNotifications_ = new NewtonBodyNotifications();
-		newtonNotifications_->rigidBodyComponent = this;
+		newtonNotifications_->rigidBodyComponent_ = this;
+		newtonNotifications_->newtonPhysicsWorld_ = physicsWorld_;
 
-		physicsWorld_->GetNewtonWorld()->AddBody(newtonBody_);
+		for (int densityPass = 1; densityPass >= 0; densityPass--)
+		{
 
-
-
-		effectiveCollision_.SetShape(new ndShapeBox(1,1,1));
-		mass_ = 1.0f;
-		if (GetIsSceneRootBody())
-			mass_ = 0.0f;
+			effectiveCollision_ = new ndShapeCompound();
 
 
-		newtonBody_->GetAsBodyKinematic()->SetCollisionShape(effectiveCollision_);
-		newtonBody_->GetAsBodyDynamic()->SetMassMatrix(mass_, effectiveCollision_);
+
+			effectiveCollision_.GetShape()->GetAsShapeCompound()->BeginAddRemove();
+			float totalVolume = 0.0f;
+			float totalMass = 0.0f;
+
+			for (NewtonCollisionShape* colComp : enabledCollisionShapes)
+			{
+
+				//collect all subShapes in the colComp (normally 1, but may be more if the colComp is itself a compound).
+				ea::vector<ndShapeInstance> subShapes;
+				ndShapeCompound* shapeAsCompound = colComp->GetNewtonShape().GetShape()->GetAsShapeCompound();
+				if (shapeAsCompound)
+				{
+					shapeAsCompound->BeginAddRemove();
+					ndShapeCompound::ndTreeArray::Iterator it(shapeAsCompound->GetTree());
+					for (it.Begin(); it; it++)
+					{
+						subShapes.push_back(*it.GetNode()->GetInfo()->GetShape());
+					}
+					shapeAsCompound->EndAddRemove();
+				}
+				else
+				{
+					ndShapeInstance shape = colComp->GetNewtonShape();
 
 
+					Matrix3x4 colCompNodeToBodyNode = (node_->GetWorldTransform().Inverse() * colComp->GetNode()->GetWorldTransform());
+					Matrix3x4 localMatrix = colCompNodeToBodyNode * colComp->GetOffsetMatrix();
+					Matrix3x4 localMatrixPosRot = Matrix3x4(localMatrix.Translation(), localMatrix.Rotation(), 1.0f);
+
+
+					Matrix3x4 densityScaleMat = Matrix3x4::IDENTITY;
+
+					if (densityPass)
+						densityScaleMat = Matrix3x4::FromScale(colComp->GetDensity());
+
+					shape.SetLocalMatrix(UrhoToNewton(localMatrix*densityScaleMat));
+
+
+					subShapes.push_back(shape);
+				}
+
+
+				for (ndShapeInstance subShape : subShapes)
+				{
+					totalVolume += subShape.GetVolume();
+					totalMass += subShape.GetVolume()*colComp->GetDensity();
+
+					effectiveCollision_.GetShape()->GetAsShapeCompound()->AddCollision(&subShape);
+				}
+			}
+
+			effectiveCollision_.GetShape()->GetAsShapeCompound()->EndAddRemove();
+
+			mass_ = totalMass;
+			if (GetIsSceneRootBody())
+				mass_ = 0.0f;
+
+
+
+			newtonBody_->GetAsBodyKinematic()->SetCollisionShape(effectiveCollision_);
+			newtonBody_->GetAsBodyDynamic()->SetMassMatrix(mass_, effectiveCollision_);
+
+			finalCenterOfMass = newtonBody_->GetAsBodyDynamic()->GetCentreOfMass();
+		}
 
 		//if we are building the scene body - set the COM to (0,0,0)
 		if (GetIsSceneRootBody()) {
@@ -835,25 +885,24 @@ namespace Urho3D {
 		centerOfMassEffective_ = NewtonToUrhoVec3(finalCenterOfMass);
 
 
-		//newtonBody_->SetCentreOfMass(UrhoToNewton(centerOfMassEffective_));
-
-		//if (effectiveCollision_.GetShape() != nullptr)
-		//	newtonBody_->GetAsBodyKinematic()->GetCollisionShape().SetCollisionMode(continuousCollision_);
+		newtonBody_->SetCentreOfMass(UrhoToNewton(centerOfMassEffective_));
 
 
         //ensure newton damping is 0 because we apply our own as a force.
-		//newtonBody_->GetAsBodyDynamic()->SetLinearDamping(linearDampeningInternal_);
+		newtonBody_->GetAsBodyDynamic()->SetLinearDamping(linearDampeningInternal_);
 
-		//newtonBody_->GetAsBodyDynamic()->SetAngularDamping(UrhoToNewton(angularDampeningInternal_));
+		newtonBody_->GetAsBodyDynamic()->SetAngularDamping(UrhoToNewton(angularDampeningInternal_));
 
         //set auto sleep mode.
-		//newtonBody_->GetAsBodyDynamic()->SetAutoSleep(autoSleep_);
+		newtonBody_->GetAsBodyDynamic()->SetAutoSleep(autoSleep_);
 
+		
 
-        //assign callback
+        //assign callbacks
 		newtonBody_->SetNotifyCallback(newtonNotifications_);
 
 
+		physicsWorld_->GetNewtonWorld()->AddBody(newtonBody_);
 
 
         // move the body.
@@ -861,8 +910,9 @@ namespace Urho3D {
         lastSetNodeWorldTransform_ = node_->GetWorldTransform();
 
 
-
+		
 		if (mass_ > 0.0f) {
+			//restore velocity
 			SetLinearVelocityHard(oldLinearVelocity);
 			SetAngularVelocity(oldAngularVelocity);
 		}
@@ -1122,7 +1172,7 @@ namespace Urho3D {
 
         if (newtonBody_) {
             Activate();
-			newtonBody_->GetAsBodyDynamic()->AddImpulse(UrhoToNewton((targetVelocity)), UrhoToNewton(node_->LocalToWorld(localPosition)), physicsWorld_->timeStepAvg_);
+			newtonBody_->GetAsBodyDynamic()->AddImpulse(UrhoToNewton((targetVelocity)), UrhoToNewton(node_->LocalToWorld(localPosition)), physicsWorld_->timeStep_);
         }
         else
         {

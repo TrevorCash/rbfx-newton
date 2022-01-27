@@ -110,7 +110,7 @@ namespace Urho3D {
 
     void NewtonKinematicsControllerConstraint::buildConstraint()
     {
-       // newtonConstraint_ = new ndJointKinematicController(GetOwnNewtonBodyBuild(), UrhoToNewton(GetOwnBuildWorldFrame()));
+        newtonConstraint_ = new ndJointKinematicController(GetOtherNewtonBodyBuild()->GetAsBodyKinematic(), GetOwnNewtonBodyBuild()->GetAsBodyKinematic(), UrhoToNewton(GetOwnBuildWorldFrame()));
         
 		
 		

@@ -538,7 +538,9 @@ namespace Urho3D
 		virtual void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep);
 
 
-		NewtonRigidBody* rigidBodyComponent;
+		NewtonRigidBody* rigidBodyComponent_ = nullptr;
+		Scene* scene_ = nullptr;
+		NewtonPhysicsWorld* newtonPhysicsWorld_ = nullptr;
 	};
 
 	inline bool RigidBodySceneDepthCompare(const WeakPtr<NewtonRigidBody>& body1, const WeakPtr<NewtonRigidBody>& body2) {

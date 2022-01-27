@@ -70,6 +70,42 @@ namespace Urho3D {
 
     static const Vector3 DEFAULT_GRAVITY = Vector3(0.0f, -9.81f, 0.0f);
 
+    NewtonWorldContactNotify::NewtonWorldContactNotify(): ndContactNotify()
+    {
+    }
+
+    NewtonWorldContactNotify::~NewtonWorldContactNotify()
+    {
+    }
+
+    void NewtonWorldContactNotify::OnBodyAdded(ndBodyKinematic* const ndBodyKinematic) const
+    {
+    }
+
+    void NewtonWorldContactNotify::OnBodyRemoved(ndBodyKinematic* const ndBodyKinematic) const
+    {
+    }
+
+    ndMaterial NewtonWorldContactNotify::GetMaterial(const ndContact* const contact, const ndShapeInstance& shape1, ndShapeInstance& shape2) const
+    {
+	    return ndMaterial();
+    }
+
+    bool NewtonWorldContactNotify::OnCompoundSubShapeOverlap(const ndContact* const contact, ndFloat32 timestep, const ndShapeInstance* const subShapeA, const ndShapeInstance* const subShapeB)
+    {
+	    return true;
+    }
+
+    bool NewtonWorldContactNotify::OnAabbOverlap(const ndContact* const contact, ndFloat32 timestep)
+    {
+	    return true;
+    }
+
+    void NewtonWorldContactNotify::OnContactCallback(ndInt32 threadIndex, const ndContact* const contact, ndFloat32 timestep)
+    {
+
+    }
+
     NewtonPhysicsWorld::NewtonPhysicsWorld(Context* context) : Component(context)
     {
 #ifdef URHO3D_STATIC
@@ -225,6 +261,9 @@ namespace Urho3D {
                 }
 
 
+				newtonWorld_->SetContactNotify(&newtonContactNotify_);
+				
+
                 //NewtonMaterialSetCollisionCallback(newtonWorld_, 0, 0, Newton_AABBOverlapCallback, Newton_ProcessContactsCallback);
                 //NewtonMaterialSetCompoundCollisionCallback(newtonWorld_, 0, 0, Newton_AABBCompoundOverlapCallback);
                 //NewtonSetPostUpdateCallback(newtonWorld_, Newton_PostUpdateCallback);
@@ -350,18 +389,8 @@ namespace Urho3D {
 
     void NewtonPhysicsWorld::HandleSceneUpdate(StringHash eventType, VariantMap& eventData)
     {
-
-
-       float timeStep = eventData[SceneSubsystemUpdate::P_TIMESTEP].GetFloat();
-
-	   timeStepAvg_ += (timeStep - timeStepAvg_)*0.5f;
-
-		//do the update.
-	   timeStepAvg_ = Clamp(timeStep, 0.0f, 1.0f / 60.0f);
-
-	   Update(timeStepAvg_, true);
-		
-	   
+    	timeStep_ = eventData[SceneSubsystemUpdate::P_TIMESTEP].GetFloat();
+    	Update(timeStep_, true);
     }
 
 
@@ -590,7 +619,6 @@ namespace Urho3D {
 
         for (ndShapeInstance* shape : freeShapeQueue_)
         {
-
 			delete shape;
         }
         freeShapeQueue_.clear();
@@ -598,7 +626,6 @@ namespace Urho3D {
 
         for (ndBody* body : freeBodyQueue_)
         {
-			newtonWorld_->RemoveBody(body);
 			delete body;
         }
         freeBodyQueue_.clear();
