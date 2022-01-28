@@ -217,7 +217,7 @@ void PhysicsTests::CreateScene()
     //SpawnMaterialsTest(Vector3(0,-25,100));
 
 
-    SpawnCompoundedRectTest(Vector3(0, 2, 0));
+    //SpawnCompoundedRectTest(Vector3(0, 2, 0));
 
     //SpawnBallSocketTest(Vector3(50, 10, 0));
     //SpawnHingeActuatorTest(Vector3(52, 10, 0));

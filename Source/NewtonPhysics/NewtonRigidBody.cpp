@@ -832,13 +832,13 @@ namespace Urho3D {
 					Matrix3x4 localMatrixPosRot = Matrix3x4(localMatrix.Translation(), localMatrix.Rotation(), 1.0f);
 
 
-					Matrix3x4 densityScaleMat = Matrix3x4::IDENTITY;
+					float densityScaleMat = 1.0f;
 
 					if (densityPass)
-						densityScaleMat = Matrix3x4::FromScale(colComp->GetDensity());
+						densityScaleMat = colComp->GetDensity();
 
-					shape.SetLocalMatrix(UrhoToNewton(localMatrix*densityScaleMat));
-
+					shape.SetLocalMatrix(UrhoToNewton(localMatrixPosRot));//sheer not working.
+					shape.SetScale(UrhoToNewton(colComp->GetNode()->GetWorldScale() * densityScaleMat));
 
 					subShapes.push_back(shape);
 				}
