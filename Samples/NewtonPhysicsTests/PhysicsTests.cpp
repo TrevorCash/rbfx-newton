@@ -230,7 +230,7 @@ void PhysicsTests::CreateScene()
 
 	//SpawnATRT(Vector3(5, 5, 0));
 
-	//ResetGYMs();	
+	ResetGYMs();	
 
 	//SpawnSegway(Vector3(0,5,0));
 
@@ -1954,7 +1954,7 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
 
         auto* shape = floorNode->CreateComponent<NewtonCollisionShape_Box>();
 
-		if(1){
+		if(0){
 			Node* boxNode = floorNode->CreateChild("StaticBox");
 			boxNode->SetRotation(Quaternion(10, Vector3(1, 0, 0)));
 			boxNode->SetScale(Vector3(1, 1, 1));

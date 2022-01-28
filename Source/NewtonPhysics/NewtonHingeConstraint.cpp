@@ -307,6 +307,10 @@ namespace Urho3D {
         //   newtonConstraint_ = new ndJointHinge(UrhoToNewton(GetOwnBuildWorldFrame()), UrhoToNewton(GetOtherBuildWorldFrame()),
 		//		GetOwnNewtonBodyBuild()->GetAsBodyKinematic(),
 		//		GetOtherNewtonBodyBuild()->GetAsBodyKinematic());
+
+			newtonConstraint_ = new ndJointHinge(UrhoToNewton(GetOwnBuildWorldFrame()),
+				UrhoToNewton(GetOtherBuildWorldFrame()),
+				GetOwnNewtonBodyBuild()->GetAsBodyKinematic(), GetOtherNewtonBodyBuild()->GetAsBodyKinematic());
         }
 
 

@@ -526,6 +526,8 @@ namespace Urho3D {
 						//URHO3D_LOGINFO("building constraint " + ea::to_string((int)(void*)this));
 
 						buildConstraint();
+						if(newtonConstraint_ != nullptr)
+							physicsWorld_->GetNewtonWorld()->AddJoint(newtonConstraint_->GetAsBilateral());
 					}
 				}
 				
@@ -634,8 +636,8 @@ namespace Urho3D {
 
     void NewtonConstraint::freeInternal()
     {
-
         if (newtonConstraint_ != nullptr) {
+			physicsWorld_->GetNewtonWorld()->RemoveJoint(newtonConstraint_->GetAsBilateral());
             physicsWorld_->addToFreeQueue(newtonConstraint_);
             newtonConstraint_ = nullptr;
         }

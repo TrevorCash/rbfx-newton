@@ -801,7 +801,6 @@ namespace Urho3D {
 			effectiveCollision_ = new ndShapeCompound();
 
 
-
 			effectiveCollision_.GetShape()->GetAsShapeCompound()->BeginAddRemove();
 			float totalVolume = 0.0f;
 			float totalMass = 0.0f;
@@ -832,13 +831,15 @@ namespace Urho3D {
 					Matrix3x4 localMatrixPosRot = Matrix3x4(localMatrix.Translation(), localMatrix.Rotation(), 1.0f);
 
 
-					float densityScaleMat = 1.0f;
+					float densityScale = 1.0f;
 
 					if (densityPass)
-						densityScaleMat = colComp->GetDensity();
+						densityScale = colComp->GetDensity();
 
-					shape.SetLocalMatrix(UrhoToNewton(localMatrixPosRot));//sheer not working.
-					shape.SetScale(UrhoToNewton(colComp->GetNode()->GetWorldScale() * densityScaleMat));
+
+					shape.SetLocalMatrix(UrhoToNewton(localMatrixPosRot));//no sheer for newton..
+					shape.SetScale(UrhoToNewton(colComp->GetNode()->GetScale() * colComp->GetScaleFactor() * densityScale));
+
 
 					subShapes.push_back(shape);
 				}
