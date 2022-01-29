@@ -331,8 +331,7 @@ namespace Urho3D {
         }
         else if(powerMode_ == NO_POWER)
         {
-            //static_cast<ndJointHinge*>(newtonConstraint_)->EnableLimits(enableLimits_);
-            //static_cast<ndJointHinge*>(newtonConstraint_)->SetLimits(minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad);
+			static_cast<ndJointHinge*>(newtonConstraint_)->EnableLimits(enableLimits_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad);
             static_cast<ndJointHinge*>(newtonConstraint_)->SetFriction((frictionTorque_));
             //static_cast<ndJointHinge*>(newtonConstraint_)->SetAsSpringDamper(enableSpringDamper_,  springSpringCoef_, springDamperCoef_);
         }

@@ -66,13 +66,11 @@ public:
 		hinge->SetOtherBody(bodyNode->GetComponent<NewtonRigidBody>());
 		hinge->SetWorldPosition(Vector3::ZERO + Vector3(1.2, 0.8, 0));
 		hinge->SetWorldRotation(Quaternion(0, 0, -90 + 20));
+	//	hinge->SetEnableLimits(true);
+	//	hinge->SetMaxAngle(30);
+	//	hinge->SetMinAngle(-30);
 		//hinge->SetSolveMode(SOLVE_MODE_EXACT);
 
-		NewtonHingeConstraint* hingelimits = E->CreateComponent<NewtonHingeConstraint>();
-		hingelimits->SetOtherBody(bodyNode->GetComponent<NewtonRigidBody>());
-		hingelimits->SetWorldPosition(Vector3::ZERO + Vector3(1.2, 0.8, 0));
-		hingelimits->SetWorldRotation(Quaternion(0, 0, -90 + 20));
-		//hingelimits->SetSolveMode(SOLVE_MODE_EXACT);
 
 
 		Node* F = SpawnSamplePhysicsBox(rootNode, Vector3::ZERO + Vector3(1.5, 0, 0), Vector3(0.2, 2.5, 0.5));

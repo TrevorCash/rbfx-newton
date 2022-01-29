@@ -637,7 +637,7 @@ namespace Urho3D {
     void NewtonConstraint::freeInternal()
     {
         if (newtonConstraint_ != nullptr) {
-			physicsWorld_->GetNewtonWorld()->RemoveJoint(newtonConstraint_->GetAsBilateral());
+			
             physicsWorld_->addToFreeQueue(newtonConstraint_);
             newtonConstraint_ = nullptr;
         }
@@ -648,8 +648,28 @@ namespace Urho3D {
     void NewtonConstraint::AddJointReferenceToBody(NewtonRigidBody* rigBody)
     {
 
-        if (!rigBody->connectedConstraints_.contains(WeakPtr<NewtonConstraint>(this)))
-            rigBody->connectedConstraints_.insert(WeakPtr<NewtonConstraint>(this));
+		if (!rigBody->connectedConstraints_.contains(WeakPtr<NewtonConstraint>(this)))
+		{
+			ea::vector<NewtonRigidBody*> connectedBodies;
+			rigBody->GetConnectedBodies(connectedBodies);
+
+			NewtonRigidBody* pairedBody = nullptr;
+			if (GetOwnBody() == rigBody)
+				pairedBody = GetOtherBody();
+			if (GetOtherBody() == rigBody)
+				pairedBody = GetOwnBody();
+
+			//see if rigBody already is connected to the pairedBody.  if so raise warning/error
+			if(connectedBodies.contains(pairedBody))
+			{
+				URHO3D_LOGERROR("MULTIPLE CONTRAINTS CONNECTING 2 BODIES");
+				URHO3D_ASSERT(0);
+			}
+
+			rigBody->connectedConstraints_.insert(WeakPtr<NewtonConstraint>(this));
+		}
+
+
 
     }
 

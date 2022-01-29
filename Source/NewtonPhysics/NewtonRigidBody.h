@@ -308,6 +308,7 @@ namespace Urho3D
 
         /// Get Immediately connected contraints to this rigid body.
         void GetConnectedContraints(ea::vector<NewtonConstraint*>& contraints);
+		void GetConnectedBodies(ea::vector<NewtonRigidBody*>& bodies);
 		ea::vector<NewtonConstraint*> GetConnectedContraints();
 
 		ea::vector<NewtonCollisionShape*> GetCollisionShapes() const { return collisionShapes_; }

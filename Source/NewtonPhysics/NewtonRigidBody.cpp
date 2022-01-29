@@ -1292,6 +1292,18 @@ namespace Urho3D {
             contraints.push_back(*i);
         }
     }
+	void NewtonRigidBody::GetConnectedBodies(ea::vector<NewtonRigidBody*>& bodies)
+	{
+		bodies.clear();
+		for (auto i = connectedConstraints_.begin(); i != connectedConstraints_.end(); ++i)
+		{
+			if((*i)->GetOwnBody() != this)
+				bodies.push_back((*i)->GetOwnBody());
+
+			if ((*i)->GetOtherBody() != this)
+				bodies.push_back((*i)->GetOtherBody());
+		}
+	}
 
 	ea::vector<NewtonConstraint*> NewtonRigidBody::GetConnectedContraints()
     {

@@ -162,7 +162,7 @@ void PhysicsTests::CreateScene()
     // Finally, create a DebugRenderer component so that we can draw physics debug geometry
     scene_->CreateComponent<Octree>();
     NewtonPhysicsWorld* newtonWorld = scene_->CreateComponent<NewtonPhysicsWorld>();
-    newtonWorld->SetGravity(Vector3(0, 0, 0));
+    newtonWorld->SetGravity(Vector3(0, -9.81f, 0));
     //newtonWorld->SetGravity(Vector3(0, 0, 0));
 	
     //scene_->CreateComponent<NewtonCollisionShape_SceneCollision>();
@@ -235,7 +235,6 @@ void PhysicsTests::CreateScene()
 	//SpawnSegway(Vector3(0,5,0));
 
 
-    //SpawnTrialBike(Vector3(-5, 5, 0), Quaternion(90, Vector3(0, 1, 0)) * tilt, false);
 
     //SpawnKinematicBodyTest(Vector3(0, 0, 0), Quaternion::IDENTITY);
 
@@ -263,9 +262,6 @@ void PhysicsTests::CreateScene()
     //CreateTowerOfLiar(Vector3(40, 0, 20));
 
 	//SpawnCollisionOffsetTest(Vector3(0, 0, 0));
-
-
-
 }
 void PhysicsTests::CreateUI()
 {
@@ -862,13 +858,10 @@ void PhysicsTests::SpawnLinearJointedObject(float size, Vector3 worldPosition)
 		nodes.push_back(SpawnSamplePhysicsSphere(scene_, worldPosition + Vector3(0, i*dist, 0), dist*0.5f));
 
         if (i > 0) {
-            NewtonHingeConstraint* constraint = nodes[i - 1]->CreateComponent<NewtonHingeConstraint>();
-			//constraint->SetSolveMode(SOLVE_MODE_EXACT);
+            NewtonFixedDistanceConstraint* constraint = nodes[i - 1]->CreateComponent<NewtonFixedDistanceConstraint>();
             constraint->SetOtherBody(nodes[i]->GetComponent<NewtonRigidBody>());
             constraint->SetWorldPosition(worldPosition + Vector3(0, i*dist, 0) - Vector3(0, dist, 0)*0.5f);
-            //constraint->SetOwnRotation(Quaternion(0, 0, -90));
-           // constraint->SetOtherRotation(Quaternion(0,0,-90));
-           // constraint->SetTwistLimitsEnabled(true);
+
 			
             
         }
@@ -1005,7 +998,7 @@ void PhysicsTests::SpawnSliderTest(Vector3 worldPosition)
 
 
 
-    constraint->SetEnableSliderSpringDamper(true);
+    //constraint->SetEnableSliderSpringDamper(true);
     //constraint->SetEnableTwistSpringDamper(true);
 
 }
@@ -1243,122 +1236,6 @@ void PhysicsTests::SpawnHingeSpringTest(const Vector3 worldPosition, const Quate
     baseNode->SetWorldPosition(worldPosition);
     //baseNode->SetWorldRotation(worldOrientation);
 
-}
-
-
-void PhysicsTests::SpawnTrialBike(Vector3 worldPosition, Quaternion orientation, bool enableGyroOnWheels)
-{
-    Node* root = scene_->CreateChild("TrialBike");
-	root->AddTag("TrialBike");
-
-    //A (Engine Body)
-    Node* A = SpawnSamplePhysicsBox(root, Vector3::ZERO, Vector3(1, 1, 0.5f));
-
-    Node* B = SpawnSamplePhysicsBox(A, Vector3::ZERO + Vector3(-1,0.7,0), Vector3(2, 0.3, 0.5));
-    B->RemoveComponent<NewtonRigidBody>();
-    B->SetWorldRotation(Quaternion(0, 0, -30));
-
-    Node* C = SpawnSamplePhysicsBox(root, Vector3::ZERO + Vector3(-1, -0.5, 0), Vector3(2, 0.3, 0.5));
-    C->SetWorldRotation(Quaternion(0, 0, 0));
-
-    C->GetComponent<NewtonRigidBody>()->SetCollisionOverride(A->GetComponent<NewtonRigidBody>(), false);
-
-    //make back spring.
-    NewtonHingeConstraint* hingeConstraint = A->CreateComponent<NewtonHingeConstraint>();
-    hingeConstraint->SetOtherBody(C->GetComponent<NewtonRigidBody>());
-    hingeConstraint->SetNoPowerSpringDamper(true);
-    hingeConstraint->SetNoPowerSpringCoefficient(1000.0f);
-    hingeConstraint->SetWorldRotation(Quaternion(90, 0, 90));
-    hingeConstraint->SetWorldPosition(A->GetWorldPosition() + Vector3(0,-0.5,0));
-
-
-
-    Node* D = SpawnSamplePhysicsBox(A, Vector3::ZERO + Vector3(0.7,0.5,0), Vector3(1,0.5,0.5));
-    D->RemoveComponent<NewtonRigidBody>();
-    D->SetWorldRotation(Quaternion(0, 0, 45));
-
-
-    Node* E = SpawnSamplePhysicsBox(root, Vector3::ZERO + Vector3(1.5, 0, 0), Vector3(0.2, 2.5, 0.5));
-    E->GetComponent<NewtonRigidBody>()->SetCollisionOverride(A->GetComponent<NewtonRigidBody>(), false);
-    E->SetWorldRotation(Quaternion(0, 0, 20));
-
-
-    NewtonHingeConstraint* hinge = E->CreateComponent<NewtonHingeConstraint>();
-	hinge->SetPowerMode(NewtonHingeConstraint::MOTOR_TORQUE);
-    hinge->SetOtherBody(A->GetComponent<NewtonRigidBody>());
-    hinge->SetWorldPosition(Vector3::ZERO + Vector3(1.2, 0.8, 0));
-    hinge->SetWorldRotation(Quaternion(0,0,-90 + 20));
-
-	NewtonHingeConstraint* hingelimits = E->CreateComponent<NewtonHingeConstraint>();
-	hingelimits->SetOtherBody(A->GetComponent<NewtonRigidBody>());
-	hingelimits->SetWorldPosition(Vector3::ZERO + Vector3(1.2, 0.8, 0));
-	hingelimits->SetWorldRotation(Quaternion(0, 0, -90 + 20));
-
-
-
-    Node* F = SpawnSamplePhysicsBox(root, Vector3::ZERO + Vector3(1.5, 0, 0), Vector3(0.2, 2.5, 0.5));
-    F->SetWorldRotation(Quaternion(0, 0, 20));
-    F->GetComponent<NewtonRigidBody>()->SetCollisionOverride(E->GetComponent<NewtonRigidBody>(), false);
-    F->GetComponent<NewtonRigidBody>()->SetCollisionOverride(A->GetComponent<NewtonRigidBody>(), false);
-
-    NewtonSliderConstraint* frontSuspension = F->CreateComponent<NewtonSliderConstraint>();
-    frontSuspension->SetOtherBody(E->GetComponent<NewtonRigidBody>());
-    frontSuspension->SetWorldRotation(F->GetWorldRotation() * Quaternion(0,0,90));
-    frontSuspension->SetEnableSliderSpringDamper(true);
-    frontSuspension->SetSliderSpringCoefficient(1000.0f);
-    frontSuspension->SetSliderDamperCoefficient(50.0f);
-    frontSuspension->SetEnableTwistLimits(true, true);
-    frontSuspension->SetTwistLimits(0, 0);
-    frontSuspension->SetEnableSliderLimits(true, true);
-    frontSuspension->SetSliderLimits(-0.5, 0.5);
-
-
-
-    float wheelFriction = 2.0f;
-
-    //backwheel
-    Vector3 backWheelOffset = Vector3(-2.0, -0.5, 0);
-    Node* backWheel = SpawnSamplePhysicsChamferCylinder(root, Vector3::ZERO + backWheelOffset, 0.8f,0.2f);
-    backWheel->SetWorldRotation(Quaternion(90,0,0));
-    backWheel->GetComponent<NewtonRigidBody>()->SetCollisionOverride(C->GetComponent<NewtonRigidBody>(), false);
-    //backWheel->GetComponent<NewtonRigidBody>()->SetUseGyroscopicTorque(enableGyroOnWheels);
-    backWheel->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(wheelFriction);
-
-
-    NewtonHingeConstraint* motor = backWheel->CreateComponent<NewtonHingeConstraint>();
-    motor->SetPowerMode(NewtonHingeConstraint::MOTOR_SPEED);
-    motor->SetOtherBody(C->GetComponent<NewtonRigidBody>());
-    motor->SetWorldPosition(Vector3::ZERO + backWheelOffset);
-    motor->SetWorldRotation(Quaternion(0, 90, 0));
-    //motor->SetMotorTargetAngularRate(10);
-    motor->SetMaxTorque(motor->GetMaxTorque()*0.00125f);
-
-
-
-
-
-    Vector3 frontWheelOffset = Vector3(1.8, -1, 0);
-    Node* frontWheel = SpawnSamplePhysicsChamferCylinder(root, Vector3::ZERO + frontWheelOffset, 0.8f, 0.2f);
-    frontWheel->SetWorldRotation(Quaternion(90, 0, 0));
-    frontWheel->GetComponent<NewtonRigidBody>()->SetCollisionOverride(E->GetComponent<NewtonRigidBody>(), false);
-    frontWheel->GetComponent<NewtonRigidBody>()->SetCollisionOverride(F->GetComponent<NewtonRigidBody>(), false);
-    //frontWheel->GetComponent<NewtonRigidBody>()->SetUseGyroscopicTorque(enableGyroOnWheels);
-    frontWheel->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(wheelFriction);
-
-
-    NewtonHingeConstraint* frontAxle = frontWheel->CreateComponent<NewtonHingeConstraint>();
-    //frontAxle->SetPowerMode(NewtonHingeConstraint::MOTOR_TORQUE);
-    frontAxle->SetOtherBody(F->GetComponent<NewtonRigidBody>());
-    frontAxle->SetWorldPosition(Vector3::ZERO + frontWheelOffset);
-    frontAxle->SetWorldRotation(Quaternion(0, 90, 0));
-    frontAxle->SetEnableLimits(false);
-    //frontAxle->SetMotorTargetAngularRate(10);
-
-
-
-
-    root->SetWorldPosition(worldPosition);
-	root->SetWorldRotation(orientation);
 }
 
 

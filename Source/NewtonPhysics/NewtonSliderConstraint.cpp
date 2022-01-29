@@ -359,7 +359,9 @@ namespace Urho3D
 
     void Urho3D::NewtonSliderConstraint::buildConstraint()
     {
- //       newtonConstraint_ = new ndJointSlider(UrhoToNewton(GetOwnBuildWorldFrame()), UrhoToNewton(GetOtherBuildWorldFrame()), GetOwnNewtonBodyBuild(), GetOtherNewtonBodyBuild());
+        newtonConstraint_ = new ndJointSlider(UrhoToNewton(GetOwnBuildWorldFrame()),
+			GetOwnNewtonBodyBuild()->GetAsBodyKinematic(), 
+			GetOtherNewtonBodyBuild()->GetAsBodyKinematic());
     }
 
     bool Urho3D::NewtonSliderConstraint::applyAllJointParams()
@@ -396,7 +398,7 @@ namespace Urho3D
         if (enableUpperSliderLimit_)
             upperSlideLimit = sliderLimits_.y_;
 
-//        static_cast<ndJointSlider*>(newtonConstraint_)->SetLimits(lowerSlideLimit, upperSlideLimit);
+        static_cast<ndJointSlider*>(newtonConstraint_)->EnableLimits(enableLowerSliderLimit_, lowerSlideLimit, upperSlideLimit);
     }
 
     void NewtonSliderConstraint::applyTwistLimits()

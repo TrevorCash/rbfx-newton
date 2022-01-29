@@ -136,7 +136,6 @@ private:
     void SpawnRandomObjects();
     void SpawnCompoundedRectTest(Vector3 worldPosition);
     void SpawnCompoundedRectTest2(Vector3 worldPosition);
-    void SpawnTrialBike(Vector3 worldPosition, Quaternion orientation, bool enableGyroOnWheels);
     void SpawnHingeSpringTest(const Vector3 ZERO, const Quaternion IDENTITY);
     void SpawnKinematicBodyTest(Vector3 worldPosition, Quaternion worldRotation);
 	void SpawnRejointingTest(Vector3 worldPosition);
