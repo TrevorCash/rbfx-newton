@@ -305,6 +305,8 @@ namespace Urho3D
 
         Vector3 GetAcceleration();
 
+		Matrix3 GetMassMatrix();
+
 
         /// Get Immediately connected contraints to this rigid body.
         void GetConnectedContraints(ea::vector<NewtonConstraint*>& contraints);

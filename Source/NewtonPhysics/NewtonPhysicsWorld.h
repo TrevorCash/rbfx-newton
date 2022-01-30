@@ -269,7 +269,7 @@ namespace Urho3D
 
         void applyNewtonWorldSettings();
 
-		NewtonWorldContactNotify newtonContactNotify_;
+		NewtonWorldContactNotify* newtonContactNotify_ = nullptr;
 
         bool contactMapLocked_ = false;
 

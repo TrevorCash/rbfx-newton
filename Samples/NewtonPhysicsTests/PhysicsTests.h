@@ -61,6 +61,7 @@ public:
 		// Resource prefix path is a list of semicolon-separated paths which will be checked for containing resource directories. They are relative to application executable file.
 		engineParameters_[EP_RESOURCE_PREFIX_PATHS] = ".;./../../../bin";
 		engineParameters_[EP_WORKER_THREADS] = 4;
+		engineParameters_[EP_RENDER_PATH] = "./RenderPaths/PBRDeferred.xml";
 	}
 
 
@@ -142,7 +143,7 @@ private:
 	void SpawnCollisionOffsetTest(Vector3 worldPosition);
 	void SpawnATRT(Vector3 worldPosition);
     void SpawnSegway(Vector3 worldPosition);
-
+	void SpawnRobotArm(Vector3 worldPosition);
 
     /// Handle the logic update event.
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
@@ -173,6 +174,7 @@ private:
 
 
     Node* pickPullNode = nullptr;
+	WeakPtr<Node> hoverNode;
     Quaternion pickPullCameraStartOrientation;
     Vector3 pickPullStartPositionWorld;
     Vector3 pickPullEndPositionWorld;
@@ -201,6 +203,7 @@ private:
 	ea::vector<NewtonConstraint*> forceCalculationConstraints_;
 
     WeakPtr<Node> kinematicNode_;
+
 
     void CreateScenery(Vector3 worldPosition);
     void RemovePickNode(bool removeRigidBodyOnly = false);

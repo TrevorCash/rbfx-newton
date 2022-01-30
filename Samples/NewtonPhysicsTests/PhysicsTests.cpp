@@ -230,9 +230,11 @@ void PhysicsTests::CreateScene()
 
 	//SpawnATRT(Vector3(5, 5, 0));
 
-	ResetGYMs();	
+	//ResetGYMs();	
 
 	//SpawnSegway(Vector3(0,5,0));
+	for(int i = 0; i < 10; i++)
+		SpawnRobotArm(Vector3(i*10, 5, 0));
 
 
 
@@ -385,6 +387,7 @@ void PhysicsTests::MoveCamera(float timeStep)
     if (input->GetMouseButtonPress(MOUSEB_LEFT))
         CreatePickTargetNodeOnPhysics();
 
+	hoverNode = GetCameraPickNode().node_;
 
 
     if (input->GetKeyPress(KEY_R)) {
@@ -1465,8 +1468,53 @@ void PhysicsTests::SpawnSegway(Vector3 worldPosition)
 
 
     root->SetWorldPosition(worldPosition);
+}
 
 
+void PhysicsTests::SpawnRobotArm(Vector3 worldPosition)
+{
+	Node* root = scene_->CreateChild("RobotArm");
+
+	Node* base = SpawnSamplePhysicsCylinder(root, Vector3::ZERO, 2,0.5);
+	base->GetComponent<NewtonCollisionShape_Cylinder>()->SetDensity(100);
+
+	Node* base2 = SpawnSamplePhysicsCylinder(root, Vector3(0,1,0), 1, 1);
+
+	NewtonHingeConstraint* motor1 = base->CreateComponent<NewtonHingeConstraint>();
+	motor1->SetOtherBody(base2->GetComponent<NewtonRigidBody>());
+	motor1->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
+	motor1->SetEnableLimits(false);
+
+
+	Node* arm1 = SpawnSamplePhysicsBox(root, Vector3(0, 2, 0), Vector3(1, 3, 1));
+	NewtonHingeConstraint* motor2 = base2->CreateComponent<NewtonHingeConstraint>();
+	motor2->SetOtherBody(arm1->GetComponent<NewtonRigidBody>());
+
+
+	Node* arm2 = SpawnSamplePhysicsBox(root, Vector3(0, 4, 0), Vector3(1, 3, 1));
+	NewtonHingeConstraint* motor3 = arm1->CreateComponent<NewtonHingeConstraint>();
+	motor3->SetOtherBody(arm2->GetComponent<NewtonRigidBody>());
+	motor3->SetPosition(Vector3(0,1,0));
+
+	Node* arm3 = SpawnSamplePhysicsBox(root, Vector3(0, 6, 0), Vector3(1, 3, 1));
+	NewtonHingeConstraint* motor4 = arm2->CreateComponent<NewtonHingeConstraint>();
+	motor4->SetOtherBody(arm3->GetComponent<NewtonRigidBody>());
+	motor4->SetPosition(Vector3(0, 1, 0));
+
+	Node* wrist = SpawnSamplePhysicsCylinder(root, Vector3(0, 7.5, 0), 0.5, 0.5);
+	NewtonHingeConstraint* motor5 = arm3->CreateComponent<NewtonHingeConstraint>();
+	motor5->SetOtherBody(wrist->GetComponent<NewtonRigidBody>());
+	motor5->SetPosition(Vector3(0, 1, 0));
+	motor5->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
+
+	Node* arm4 = SpawnSamplePhysicsBox(root, Vector3(0, 8.5, 0), Vector3(0.5, 1.5, 0.5));
+	NewtonHingeConstraint* motor6 = wrist->CreateComponent<NewtonHingeConstraint>();
+	motor6->SetOtherBody(arm4->GetComponent<NewtonRigidBody>());
+	motor6->SetPosition(Vector3(0, 0, 0));
+
+
+
+	root->SetWorldPosition(worldPosition);
 }
 
 
@@ -1644,6 +1692,39 @@ if (drawDebug_) {
 	}
 
 
+
+	if(hoverNode )
+	{
+		ea::vector<NewtonRigidBody*> rigBodies;
+		GetRootRigidBodies(rigBodies, hoverNode, true);
+		if (rigBodies.size())
+		{
+
+			ui::Begin("NewtonBody Info");
+
+
+			Matrix3 inertia = rigBodies[0]->GetMassMatrix();
+			ui::Text("Inertia Matrix:");
+			ui::Text("%f,%f,%f\r\n%f,%f,%f\r\n%f,%f,%f\r\n", 
+				inertia.m00_, inertia.m01_, inertia.m02_,
+				inertia.m10_, inertia.m11_, inertia.m12_,
+				inertia.m20_, inertia.m21_, inertia.m22_);
+
+			ui::Text("Mass: %f", rigBodies[0]->GetEffectiveMass());
+			Vector3 netForce = rigBodies[0]->GetNetWorldForce();
+			ui::Text("Net Force (NoGrav)(World): %f,%f,%f", netForce.x_, netForce.y_, netForce.z_);
+			Vector3 netTorque = rigBodies[0]->GetNetWorldTorque();
+			ui::Text("Net Torque (NoGrav)(World): %f,%f,%f", netTorque.x_, netTorque.y_, netTorque.z_);
+
+			ui::End();
+		}
+	}
+
+
+
+
+
+
 	scene_->GetComponent<NewtonPhysicsWorld>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
 	GetSubsystem<VisualDebugger>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>());
 
@@ -1811,6 +1892,8 @@ RayQueryResult PhysicsTests::GetCameraPickNode()
 
 
 
+
+
 void PhysicsTests::CreateScenery(Vector3 worldPosition)
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
@@ -1819,12 +1902,12 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
         // Create a floor object, 1000 x 1000 world units. Adjust position so that the ground is at zero Y
         Node* floorNode = scene_->CreateChild("Floor");
         floorNode->SetPosition(worldPosition - Vector3(0, 0.5f, 0));
-        floorNode->SetScale(Vector3(100.0f, 1.0f, 100.0f));
+        floorNode->SetScale(Vector3(1000.0f, 1.0f, 1000.0f));
         auto* floorObject = floorNode->CreateComponent<StaticModel>();
         floorObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
-		SharedPtr<Material> floorMat = cache->GetResource<Material>("Materials/Metal.xml")->Clone();
+		SharedPtr<Material> floorMat = cache->GetResource<Material>("Materials/Brick.xml")->Clone();
 
-		floorMat->SetUVTransform(Vector2(), 0, 10);
+		floorMat->SetUVTransform(Vector2(), 0, 500);
 		floorMat->SetShaderParameter("MatDiffColor", Vector4(1.0, 1.0, 1.0, 0.1f));
         floorObject->SetMaterial(floorMat);
 		//floorNode->SetRotation(Quaternion(10, Vector3(1, 0, 0)));

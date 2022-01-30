@@ -856,7 +856,7 @@ namespace Urho3D {
 
 			effectiveCollision_.GetShape()->GetAsShapeCompound()->EndAddRemove();
 
-			mass_ = totalMass;
+			mass_ = totalMass*massScale_;
 			if (GetIsSceneRootBody())
 				mass_ = 0.0f;
 
@@ -1283,6 +1283,21 @@ namespace Urho3D {
         else
             return Vector3::ZERO;
     }
+
+
+	Matrix3 NewtonRigidBody::GetMassMatrix()
+	{
+		if (newtonBody_) {
+			ndVector inertiaDiags = newtonBody_->GetAsBodyDynamic()->GetMassMatrix();
+			Matrix3 inertiaMatrix;
+			inertiaMatrix.m00_ = inertiaDiags.m_x;
+			inertiaMatrix.m11_ = inertiaDiags.m_y;
+			inertiaMatrix.m22_ = inertiaDiags.m_z;
+			return inertiaMatrix;
+		}
+		else
+			return Matrix3::IDENTITY*0.0f;
+	}
 
 	void NewtonRigidBody::GetConnectedContraints(ea::vector<NewtonConstraint*>& contraints)
     {

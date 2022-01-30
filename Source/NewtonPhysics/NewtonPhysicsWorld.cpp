@@ -260,8 +260,8 @@ namespace Urho3D {
                     sceneBody_->SetTemporary(true);
                 }
 
-
-				newtonWorld_->SetContactNotify(&newtonContactNotify_);
+				newtonContactNotify_ = new NewtonWorldContactNotify();
+				newtonWorld_->SetContactNotify(newtonContactNotify_);
 				
 
                 //NewtonMaterialSetCollisionCallback(newtonWorld_, 0, 0, Newton_AABBOverlapCallback, Newton_ProcessContactsCallback);
