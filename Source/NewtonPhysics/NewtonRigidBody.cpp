@@ -352,13 +352,11 @@ namespace Urho3D {
             if (useForces)
             {
 	            const ndVector curWorldVel = newtonBody_->GetVelocity();
+	            const ndVector worldVelDelta = UrhoToNewton((worldVelocity)) - curWorldVel;
 
-
-	            const ndVector worldVel = UrhoToNewton((worldVelocity)) - curWorldVel;
-                
 				Vector3 worldPos = GetWorldPosition();
 
-				newtonBody_->GetAsBodyDynamic()->ApplyImpulsePair(worldVel,ndVector(0,0,0,0), physicsWorld_->timeStep_*GetScene()->GetTimeScale());
+				newtonBody_->GetAsBodyDynamic()->ApplyImpulsePair(worldVelDelta*GetEffectiveMass(),ndVector(0,0,0,0), physicsWorld_->timeStep_*GetScene()->GetTimeScale());
 			
 			}
 			else {

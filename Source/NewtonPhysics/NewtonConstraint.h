@@ -125,7 +125,7 @@ namespace Urho3D {
 
 
 
-
+        
 
 
         void SetSolveMode(ndJointBilateralSolverModel mode);
@@ -154,6 +154,9 @@ namespace Urho3D {
         ///return the torque exerted on other rigid body. Only functional if ForceCalculation is enabled.
         Vector3 GetOtherTorque();
 
+        //return the relative angular vel between the 2 bodies in world space
+        Vector3 GetWorldAngularRate();
+
 
         /// Return physics world.
         NewtonPhysicsWorld* GetPhysicsWorld() const { return physicsWorld_; }
@@ -169,8 +172,6 @@ namespace Urho3D {
 
 		ndBody* GetOtherNewtonBody(bool resolved = true) const;
 		ndBody* GetOtherNewtonBodyBuild() const;
-
-
 
 
         ndConstraint* GetNewtonJoint() const {

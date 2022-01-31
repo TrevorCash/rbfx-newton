@@ -150,7 +150,7 @@ namespace Urho3D
 
 
         /// newton Mesh reference
-		//WeakPtr<NewtonMeshObject> newtonMesh_;
+		WeakPtr<NewtonMeshObject> newtonMesh_;
 
 
         float staticFriction_ = COLLISION_SHAPE_DEF_STATIC_FRICTION;

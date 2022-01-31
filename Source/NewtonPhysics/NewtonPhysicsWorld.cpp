@@ -57,6 +57,7 @@
 #include "NewtonSliderConstraint.h"
 #include "Newton6DOFConstraint.h"
 #include "NewtonGearConstraint.h"
+#include "NewtonMeshObject.h"
 
 
 #include "ndNewton.h"
@@ -98,7 +99,30 @@ namespace Urho3D {
 
     bool NewtonWorldContactNotify::OnAabbOverlap(const ndContact* const contact, ndFloat32 timestep)
     {
-	    return true;
+              //URHO3D_PROFILE_THREAD(NewtonThreadProfilerString(threadIndex).c_str());
+        URHO3D_PROFILE_FUNCTION();
+
+
+        const ndBody* const body0 = contact->GetBody0();
+        const ndBody* const body1 = contact->GetBody1();
+
+        NewtonBodyNotifications* notifications0 = static_cast<NewtonBodyNotifications*>(body0->GetNotifyCallback());
+        NewtonBodyNotifications* notifications1 = static_cast<NewtonBodyNotifications*>(body1->GetNotifyCallback());
+
+        NewtonRigidBody* rigBody0 = notifications0->rigidBodyComponent_;
+        NewtonRigidBody* rigBody1 = notifications1->rigidBodyComponent_;
+
+        if (!rigBody0 || !rigBody1)
+        	return 0;
+
+        NewtonPhysicsWorld* physicsWorld = rigBody0->GetPhysicsWorld();
+
+
+
+        bool res = rigBody1->CanCollideWith(rigBody0);
+
+
+        return res;
     }
 
     void NewtonWorldContactNotify::OnContactCallback(ndInt32 threadIndex, const ndContact* const contact, ndFloat32 timestep)
@@ -578,11 +602,11 @@ namespace Urho3D {
 
 
 
-    //Urho3D::StringHash NewtonPhysicsWorld::NewtonMeshKey(eastl::string modelResourceName, int modelLodLevel, eastl::string otherData)
-    //{
-    //    return modelResourceName + eastl::to_string(modelLodLevel) + otherData;
-    //}
-/*
+    Urho3D::StringHash NewtonPhysicsWorld::NewtonMeshKey(eastl::string modelResourceName, int modelLodLevel, eastl::string otherData)
+    {
+        return modelResourceName + eastl::to_string(modelLodLevel) + otherData;
+    }
+
     NewtonMeshObject* NewtonPhysicsWorld::GetCreateNewtonMesh(StringHash urhoNewtonMeshKey)
     {
         if (newtonMeshCache_.contains(urhoNewtonMeshKey)) {
@@ -590,7 +614,7 @@ namespace Urho3D {
         }
         else
         {
-            NewtonMesh* mesh = NewtonMeshCreate(newtonWorld_);
+            ndMeshEffect* mesh = new ndMeshEffect();
             SharedPtr<NewtonMeshObject> meshObj = context_->CreateObject<NewtonMeshObject>();
             meshObj->mesh = mesh;
             newtonMeshCache_[urhoNewtonMeshKey] = meshObj;
@@ -604,7 +628,7 @@ namespace Urho3D {
             return newtonMeshCache_[urhoNewtonMeshKey];
         }
         return nullptr;
-    }*/
+    }
 
     void NewtonPhysicsWorld::freePhysicsInternals()
     {
@@ -817,11 +841,11 @@ namespace Urho3D {
         NewtonCollisionShape_ChamferCylinder::RegisterObject(context);
         NewtonCollisionShape_Capsule::RegisterObject(context);
         NewtonCollisionShape_Cone::RegisterObject(context);
-        //NewtonCollisionShape_Geometry::RegisterObject(context);
+        NewtonCollisionShape_Geometry::RegisterObject(context);
         //NewtonCollisionShape_ConvexHull::RegisterObject(context);
         //NewtonCollisionShape_ConvexHullCompound::RegisterObject(context);
         //NewtonCollisionShape_ConvexDecompositionCompound::RegisterObject(context);
-        //NewtonCollisionShape_TreeCollision::RegisterObject(context);
+        NewtonCollisionShape_TreeCollision::RegisterObject(context);
         //NewtonCollisionShape_HeightmapTerrain::RegisterObject(context);
 
         NewtonRigidBody::RegisterObject(context);
@@ -829,7 +853,7 @@ namespace Urho3D {
 
 
 
-        //NewtonMeshObject::RegisterObject(context);
+        NewtonMeshObject::RegisterObject(context);
         NewtonConstraint::RegisterObject(context);
         NewtonFixedDistanceConstraint::RegisterObject(context);
         NewtonBallAndSocketConstraint::RegisterObject(context);

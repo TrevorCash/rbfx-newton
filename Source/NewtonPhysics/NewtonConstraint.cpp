@@ -334,7 +334,18 @@ namespace Urho3D {
         return Vector3();
     }
 
-	Urho3D::NewtonRigidBody* NewtonConstraint::GetOwnBody(bool useResolved /*= true*/) const
+    Vector3 NewtonConstraint::GetWorldAngularRate()
+    {
+        if(newtonConstraint_)
+        {
+            ndVector relOmega = newtonConstraint_->GetBody0()->GetOmega() - newtonConstraint_->GetBody1()->GetOmega();
+            return NewtonToUrhoVec3(relOmega);
+        }
+        return Vector3::ZERO;
+    }
+
+
+    Urho3D::NewtonRigidBody* NewtonConstraint::GetOwnBody(bool useResolved /*= true*/) const
 	{
 		if (useResolved && (ownBodyResolved_ != ownBody_))
 		{

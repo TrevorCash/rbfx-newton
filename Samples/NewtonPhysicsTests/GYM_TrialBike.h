@@ -267,7 +267,7 @@ public:
 		float steerError = targetSteerAngle - curSteerAngle;
 		stat4.push_back(steerError);
 		float hingeTorque = hingeTorquePParam * steerError - 0.0f*motors[0]->GetCurrentAngularRate();
-		//motors[0]->SetMotorTorque(hingeTorque);
+		motors[0]->SetMotorTorque(hingeTorque);
 		frontHingeTorques.push_back(hingeTorque);
 
 
@@ -275,8 +275,8 @@ public:
 		float forwardAngVel = bodyNode->GetComponent<NewtonRigidBody>()->GetAngularVelocity(TS_LOCAL).z_;
 		float targetForwardTilt = 0.0f;
 		float forwardTiltError = targetForwardTilt - curForwardTilt;
-		//float throttleTorque = Clamp(10.0f * velError, -15.0f, 30.0f) + 0.0f*forwardTiltError;
-		//motors[1]->SetMotorTorque(throttleTorque);
+
+		motors[1]->SetMotorTorque(throttleTorque);
 
 		motorTorques.push_back(throttleTorque);
 

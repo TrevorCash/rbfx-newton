@@ -292,15 +292,15 @@ namespace Urho3D
 
         ///convex casts
         //int DoNewtonCollideTest(const dFloat* const matrix, const NewtonCollision* shape);
-		void GetBodiesInConvexCast(eastl::vector<NewtonRigidBody*>& result, int numContacts);
+		void GetBodiesInConvexCast(ea::vector<NewtonRigidBody*>& result, int numContacts);
 
         ///newton mesh caching
-		//eastl::hash_map <StringHash, SharedPtr<NewtonMeshObject>> newtonMeshCache_;
+		ea::hash_map <StringHash, SharedPtr<NewtonMeshObject>> newtonMeshCache_;
 
         ///returns a unique key for looking up an exising NewtonMesh from the cache.
-		//static StringHash NewtonMeshKey(eastl::string modelResourceName, int modelLodLevel, eastl::string otherData);
-        //NewtonMeshObject* GetCreateNewtonMesh(StringHash urhoNewtonMeshKey);
-        //NewtonMeshObject* GetNewtonMesh(StringHash urhoNewtonMeshKey);
+		static StringHash NewtonMeshKey(ea::string modelResourceName, int modelLodLevel, ea::string otherData);
+        NewtonMeshObject* GetCreateNewtonMesh(StringHash urhoNewtonMeshKey);
+        NewtonMeshObject* GetNewtonMesh(StringHash urhoNewtonMeshKey);
         
 
         void freePhysicsInternals();

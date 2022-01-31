@@ -50,7 +50,7 @@
 
 #include "Urho3D/Graphics/Terrain.h"
 #include "Urho3D/Scene/Node.h"
-
+#include "Urho3D/Scene/ConstructiveSolidGeometry.h"
 
 #include "NewtonPhysicsWorld.h"
 #include "NewtonFixedDistanceConstraint.h"
@@ -230,11 +230,11 @@ void PhysicsTests::CreateScene()
 
 	//SpawnATRT(Vector3(5, 5, 0));
 
-	//ResetGYMs();	
+	ResetGYMs();	
 
 	//SpawnSegway(Vector3(0,5,0));
-	for(int i = 0; i < 10; i++)
-		SpawnRobotArm(Vector3(i*10, 5, 0));
+	//for(int i = 0; i < 10; i++)
+	//	SpawnRobotArm(Vector3(i*10, 5, 0));
 
 
 
@@ -1035,7 +1035,7 @@ void PhysicsTests::SpawnRandomObjects()
         else
             node = SpawnSamplePhysicsCylinder(scene_, cameraNode_->GetWorldPosition() + posOffset, 0.5f);
 
-
+        node->SetScale(0.5f);
         node->GetComponent<NewtonRigidBody>()->SetLinearVelocity(cameraNode_->GetWorldDirection() * 10.0f);
         //node->GetComponent<NewtonRigidBody>()->SetContinuousCollision(false);
         //node->GetComponent<RigidBody>()->SetLinearDamping(0.01f);
@@ -1932,7 +1932,35 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
 		}
 
 
+		SharedPtr<CSGManipulator> csg = context_->CreateObject<CSGManipulator>();
+        Node* csgRes = scene_->CreateChild("CSGRES");
+        auto* resMdl = csgRes->CreateComponent<StaticModel>();
+        resMdl->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
+    	csg->SetResultNode(csgRes);
 
+        Node* boxNode = scene_->CreateChild("StaticBox");
+        SharedPtr<Material> boxMat = cache->GetResource<Material>("Materials/Brick.xml")->Clone();
+        auto* boxMdl = boxNode->CreateComponent<StaticModel>();
+        boxMdl->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
+        boxMdl->SetMaterial(boxMat);
+        boxNode->SetScale(1);
+
+        Node* boxNode2 = scene_->CreateChild("StaticBox");
+        boxMdl = boxNode2->CreateComponent<StaticModel>();
+        boxMdl->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
+        boxMdl->SetMaterial(boxMat);
+        boxNode2->SetPosition(Vector3(0.5, 0.5, 0.5));
+        //boxNode2->SetRotation(Quaternion(30, Vector3(1, 0, 0)));
+        //boxNode2->SetScale(5);
+        csg->Union(boxNode);
+        csg->Subtract(boxNode2);
+
+        csg->BakeSingle();
+
+        csgRes->SetPosition(Vector3(10, 0, 0));
+        resMdl->SetMaterial(boxMat);
+
+        csgRes->CreateComponent<NewtonCollisionShape_TreeCollision>();
     }
     else {
         //Create heightmap terrain with collision

@@ -43,26 +43,12 @@ namespace Urho3D {
     void NewtonHingeConstraint::RegisterObject(Context* context)
     {
         context->RegisterFactory<NewtonHingeConstraint>(DEF_PHYSICS_CATEGORY.c_str());
-
-
         URHO3D_COPY_BASE_ATTRIBUTES(NewtonConstraint);
 
         URHO3D_ACCESSOR_ATTRIBUTE("Enable Limits", GetLimitsEnabled, SetEnableLimits, bool, true, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Angle Min", GetMinAngle, SetMinAngle, float, -45.0f, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Angle Max", GetMaxAngle, SetMaxAngle, float, 45.0f, AM_DEFAULT);
-        URHO3D_ACCESSOR_ATTRIBUTE("Friction", GetFriction, SetFriction, float, 0.0f, AM_DEFAULT);
-        URHO3D_ENUM_ACCESSOR_ATTRIBUTE("Power Mode", GetPowerMode, SetPowerMode, PoweredMode, hingePoweredModeNames, PoweredMode::NO_POWER, AM_DEFAULT);
-        URHO3D_ACCESSOR_ATTRIBUTE("Max Torque", GetMaxTorque, SetMaxTorque, float, 10000.0f, AM_DEFAULT);
-
-        URHO3D_ACCESSOR_ATTRIBUTE("Actuator Max Angular Rate", GetActuatorMaxAngularRate, SetActuatorMaxAngularRate, float, 1.0f, AM_DEFAULT);
-        URHO3D_ACCESSOR_ATTRIBUTE("Actuator Target Angle", GetActuatorTargetAngle, SetActuatorTargetAngle, float, 0.0f, AM_DEFAULT);
-
-        URHO3D_ACCESSOR_ATTRIBUTE("Spring Damper Enable", GetNoPowerSpringDamper, SetNoPowerSpringDamper, bool, false, AM_DEFAULT);
-        URHO3D_ACCESSOR_ATTRIBUTE("Spring Coefficient", GetNoPowerSpringCoefficient, SetNoPowerSpringCoefficient, float, HINGE_CONSTRAINT_DEF_SPRING_COEF, AM_DEFAULT);
-        URHO3D_ACCESSOR_ATTRIBUTE("Spring Damper Coefficient", GetNoPowerDamperCoefficient, SetNoPowerDamperCoefficient, float, HINGE_CONSTRAINT_DEF_DAMPER_COEF, AM_DEFAULT);
-        URHO3D_ACCESSOR_ATTRIBUTE("Spring Damper Relaxation", GetNoPowerSpringDamperRelaxation, SetNoPowerSpringDamperRelaxation, float, HINGE_CONSTRAINT_DEF_RELAX, AM_DEFAULT);
-
-
+        URHO3D_ACCESSOR_ATTRIBUTE("Torque", GetTorque, SetTorque, float, 0.0f, AM_DEFAULT);
     }
 
     void NewtonHingeConstraint::SetMinAngle(float minAngle)
@@ -74,7 +60,7 @@ namespace Urho3D {
 
 			if (newtonConstraint_)
 			{
-				static_cast<ndJointHinge*>(newtonConstraint_)->EnableLimits(enableLimits_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad);
+			//	static_cast<ndJointHinge*>(newtonConstraint_)->EnableLimits(enableLimits_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad);
 			}
             else
                 MarkDirty();
@@ -87,7 +73,7 @@ namespace Urho3D {
             maxAngle_ = maxAngle;
             WakeBodies();
             if (newtonConstraint_) {
-				static_cast<ndJointHinge*>(newtonConstraint_)->EnableLimits(enableLimits_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad);
+			//	static_cast<ndJointHinge*>(newtonConstraint_)->EnableLimits(enableLimits_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad);
             }
             else
                 MarkDirty();
@@ -101,188 +87,35 @@ namespace Urho3D {
             enableLimits_ = enable;
             WakeBodies();
             if (newtonConstraint_) {
-				static_cast<ndJointHinge*>(newtonConstraint_)->EnableLimits(enableLimits_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad);
+				//static_cast<ndJointHinge*>(newtonConstraint_)->EnableLimits(enableLimits_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad);
             }
             else
                 MarkDirty();
         }
     }
 
-    void NewtonHingeConstraint::SetFriction(float friction)
-    {
+   
 
-        if (frictionTorque_ != friction) {
-            frictionTorque_ = friction;
-            WakeBodies();
-            if (newtonConstraint_) {
-                if (powerMode_ == NO_POWER)
-                    dynamic_cast<ndJointHinge*>(newtonConstraint_)->SetFriction((frictionTorque_));
-            }
-            else
-                MarkDirty();
-        }
-    }
-
-    void NewtonHingeConstraint::SetMaxTorque(float torque)
+    void NewtonHingeConstraint::SetTorque(float torque)
     {
-        if (maxTorque_ != torque)
+        if (commandedTorque_ != torque)
         {
-            maxTorque_ = torque;
+            commandedTorque_ = torque;
             WakeBodies();
             if (newtonConstraint_)
             {
-                if (powerMode_ == ACTUATOR)
-                    static_cast<ndJointHingeActuator*>(newtonConstraint_)->SetMaxTorque((maxTorque_));
-
+            	static_cast<PivotJoint*>(newtonConstraint_)->SetTorque(commandedTorque_);
             }
             else
                 MarkDirty();
         }
-    }
-
-    void NewtonHingeConstraint::SetPowerMode(PoweredMode mode)
-    {
-        if (powerMode_ != mode) {
-            powerMode_ = mode;
-            MarkDirty();
-        }
-        else
-            MarkDirty();
-    }
-
-
-
-    void NewtonHingeConstraint::SetActuatorMaxAngularRate(float rate)
-    {
-        if (maxAngularRate_ != rate)
-        {
-            maxAngularRate_ = rate;
-            WakeBodies();
-            if (newtonConstraint_)
-            {
-                if (powerMode_ == ACTUATOR)
-                    static_cast<ndJointHingeActuator*>(newtonConstraint_)->SetAngularRate(maxAngularRate_);
-
-
-            }
-            else
-                MarkDirty();
-        }
-    }
-
-    void NewtonHingeConstraint::SetActuatorTargetAngle(float angle)
-    {
-        if (targetAngle_ != angle)
-        {
-            targetAngle_ = angle;
-            WakeBodies();
-            if (newtonConstraint_)
-            {
-                if (powerMode_ == ACTUATOR)
-                    static_cast<ndJointHingeActuator*>(newtonConstraint_)->SetTargetAngle(targetAngle_* ndDegreeToRad);
-            }
-            else
-                MarkDirty();
-        }
-    }
-
-
-
-
-
-
-    void NewtonHingeConstraint::SetNoPowerSpringDamper(bool enable)
-    {
-        if (enableSpringDamper_ != enable)
-        {
-            enableSpringDamper_ = enable;
-
-            if (newtonConstraint_)
-            {
-                if (powerMode_ == NO_POWER)
-                {
-                 //   static_cast<ndJointHinge*>(newtonConstraint_)->SetAsSpringDamper(enableSpringDamper_, springRelaxation_, springSpringCoef_);
-                }
-            }
-            else
-                MarkDirty();
-
-        }
-    }
-
-
-
-    void NewtonHingeConstraint::SetNoPowerSpringCoefficient(float springCoef)
-    {
-        if (springSpringCoef_ != springCoef)
-        {
-            springSpringCoef_ = springCoef;
-
-            if (newtonConstraint_)
-            {
-                if (powerMode_ == NO_POWER)
-                {
-                   // static_cast<ndJointHinge*>(newtonConstraint_)->SetAsSpringDamper(enableSpringDamper_, springSpringCoef_, springDamperCoef_);
-                }
-            }
-            else
-                MarkDirty();
-
-        }
-    }
-
-    void NewtonHingeConstraint::SetNoPowerDamperCoefficient(float damperCoef)
-    {
-        if (springDamperCoef_ != damperCoef)
-        {
-            springDamperCoef_ = damperCoef;
-
-            if (newtonConstraint_)
-            {
-                if (powerMode_ == NO_POWER)
-                {
-                 //   static_cast<ndJointHinge*>(newtonConstraint_)->SetAsSpringDamper(enableSpringDamper_, springSpringCoef_, springDamperCoef_);
-                }
-            }
-            else
-                MarkDirty();
-
-        }
-    }
-
-    void NewtonHingeConstraint::SetNoPowerSpringDamperRelaxation(float relaxation)
-    {
-        if (springRelaxation_ != relaxation)
-        {
-            springRelaxation_ = relaxation;
-
-            if (newtonConstraint_)
-            {
-                if (powerMode_ == NO_POWER)
-                {
-                 //   static_cast<ndJointHinge*>(newtonConstraint_)->SetAsSpringDamper(enableSpringDamper_, springSpringCoef_, springDamperCoef_);
-                }
-            }
-            else
-                MarkDirty();
-
-        }
-    }
-
-    float NewtonHingeConstraint::GetCurrentAngularRate()
-    {
-        if (newtonConstraint_)
-        {
-            //return static_cast<ndJointHinge*>(newtonConstraint_)->GetJointOmega();
-        }
-        return 0.0f;
     }
 
     float NewtonHingeConstraint::GetCurrentAngle()
     {
         if (newtonConstraint_)
         {
-          //  return static_cast<ndJointHinge*>(newtonConstraint_)->GetJointAngle();
+        	return static_cast<PivotJoint*>(newtonConstraint_)->GetAngle();
         }
         return 0.0f;
     }
@@ -294,26 +127,11 @@ namespace Urho3D {
 
     void NewtonHingeConstraint::buildConstraint()
     {
-        // Create a dCustomHinge
-
-        if (powerMode_ == ACTUATOR)
-        {
-        //    newtonConstraint_ = new ndJointHingeActuator(UrhoToNewton(GetOwnBuildWorldFrame()), maxAngularRate_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad, 
-		//		GetOwnNewtonBodyBuild()->GetAsBodyKinematic(), 
-		//		GetOtherNewtonBodyBuild()->GetAsBodyKinematic());
-        }
-        else
-        {
-        //   newtonConstraint_ = new ndJointHinge(UrhoToNewton(GetOwnBuildWorldFrame()), UrhoToNewton(GetOtherBuildWorldFrame()),
-		//		GetOwnNewtonBodyBuild()->GetAsBodyKinematic(),
-		//		GetOtherNewtonBodyBuild()->GetAsBodyKinematic());
-
-			newtonConstraint_ = new ndJointHinge(UrhoToNewton(GetOwnBuildWorldFrame()),
-				UrhoToNewton(GetOtherBuildWorldFrame()),
-				GetOwnNewtonBodyBuild()->GetAsBodyKinematic(), GetOtherNewtonBodyBuild()->GetAsBodyKinematic());
-        }
-
-
+        newtonConstraint_ = new PivotJoint(
+            GetOwnNewtonBodyBuild()->GetAsBodyKinematic(), 
+            GetOtherNewtonBodyBuild()->GetAsBodyKinematic(), 
+            UrhoToNewton(GetOwnBuildWorldFrame())
+            );
     }
 
     bool NewtonHingeConstraint::applyAllJointParams()
@@ -321,25 +139,82 @@ namespace Urho3D {
         if (!NewtonConstraint::applyAllJointParams())
             return false;
 
-        if (powerMode_ == ACTUATOR)
-        {
-            //static_cast<dCustomHingeActuator*>(newtonJoint_)->EnableLimits(enableLimits_); this breaks.
-            //static_cast<ndJointHingeActuator*>(newtonConstraint_)->SetLimits(minAngle_ * ndDegreeToRad, maxAngle_ * dDegreeToRad);
-            static_cast<ndJointHingeActuator*>(newtonConstraint_)->SetTargetAngle(targetAngle_* ndDegreeToRad);
-            static_cast<ndJointHingeActuator*>(newtonConstraint_)->SetMaxTorque((maxTorque_));
-            static_cast<ndJointHingeActuator*>(newtonConstraint_)->SetAngularRate(maxAngularRate_);
-        }
-        else if(powerMode_ == NO_POWER)
-        {
-			static_cast<ndJointHinge*>(newtonConstraint_)->EnableLimits(enableLimits_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad);
-            static_cast<ndJointHinge*>(newtonConstraint_)->SetFriction((frictionTorque_));
-            //static_cast<ndJointHinge*>(newtonConstraint_)->SetAsSpringDamper(enableSpringDamper_,  springSpringCoef_, springDamperCoef_);
-        }
 
+
+        //static_cast<PivotJoint*>(newtonConstraint_)->EnableLimits(enableLimits_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad);
+        static_cast<PivotJoint*>(newtonConstraint_)->SetTorque(commandedTorque_);
+    
 
         return true;
     }
 
 
+    PivotJoint::PivotJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix) :
+	ndJointBilateralConstraint(7, body0, body1, globalMatrix ),
+    m_commandedTorque(0.0f),
+	m_minLimit(-1.0f),
+    m_maxLimit(1.0f),
+	m_friction(0.0f),
+	m_omega(0.0f)
+    {
 
+    }
+
+    
+
+    void PivotJoint::SetTorque(ndFloat32 newtonMeters)
+    {
+        m_commandedTorque = newtonMeters;
+    }
+
+    ndFloat32 PivotJoint::CalculateAcceleration(ndConstraintDescritor& desc)
+    {
+        const ndVector& relOmega = m_body1->GetOmega() + m_body0->GetOmega();
+
+        ndFloat32 currentOmega = relOmega.AddHorizontal().GetScalar();
+        ndFloat32 diff = Sign(m_commandedTorque)*1e9f -  currentOmega;
+
+        ndFloat32 accel = diff * desc.m_invTimestep;
+        return accel;
+    }
+
+
+    void PivotJoint::JacobianDerivative(ndConstraintDescritor& desc)
+    {
+        ndMatrix matrix0;
+        ndMatrix matrix1;
+        CalculateGlobalMatrix(matrix0, matrix1);
+
+        const ndFloat32 angle0 = CalculateAngle(matrix0.m_front, matrix1.m_front, matrix1.m_up);
+        const ndFloat32 angle1 = CalculateAngle(matrix0.m_front, matrix1.m_front, matrix1.m_right);
+
+        ndVector omega0(m_body0->GetOmega());
+        ndVector omega1(m_body1->GetOmega());
+
+    	// the joint angle can be determined by getting the angle between any two non parallel vectors
+        const ndFloat32 deltaAngle = AnglesAdd(-CalculateAngle(matrix0.m_up, matrix1.m_up, matrix1.m_front), -m_angle);
+        m_angle += deltaAngle;
+
+        AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1.m_front);
+        AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1.m_up);
+        AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1.m_right);
+
+
+        AddAngularRowJacobian(desc, matrix1.m_up, angle0);
+        AddAngularRowJacobian(desc, matrix1.m_right, angle1);
+		AddAngularRowJacobian(desc, matrix0.m_front, 0.0f);
+
+    	float acc = CalculateAcceleration(desc);
+        float highFric = m_commandedTorque;
+        float lowFric = -m_commandedTorque;
+
+
+
+
+        SetMotorAcceleration(desc, acc);
+
+        SetHighFriction(desc, highFric);
+        SetLowerFriction(desc, lowFric);
+        SetDiagonalRegularizer(desc, ndFloat32(0.1f));
+    }
 }

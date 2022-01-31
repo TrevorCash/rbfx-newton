@@ -95,170 +95,174 @@ namespace Urho3D {
 
 
 
-//
-//
-//
-//
-//
-//
-//
-//
-//    NewtonCollisionShape_Geometry::NewtonCollisionShape_Geometry(Context* context) : NewtonCollisionShape(context)
-//    {
-//
-//    }
-//
-//    NewtonCollisionShape_Geometry::~NewtonCollisionShape_Geometry()
-//    {
-//
-//    }
-//
-//    void NewtonCollisionShape_Geometry::RegisterObject(Context* context)
-//    {
-//        context->RegisterFactory<NewtonCollisionShape_Geometry>(DEF_PHYSICS_CATEGORY.c_str());
-//        URHO3D_COPY_BASE_ATTRIBUTES(NewtonCollisionShape);
-//        URHO3D_MIXED_ACCESSOR_ATTRIBUTE("Model", GetModelResourceRef, SetModelByResourceRef, ResourceRef, ResourceRef(Model::GetTypeStatic()), AM_DEFAULT);
-//        URHO3D_ACCESSOR_ATTRIBUTE("Model Lod", GetModelLodLevel, SetModelLodLevel, int, 0, AM_DEFAULT);
-//        URHO3D_ACCESSOR_ATTRIBUTE("Hull Tolerance", GetHullTolerance, SetHullTolerance, float, 0.0f, AM_DEFAULT);
-//        
-//
-//
-//    }
-//
-//    void NewtonCollisionShape_Geometry::SetModelByResourceRef(const ResourceRef& ref)
-//    {
-//        auto* cache = GetSubsystem<ResourceCache>();
-//        SetModel(WeakPtr<Model>(cache->GetResource<Model>(ref.name_)));
-//    }
-//
-//    bool NewtonCollisionShape_Geometry::resolveOrCreateTriangleMeshFromModel()
-//{
-//        if (!model_)
-//            return false;
-//
-//        NewtonWorld* world = physicsWorld_->GetNewtonWorld();
-//
-//        /// if the newton mesh is in cache already - return that.
-//        StringHash meshKey = NewtonPhysicsWorld::NewtonMeshKey(model_->GetName(), modelLodLevel_, "");
-//        NewtonMeshObject* cachedMesh = physicsWorld_->GetNewtonMesh(meshKey);
-//        if (cachedMesh)
-//        {
-//            newtonMesh_ = cachedMesh;
-//            return true;
-//        }
-//
-//        Geometry* geo = model_->GetGeometry(modelGeomIndx_, modelLodLevel_);
-//        newtonMesh_ = getCreateTriangleMesh(geo, meshKey);
-//        if(!newtonMesh_)
-//        { 
-//            URHO3D_LOGWARNING("Unable To Create NewtonMesh For Model: " + model_->GetName());
-//            return false;
-//        }
-//
-//        return true;
-//
-//    }
-//
-//    NewtonMeshObject* NewtonCollisionShape_Geometry::getCreateTriangleMesh(Geometry* geom, StringHash meshkey)
-//    {
-//        NewtonMeshObject* cachedMesh = physicsWorld_->GetNewtonMesh(meshkey);
-//        if (cachedMesh)
-//        {
-//            return cachedMesh;
-//        }
-//
-//
-//        const unsigned char* vertexData;
-//        const unsigned char* indexData;
-//        unsigned elementSize, indexSize;
-//		const  ea::vector<VertexElement>* elements;
-//
-//        geom->GetRawData(vertexData, elementSize, indexData, indexSize, elements);
-//
-//        bool hasPosition = VertexBuffer::HasElement(*elements, TYPE_VECTOR3, SEM_POSITION);
-//
-//        if (vertexData && indexData && hasPosition)
-//        {
-//            unsigned vertexStart = geom->GetVertexStart();
-//            unsigned vertexCount = geom->GetVertexCount();
-//            unsigned indexStart = geom->GetIndexStart();
-//            unsigned indexCount = geom->GetIndexCount();
-//
-//            unsigned positionOffset = VertexBuffer::GetElementOffset(*elements, TYPE_VECTOR3, SEM_POSITION);
-//
-//
-//            cachedMesh = physicsWorld_->GetCreateNewtonMesh(meshkey);
-//            NewtonMeshBeginBuild(cachedMesh->mesh);
-//
-//
-//
-//            for (unsigned curIdx = indexStart; curIdx < indexStart + indexCount; curIdx += 3)
-//            {
-//                //get indexes
-//                unsigned i1, i2, i3;
-//                if (indexSize == 2) {
-//                    i1 = *reinterpret_cast<const unsigned short*>(indexData + curIdx * indexSize);
-//                    i2 = *reinterpret_cast<const unsigned short*>(indexData + (curIdx + 1) * indexSize);
-//                    i3 = *reinterpret_cast<const unsigned short*>(indexData + (curIdx + 2) * indexSize);
-//                }
-//                else if (indexSize == 4)
-//                {
-//                    i1 = *reinterpret_cast<const unsigned *>(indexData + curIdx * indexSize);
-//                    i2 = *reinterpret_cast<const unsigned *>(indexData + (curIdx + 1) * indexSize);
-//                    i3 = *reinterpret_cast<const unsigned *>(indexData + (curIdx + 2) * indexSize);
-//                }
-//
-//                //lookup triangle using indexes.
-//                const Vector3& v1 = *reinterpret_cast<const Vector3*>(vertexData + i1 * elementSize + positionOffset);
-//                const Vector3& v2 = *reinterpret_cast<const Vector3*>(vertexData + i2 * elementSize + positionOffset);
-//                const Vector3& v3 = *reinterpret_cast<const Vector3*>(vertexData + i3 * elementSize + positionOffset);
-//
-//
-//                NewtonMeshBeginFace(cachedMesh->mesh);
-//
-//
-//                NewtonMeshAddPoint(cachedMesh->mesh, v1.x_, v1.y_, v1.z_);
-//                NewtonMeshAddPoint(cachedMesh->mesh, v2.x_, v2.y_, v2.z_);
-//                NewtonMeshAddPoint(cachedMesh->mesh, v3.x_, v3.y_, v3.z_);
-//
-//
-//                NewtonMeshEndFace(cachedMesh->mesh);
-//            }
-//
-//            NewtonMeshEndBuild(cachedMesh->mesh);
-//        }
-//
-//        return cachedMesh;
-//    }
-//
-//    void NewtonCollisionShape_Geometry::OnNodeSet(Node* node)
-//    {
-//        NewtonCollisionShape::OnNodeSet(node);
-//
-//        if (node)
-//            autoSetModel();
-//    }
-//
-//    bool NewtonCollisionShape_Geometry::buildNewtonCollision()
-//{
-//        return resolveOrCreateTriangleMeshFromModel();
-//    }
-//
-//
-//    void NewtonCollisionShape_Geometry::autoSetModel()
-//    {
-//        StaticModel* stMdl = node_->GetComponent<StaticModel>();
-//
-//        if (stMdl)
-//        {
-//            SetModel(WeakPtr<Model>( stMdl->GetModel() ));
-//        }
-//    }
-//
-//    Urho3D::ResourceRef NewtonCollisionShape_Geometry::GetModelResourceRef() const
-//    {
-//        return GetResourceRef(model_, Model::GetTypeStatic());
-//    }
+    NewtonCollisionShape_Geometry::NewtonCollisionShape_Geometry(Context* context) : NewtonCollisionShape(context)
+    {
+
+    }
+
+    NewtonCollisionShape_Geometry::~NewtonCollisionShape_Geometry()
+    {
+
+    }
+
+    void NewtonCollisionShape_Geometry::RegisterObject(Context* context)
+    {
+        context->RegisterFactory<NewtonCollisionShape_Geometry>(DEF_PHYSICS_CATEGORY.c_str());
+        URHO3D_COPY_BASE_ATTRIBUTES(NewtonCollisionShape);
+        URHO3D_MIXED_ACCESSOR_ATTRIBUTE("Model", GetModelResourceRef, SetModelByResourceRef, ResourceRef, ResourceRef(Model::GetTypeStatic()), AM_DEFAULT);
+        URHO3D_ACCESSOR_ATTRIBUTE("Model Lod", GetModelLodLevel, SetModelLodLevel, int, 0, AM_DEFAULT);
+        URHO3D_ACCESSOR_ATTRIBUTE("Hull Tolerance", GetHullTolerance, SetHullTolerance, float, 0.0f, AM_DEFAULT);
+        
+
+
+    }
+
+    void NewtonCollisionShape_Geometry::SetModelByResourceRef(const ResourceRef& ref)
+    {
+        auto* cache = GetSubsystem<ResourceCache>();
+        SetModel(WeakPtr<Model>(cache->GetResource<Model>(ref.name_)));
+    }
+
+    bool NewtonCollisionShape_Geometry::resolveOrCreateTriangleMeshFromModel()
+{
+        if (!model_)
+            return false;
+
+        ndWorld* world = physicsWorld_->GetNewtonWorld();
+
+        /// if the newton mesh is in cache already - return that.
+        StringHash meshKey = NewtonPhysicsWorld::NewtonMeshKey(model_->GetName(), modelLodLevel_, "");
+        NewtonMeshObject* cachedMesh = physicsWorld_->GetNewtonMesh(meshKey);
+        if (cachedMesh)
+        {
+            newtonMesh_ = cachedMesh;
+            return true;
+        }
+
+        Geometry* geo = model_->GetGeometry(modelGeomIndx_, modelLodLevel_);
+        newtonMesh_ = getCreateTriangleMesh(geo, meshKey);
+        if(!newtonMesh_)
+        { 
+            URHO3D_LOGWARNING("Unable To Create NewtonMesh For Model: " + model_->GetName());
+            return false;
+        }
+
+        return true;
+    }
+
+    NewtonMeshObject* NewtonCollisionShape_Geometry::getCreateTriangleMesh(Geometry* geom, StringHash meshkey)
+    {
+        NewtonMeshObject* cachedMesh = physicsWorld_->GetNewtonMesh(meshkey);
+        if (cachedMesh)
+        {
+            return cachedMesh;
+        }
+
+
+        const unsigned char* vertexData;
+        const unsigned char* indexData;
+        unsigned elementSize, indexSize;
+		const  ea::vector<VertexElement>* elements;
+
+        geom->GetRawData(vertexData, elementSize, indexData, indexSize, elements);
+
+        bool hasPosition = VertexBuffer::HasElement(*elements, TYPE_VECTOR3, SEM_POSITION);
+
+        if (vertexData && indexData && hasPosition)
+        {
+            unsigned vertexStart = geom->GetVertexStart();
+            unsigned vertexCount = geom->GetVertexCount();
+            unsigned indexStart = geom->GetIndexStart();
+            unsigned indexCount = geom->GetIndexCount();
+
+            unsigned positionOffset = VertexBuffer::GetElementOffset(*elements, TYPE_VECTOR3, SEM_POSITION);
+
+
+            cachedMesh = physicsWorld_->GetCreateNewtonMesh(meshkey);
+           
+            cachedMesh->newtonSoup.Begin();
+
+
+            for (unsigned curIdx = indexStart; curIdx < indexStart + indexCount; curIdx += 3)
+            {
+                //get indexes
+                unsigned i1, i2, i3;
+                if (indexSize == 2) {
+                    i1 = *reinterpret_cast<const unsigned short*>(indexData + curIdx * indexSize);
+                    i2 = *reinterpret_cast<const unsigned short*>(indexData + (curIdx + 1) * indexSize);
+                    i3 = *reinterpret_cast<const unsigned short*>(indexData + (curIdx + 2) * indexSize);
+                }
+                else if (indexSize == 4)
+                {
+                    i1 = *reinterpret_cast<const unsigned *>(indexData + curIdx * indexSize);
+                    i2 = *reinterpret_cast<const unsigned *>(indexData + (curIdx + 1) * indexSize);
+                    i3 = *reinterpret_cast<const unsigned *>(indexData + (curIdx + 2) * indexSize);
+                }
+
+                //lookup triangle using indexes.
+                const Vector3& v1 = *reinterpret_cast<const Vector3*>(vertexData + i1 * elementSize + positionOffset);
+                const Vector3& v2 = *reinterpret_cast<const Vector3*>(vertexData + i2 * elementSize + positionOffset);
+                const Vector3& v3 = *reinterpret_cast<const Vector3*>(vertexData + i3 * elementSize + positionOffset);
+
+                //Todo optimize.
+                ndFloat32 faceVerts[3 * 3];
+                faceVerts[0] = v1.x_;
+                faceVerts[1] = v1.y_;
+                faceVerts[2] = v1.z_;
+                faceVerts[3] = v2.x_;
+                faceVerts[4] = v2.y_;
+                faceVerts[5] = v2.z_;
+                faceVerts[6] = v3.x_;
+                faceVerts[7] = v3.y_;
+                faceVerts[8] = v3.z_;
+
+
+                //cachedMesh->mesh->BeginBuildFace();
+
+                //cachedMesh->mesh->AddPoint(v1.x_, v1.y_, v1.z_);
+                //cachedMesh->mesh->AddPoint(v2.x_, v2.y_, v2.z_);
+                //cachedMesh->mesh->AddPoint(v3.x_, v3.y_, v3.z_);
+
+                //cachedMesh->mesh->EndBuildFace();
+
+                cachedMesh->newtonSoup.AddFace(faceVerts, sizeof(ndFloat32)*3, 3, curIdx);
+
+            }
+
+            cachedMesh->newtonSoup.End(true);
+        }
+
+        return cachedMesh;
+    }
+
+    void NewtonCollisionShape_Geometry::OnNodeSet(Node* node)
+    {
+        NewtonCollisionShape::OnNodeSet(node);
+
+        if (node)
+            autoSetModel();
+    }
+
+    bool NewtonCollisionShape_Geometry::buildNewtonCollision()
+{
+        return resolveOrCreateTriangleMeshFromModel();
+    }
+
+
+    void NewtonCollisionShape_Geometry::autoSetModel()
+    {
+        StaticModel* stMdl = node_->GetComponent<StaticModel>();
+
+        if (stMdl)
+        {
+            SetModel(WeakPtr<Model>( stMdl->GetModel() ));
+        }
+    }
+
+    Urho3D::ResourceRef NewtonCollisionShape_Geometry::GetModelResourceRef() const
+    {
+        return GetResourceRef(model_, Model::GetTypeStatic());
+    }
 
 
 //
@@ -556,33 +560,35 @@ namespace Urho3D {
 //            return false;
 //    }
 //
-//    NewtonCollisionShape_TreeCollision::NewtonCollisionShape_TreeCollision(Context* context) : NewtonCollisionShape_Geometry(context)
-//    {
-//
-//    }
-//
-//    NewtonCollisionShape_TreeCollision::~NewtonCollisionShape_TreeCollision()
-//    {
-//
-//    }
-//
-//    void NewtonCollisionShape_TreeCollision::RegisterObject(Context* context)
-//    {
-//        context->RegisterFactory<NewtonCollisionShape_TreeCollision>(DEF_PHYSICS_CATEGORY.c_str());
-//        URHO3D_COPY_BASE_ATTRIBUTES(NewtonCollisionShape_Geometry);
-//    }
-//
-//    bool NewtonCollisionShape_TreeCollision::buildNewtonCollision()
-//    {
-//        if (!NewtonCollisionShape_Geometry::buildNewtonCollision())
-//            return false;
-//
-//        NewtonWorld* world = physicsWorld_->GetNewtonWorld();
-//
-//        //newtonCollision_ = NewtonCreateConvexHullFromMesh(world, newtonMesh_->mesh, hullTolerance_, 0);
-//        newtonShape_ = NewtonCreateTreeCollisionFromMesh(world, newtonMesh_->mesh, 0);
-//        return true;
-//    }
+    NewtonCollisionShape_TreeCollision::NewtonCollisionShape_TreeCollision(Context* context) : NewtonCollisionShape_Geometry(context)
+    {
+
+    }
+
+    NewtonCollisionShape_TreeCollision::~NewtonCollisionShape_TreeCollision()
+    {
+
+    }
+
+    void NewtonCollisionShape_TreeCollision::RegisterObject(Context* context)
+    {
+        context->RegisterFactory<NewtonCollisionShape_TreeCollision>(DEF_PHYSICS_CATEGORY.c_str());
+        URHO3D_COPY_BASE_ATTRIBUTES(NewtonCollisionShape_Geometry);
+    }
+
+    bool NewtonCollisionShape_TreeCollision::buildNewtonCollision()
+    {
+        if (!NewtonCollisionShape_Geometry::buildNewtonCollision())
+            return false;
+
+        ndWorld* world = physicsWorld_->GetNewtonWorld();
+        
+
+        newtonShape_.SetShape(new ndShapeStatic_bvh(newtonMesh_->newtonSoup));
+
+        
+        return true;
+    }
 //
 
 
