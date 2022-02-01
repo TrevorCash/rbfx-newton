@@ -62,8 +62,8 @@ namespace Urho3D {
     };
 
 
-
-
+    //A Simple Hinge Joint with commandable torque and internal friction coefficient.
+    //Option Angular Limits.
     class URHONEWTON_API PivotJoint : public ndJointBilateralConstraint
     {
     public:
@@ -87,10 +87,9 @@ namespace Urho3D {
 
     private:
         void AlignMatrix();
-        ndFloat32 CalculateAcceleration(ndConstraintDescritor& desc);
+        ndFloat32 CalculateAcceleration(ndConstraintDescritor& desc, float resolvedTorque);
         ndFloat32 ResolvedTorque(ndConstraintDescritor& desc);
         void JacobianDerivative(ndConstraintDescritor& desc);
-
 
     };
 
