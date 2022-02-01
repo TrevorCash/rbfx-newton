@@ -48,7 +48,7 @@ namespace Urho3D {
         URHO3D_ACCESSOR_ATTRIBUTE("Enable Limits", GetLimitsEnabled, SetEnableLimits, bool, true, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Angle Min", GetMinAngle, SetMinAngle, float, -45.0f, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Angle Max", GetMaxAngle, SetMaxAngle, float, 45.0f, AM_DEFAULT);
-        URHO3D_ACCESSOR_ATTRIBUTE("Torque", GetTorque, SetTorque, float, 0.0f, AM_DEFAULT);
+        URHO3D_ACCESSOR_ATTRIBUTE("Torque", GetCommandedTorque, SetCommandedTorque, float, 0.0f, AM_DEFAULT);
     }
 
     void NewtonHingeConstraint::SetMinAngle(float minAngle)
@@ -87,7 +87,8 @@ namespace Urho3D {
             enableLimits_ = enable;
             WakeBodies();
             if (newtonConstraint_) {
-				//static_cast<ndJointHinge*>(newtonConstraint_)->EnableLimits(enableLimits_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad);
+                static_cast<PivotJoint*>(newtonConstraint_)->m_hasLimits = enableLimits_;
+
             }
             else
                 MarkDirty();
@@ -96,7 +97,7 @@ namespace Urho3D {
 
    
 
-    void NewtonHingeConstraint::SetTorque(float torque)
+    void NewtonHingeConstraint::SetCommandedTorque(float torque)
     {
         if (commandedTorque_ != torque)
         {
@@ -105,6 +106,21 @@ namespace Urho3D {
             if (newtonConstraint_)
             {
             	static_cast<PivotJoint*>(newtonConstraint_)->SetTorque(commandedTorque_);
+            }
+            else
+                MarkDirty();
+        }
+    }
+
+    void NewtonHingeConstraint::SetFrictionCoef(float frictionCoef)
+    {
+        if (frictionCoef_ != frictionCoef)
+        {
+            frictionCoef_ = frictionCoef;
+            WakeBodies();
+            if (newtonConstraint_)
+            {
+                static_cast<PivotJoint*>(newtonConstraint_)->m_internalFriction = frictionCoef_;
             }
             else
                 MarkDirty();
@@ -140,8 +156,10 @@ namespace Urho3D {
             return false;
 
 
-
-        //static_cast<PivotJoint*>(newtonConstraint_)->EnableLimits(enableLimits_, minAngle_ * ndDegreeToRad, maxAngle_ * ndDegreeToRad);
+        static_cast<PivotJoint*>(newtonConstraint_)->m_maxLimit = maxAngle_ * ndDegreeToRad;
+        static_cast<PivotJoint*>(newtonConstraint_)->m_minLimit = minAngle_*ndDegreeToRad;
+        static_cast<PivotJoint*>(newtonConstraint_)->m_hasLimits = enableLimits_;
+        static_cast<PivotJoint*>(newtonConstraint_)->m_internalFriction = Abs(frictionCoef_);
         static_cast<PivotJoint*>(newtonConstraint_)->SetTorque(commandedTorque_);
     
 
@@ -154,29 +172,56 @@ namespace Urho3D {
     m_commandedTorque(0.0f),
 	m_minLimit(-1.0f),
     m_maxLimit(1.0f),
-	m_friction(0.0f),
-	m_omega(0.0f)
+	m_limitsFriction(0.0f),
+	m_omega(0.0f),
+    m_angle(0.0f),
+	m_hasLimits(false),
+	m_internalFriction(0.0f)
     {
 
     }
 
-    
 
     void PivotJoint::SetTorque(ndFloat32 newtonMeters)
     {
         m_commandedTorque = newtonMeters;
     }
 
+    ndFloat32 PivotJoint::ResolvedTorque(ndConstraintDescritor& desc)
+    {
+        const ndVector& body0Omega = m_body0->GetOmega();
+        const ndVector& body1Omega = m_body1->GetOmega();
+
+        const ndJacobian& body0Jacobian = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
+        const ndJacobian& body1Jacobian = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
+
+        const ndVector relOmega(body0Omega * body0Jacobian.m_angular - body1Omega * body1Jacobian.m_angular);
+
+
+        ndFloat32 frictionTorqueTerm = m_internalFriction * NewtonToUrhoVec3(relOmega).Length();
+        ndFloat32 torque = m_commandedTorque - frictionTorqueTerm;
+        return torque;
+    }
+
     ndFloat32 PivotJoint::CalculateAcceleration(ndConstraintDescritor& desc)
     {
-        const ndVector& relOmega = m_body1->GetOmega() + m_body0->GetOmega();
+        const ndVector& body0Omega = m_body0->GetOmega();
+        const ndVector& body1Omega = m_body1->GetOmega();
 
-        ndFloat32 currentOmega = relOmega.AddHorizontal().GetScalar();
-        ndFloat32 diff = Sign(m_commandedTorque)*1e9f -  currentOmega;
+        const ndJacobian& body0Jacobian = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
+        const ndJacobian& body1Jacobian = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
+
+        const ndVector relOmega(body0Omega * body0Jacobian.m_angular - body1Omega * body1Jacobian.m_angular);
+
+        ndFloat32 currentOmega = relOmega.GetX();
+        ndFloat32 diff = m_commandedTorque*1e9f - currentOmega;
 
         ndFloat32 accel = diff * desc.m_invTimestep;
         return accel;
     }
+
+
+
 
 
     void PivotJoint::JacobianDerivative(ndConstraintDescritor& desc)
@@ -202,19 +247,62 @@ namespace Urho3D {
 
         AddAngularRowJacobian(desc, matrix1.m_up, angle0);
         AddAngularRowJacobian(desc, matrix1.m_right, angle1);
-		AddAngularRowJacobian(desc, matrix0.m_front, 0.0f);
-
-    	float acc = CalculateAcceleration(desc);
-        float highFric = m_commandedTorque;
-        float lowFric = -m_commandedTorque;
 
 
+        float torque = m_commandedTorque;
 
 
-        SetMotorAcceleration(desc, acc);
+        if (m_hasLimits)
+        {
+            if ((m_minLimit > ndFloat32(-1.e-4f)) && (m_maxLimit < ndFloat32(1.e-4f)))
+            {
+                AddAngularRowJacobian(desc, matrix1.m_front, -m_angle);
+            }
+            else
+            {
+                const ndFloat32 angle = m_angle + m_omega * desc.m_timestep;
+                if (angle < m_minLimit)
+                {
+                    AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
+                    const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
+                    const ndFloat32 penetration = angle - m_minLimit;
+                    const ndFloat32 recoveringAceel = -desc.m_invTimestep * D_HINGE_PENETRATION_RECOVERY_SPEED * dMin(dAbs(penetration / D_HINGE_PENETRATION_LIMIT), ndFloat32(1.0f));
+                    SetMotorAcceleration(desc, stopAccel - recoveringAceel);
+                    SetLowerFriction(desc, -m_limitsFriction);
+                }
+                else if (angle > m_maxLimit)
+                {
+                    AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
+                    const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
+                    const ndFloat32 penetration = angle - m_maxLimit;
+                    const ndFloat32 recoveringAceel = desc.m_invTimestep * D_HINGE_PENETRATION_RECOVERY_SPEED * dMin(dAbs(penetration / D_HINGE_PENETRATION_LIMIT), ndFloat32(1.0f));
+                    SetMotorAcceleration(desc, stopAccel - recoveringAceel);
+                    SetHighFriction(desc, m_limitsFriction);
+                }
+                else 
+                {
+                    AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
+                    SetMotorAcceleration(desc, CalculateAcceleration(desc));
+                   
+                    SetHighFriction(desc, torque);
+                    SetLowerFriction(desc, -torque);
+                  
+                }
+            }
+        }
+        else
+        {
+            AddAngularRowJacobian(desc, matrix0.m_front, 0.0f);
 
-        SetHighFriction(desc, highFric);
-        SetLowerFriction(desc, lowFric);
-        SetDiagonalRegularizer(desc, ndFloat32(0.1f));
+        	SetMotorAcceleration(desc, CalculateAcceleration(desc));
+
+
+            SetHighFriction(desc, torque);
+            SetLowerFriction(desc, -torque);
+          
+
+        }
+
+
     }
 }

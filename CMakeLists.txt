@@ -19,15 +19,15 @@ target_include_directories(rbfx-newton PUBLIC
 Source/NewtonPhysics
 )
 
-include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dCore)
-include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton)
-include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dParticles)
-include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dJoints)
-include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dModels)
-include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dModels/dVehicle)
-include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dModels/dCharacter)
-include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dTinyxml)
-include_directories(ThirdParty/newton-dynamics/newton-4.00/sdk/dCollision)
+target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dCore)
+target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton)
+target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dParticles)
+target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dJoints)
+target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dModels)
+target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dModels/dVehicle)
+target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dModels/dCharacter)
+target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dTinyxml)
+target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dCollision)
 
 
 target_link_libraries(rbfx-newton PUBLIC 
@@ -74,9 +74,4 @@ endif()
 
 target_link_libraries(rbfx-newton PUBLIC Urho3D)
 
-
-
-if (URHO3D_SAMPLES)
-	add_subdirectory(Samples/NewtonPhysicsTests)
-endif ()
 

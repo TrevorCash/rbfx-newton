@@ -36,10 +36,11 @@ namespace Urho3D {
         bool GetLimitsEnabled() const { return enableLimits_; }
 
         /// Set max torque for actuator powered modes.
-        void SetTorque(float torque);
-        float GetTorque()const { return commandedTorque_; }
+        void SetCommandedTorque(float torque);
+        float GetCommandedTorque()const { return commandedTorque_; }
 
-
+        void SetFrictionCoef(float frictionCoef);
+        float GetFrictionCoef() const { return frictionCoef_; }
 
         float GetCurrentAngle();
 
@@ -49,11 +50,10 @@ namespace Urho3D {
 
     protected:
 
-        float frictionTorque_ = 0.0f;
+        float frictionCoef_ = 0.1f;
         bool  enableLimits_ = true;
         float minAngle_ = -45.0f;
         float maxAngle_ = 45.0f;
-
         float commandedTorque_ = 0.0f;
 
         virtual void buildConstraint() override;
@@ -64,28 +64,34 @@ namespace Urho3D {
 
 
 
-    class PivotJoint : public ndJointBilateralConstraint
+    class URHONEWTON_API PivotJoint : public ndJointBilateralConstraint
     {
     public:
         D_CLASS_REFLECTION(PivotJoint);
         PivotJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix);
-    	void SetTorque(ndFloat32 newtonMeters);
-        ndFloat32 GetAngle()
+    	 void SetTorque(ndFloat32 newtonMeters);
+
+        ndFloat32 GetAngle() const
         {
             return m_angle;
         }
-    private:
-        void AlignMatrix();
-        ndFloat32 CalculateAcceleration(ndConstraintDescritor& desc);
 
-        void JacobianDerivative(ndConstraintDescritor& desc);
-    protected:
         ndFloat32 m_commandedTorque;
         ndFloat32 m_minLimit;
         ndFloat32 m_maxLimit;
+        bool m_hasLimits;
         ndFloat32 m_angle;
         ndFloat32 m_omega;
-        ndFloat32 m_friction;
+        ndFloat32 m_limitsFriction;
+        ndFloat32 m_internalFriction;
+
+    private:
+        void AlignMatrix();
+        ndFloat32 CalculateAcceleration(ndConstraintDescritor& desc);
+        ndFloat32 ResolvedTorque(ndConstraintDescritor& desc);
+        void JacobianDerivative(ndConstraintDescritor& desc);
+
+
     };
 
 
