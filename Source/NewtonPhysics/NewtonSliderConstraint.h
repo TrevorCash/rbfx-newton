@@ -28,6 +28,7 @@ namespace Urho3D {
 
         //Get the relative displacement of the slider
         float GetDisplacement() const;
+        float GetVel() const;
 
         ///Set the distance limits the bodies with be able to slide. lower limit should be negative
         void SetSliderLimits(float lowerLimit, float upperLimit);

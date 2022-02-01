@@ -131,7 +131,7 @@ namespace Urho3D {
     {
         if (newtonConstraint_)
         {
-        	return static_cast<PivotJoint*>(newtonConstraint_)->m_angle;
+        	return static_cast<PivotJoint*>(newtonConstraint_)->m_angle * ndRadToDegree;
         }
         return 0.0f;
     }
@@ -148,6 +148,53 @@ namespace Urho3D {
     void NewtonHingeConstraint::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
     {
         NewtonConstraint::DrawDebugGeometry(debug, depthTest);
+
+        if (enableLimits_) 
+        {
+            constexpr float lenScale = 4.0f;
+            float minIndicator = lenScale * minAngle_ / 360.0f;
+            float maxIndicator = lenScale * maxAngle_ / 360.0f;
+            float curIndictor = lenScale * GetAngle() / 360.0f;
+
+            float limitSize = maxIndicator / lenScale - minIndicator / lenScale;
+            limitSize = Clamp(limitSize, 0.1f, 0.5f);
+
+
+            debug->AddLine(GetOwnWorldFrame() * Vector3(minIndicator, 0, 0), GetOwnWorldFrame().Translation(), Color::RED, depthTest);
+            debug->AddLine(GetOwnWorldFrame().Translation(), GetOwnWorldFrame() * Vector3(maxIndicator, 0, 0), Color::BLUE, depthTest);
+
+            Vector3 a = GetOwnWorldFrame() * (Vector3(0, 1, -1) * limitSize + Vector3(minIndicator, 0, 0));
+            Vector3 b = GetOwnWorldFrame() * (Vector3(0, 1, 1) * limitSize + Vector3(minIndicator, 0, 0));
+            Vector3 c = GetOwnWorldFrame() * (Vector3(0, -1, 1) * limitSize + Vector3(minIndicator, 0, 0));
+            Vector3 d = GetOwnWorldFrame() * (Vector3(0, -1, -1) * limitSize + Vector3(minIndicator, 0, 0));
+
+            Vector3 a2 = GetOwnWorldFrame() * (Vector3(0, 1, -1) * limitSize + Vector3(maxIndicator, 0, 0));
+            Vector3 b2 = GetOwnWorldFrame() * (Vector3(0, 1, 1) * limitSize + Vector3(maxIndicator, 0, 0));
+            Vector3 c2 = GetOwnWorldFrame() * (Vector3(0, -1, 1) * limitSize + Vector3(maxIndicator, 0, 0));
+            Vector3 d2 = GetOwnWorldFrame() * (Vector3(0, -1, -1) * limitSize + Vector3(maxIndicator, 0, 0));
+
+
+            Vector3 a3 = GetOwnWorldFrame() * (Vector3(0, 1, -1) * limitSize * 0.5f + Vector3(curIndictor, 0, 0));
+            Vector3 b3 = GetOwnWorldFrame() * (Vector3(0, 1, 1) * limitSize * 0.5f + Vector3(curIndictor, 0, 0));
+            Vector3 c3 = GetOwnWorldFrame() * (Vector3(0, -1, 1) * limitSize * 0.5f + Vector3(curIndictor, 0, 0));
+            Vector3 d3 = GetOwnWorldFrame() * (Vector3(0, -1, -1) * limitSize * 0.5f + Vector3(curIndictor, 0, 0));
+
+
+
+            Color col1 = Color::RED;
+            col1.a_ = 0.5f;
+            Color col2 = Color::BLUE;
+            col2.a_ = 0.5f;
+            Color col3 = Color::GREEN;
+            col3.a_ = 0.5f;
+            debug->AddPolygon(a, b, c, d, col1, depthTest);
+            debug->AddPolygon(a2, b2, c2, d2, col2, depthTest);
+            debug->AddPolygon(a3, b3, c3, d3, col3, depthTest);
+        }
+
+        debug->AddLine(GetOwnWorldFrame().Translation(), GetOwnWorldFrame() * Vector3(commandedTorque_, 0, 0), Color::YELLOW, depthTest);
+
+
     }
 
     void NewtonHingeConstraint::buildConstraint()

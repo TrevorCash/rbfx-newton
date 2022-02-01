@@ -27,15 +27,27 @@ namespace Urho3D
         URHO3D_COPY_BASE_ATTRIBUTES(NewtonConstraint);
     	URHO3D_ACCESSOR_ATTRIBUTE("Slider Upper Limit", GetSliderUpperLimit, SetSliderUpperLimit, float, 0.0f, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Slider Lower Limit", GetSliderLowerLimit, SetSliderLowerLimit, float, 0.0f, AM_DEFAULT);
-        URHO3D_ACCESSOR_ATTRIBUTE("Slider Friction", GetSliderFriction, SetSliderFriction, float, 0.0f, AM_DEFAULT);
+        URHO3D_ACCESSOR_ATTRIBUTE("Slider Friction",    GetSliderFriction, SetSliderFriction,     float, 0.0f, AM_DEFAULT);
     }
 
     
-    float NewtonSliderConstraint::GetSliderPosition() const
+    float NewtonSliderConstraint::GetDisplacement() const
     {
         if (newtonConstraint_)
         {
-            return static_cast<ndJointSlider*>(newtonConstraint_)->GetPosit();
+            return static_cast<SliderJoint*>(newtonConstraint_)->m_dist;
+        }
+        else
+        {
+            return 0.0f;
+        }
+    }
+
+    float NewtonSliderConstraint::GetVel() const
+    {
+        if (newtonConstraint_)
+        {
+            return static_cast<SliderJoint*>(newtonConstraint_)->m_vel;
         }
         else
         {
@@ -96,6 +108,37 @@ namespace Urho3D
 	void Urho3D::NewtonSliderConstraint::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
     {
         NewtonConstraint::DrawDebugGeometry(debug, depthTest);
+
+
+        float limitSize = sliderLimits_.y_ - sliderLimits_.x_;
+        limitSize = Clamp(limitSize, 0.1f, 0.5f);
+
+
+        //draw limits
+        if (limitSize < M_LARGE_VALUE) 
+        {
+            debug->AddLine(GetOwnWorldFrame() * Vector3(sliderLimits_.x_, 0, 0), GetOwnWorldFrame().Translation(), Color::RED, depthTest);
+            debug->AddLine(GetOwnWorldFrame().Translation(), GetOwnWorldFrame() * Vector3(sliderLimits_.y_, 0, 0), Color::BLUE, depthTest);
+
+            Vector3 a = GetOwnWorldFrame() * (Vector3(0, 1, -1) * limitSize + Vector3(sliderLimits_.x_, 0, 0));
+            Vector3 b = GetOwnWorldFrame() * (Vector3(0, 1, 1) * limitSize + Vector3(sliderLimits_.x_, 0, 0));
+            Vector3 c = GetOwnWorldFrame() * (Vector3(0, -1, 1) * limitSize + Vector3(sliderLimits_.x_, 0, 0));
+            Vector3 d = GetOwnWorldFrame() * (Vector3(0, -1, -1) * limitSize + Vector3(sliderLimits_.x_, 0, 0));
+
+            Vector3 a2 = GetOwnWorldFrame() * (Vector3(0, 1, -1) * limitSize + Vector3(sliderLimits_.y_, 0, 0));
+            Vector3 b2 = GetOwnWorldFrame() * (Vector3(0, 1, 1) * limitSize + Vector3(sliderLimits_.y_, 0, 0));
+            Vector3 c2 = GetOwnWorldFrame() * (Vector3(0, -1, 1) * limitSize + Vector3(sliderLimits_.y_, 0, 0));
+            Vector3 d2 = GetOwnWorldFrame() * (Vector3(0, -1, -1) * limitSize + Vector3(sliderLimits_.y_, 0, 0));
+
+
+            Color col1 = Color::RED;
+            col1.a_ = 0.5f;
+            Color col2 = Color::BLUE;
+            col2.a_ = 0.5f;
+            debug->AddPolygon(a, b, c, d, col1, depthTest);
+            debug->AddPolygon(a2, b2, c2, d2, col2, depthTest);
+        }
+
     }
 
 	void NewtonSliderConstraint::SetCommandedForce(float force)
@@ -135,8 +178,11 @@ namespace Urho3D
     }
 
 
-    SliderJoint::SliderJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix0, const ndMatrix& globalMatrix1)
-        :ndJointBilateralConstraint(6, body0, body1, globalMatrix0, globalMatrix1)
+    SliderJoint::SliderJoint(ndBodyKinematic* const body0, 
+        ndBodyKinematic* const body1,
+        const ndMatrix& globalMatrix0,
+        const ndMatrix& globalMatrix1)
+        : ndJointBilateralConstraint(6, body0, body1, globalMatrix0, globalMatrix1)
         , m_dist(ndFloat32(0.0f))
         , m_vel(ndFloat32(0.0f))
         , m_minLimit(-FLT_MAX)
@@ -207,7 +253,8 @@ namespace Urho3D
             AddLinearRowJacobian(desc, matrix0.m_posit, matrix0.m_posit, matrix1.m_front);
             const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
             const ndFloat32 penetration = x - m_minLimit;
-            const ndFloat32 recoveringAceel = -desc.m_invTimestep * D_SLIDER_PENETRATION_RECOVERY_SPEED * dMin(dAbs(penetration / D_SLIDER_PENETRATION_LIMIT), ndFloat32(1.0f));
+            const ndFloat32 recoveringAceel = -desc.m_invTimestep * D_SLIDER_PENETRATION_RECOVERY_SPEED
+        	* dMin(dAbs(penetration / D_SLIDER_PENETRATION_LIMIT), ndFloat32(1.0f));
             SetMotorAcceleration(desc, stopAccel - recoveringAceel);
             SetLowerFriction(desc, 0);
         }
@@ -216,7 +263,8 @@ namespace Urho3D
             AddLinearRowJacobian(desc, matrix0.m_posit, matrix0.m_posit, matrix1.m_front);
             const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
             const ndFloat32 penetration = x - m_maxLimit;
-            const ndFloat32 recoveringAceel = desc.m_invTimestep * D_SLIDER_PENETRATION_RECOVERY_SPEED * dMin(dAbs(penetration / D_SLIDER_PENETRATION_LIMIT), ndFloat32(1.0f));
+            const ndFloat32 recoveringAceel = desc.m_invTimestep * D_SLIDER_PENETRATION_RECOVERY_SPEED
+        	* dMin(dAbs(penetration / D_SLIDER_PENETRATION_LIMIT), ndFloat32(1.0f));
             SetMotorAcceleration(desc, stopAccel - recoveringAceel);
             SetHighFriction(desc, 0);
         }
