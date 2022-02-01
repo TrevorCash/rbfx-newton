@@ -42,8 +42,11 @@ namespace Urho3D {
         void SetFrictionCoef(float frictionCoef);
         float GetFrictionCoef() const { return frictionCoef_; }
 
-        float GetCurrentAngle();
+        //Get Relative Angle
+        float GetAngle();
 
+        //Get Relative Omega
+        float GetOmega() const;
 
 
         virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
@@ -68,13 +71,8 @@ namespace Urho3D {
     {
     public:
         D_CLASS_REFLECTION(PivotJoint);
-        PivotJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix);
-    	 void SetTorque(ndFloat32 newtonMeters);
-
-        ndFloat32 GetAngle() const
-        {
-            return m_angle;
-        }
+        PivotJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix0, const ndMatrix& globalMatrix1);
+    	void SetTorque(ndFloat32 newtonMeters);
 
         ndFloat32 m_commandedTorque;
         ndFloat32 m_minLimit;
@@ -82,13 +80,11 @@ namespace Urho3D {
         bool m_hasLimits;
         ndFloat32 m_angle;
         ndFloat32 m_omega;
-        ndFloat32 m_limitsFriction;
-        ndFloat32 m_internalFriction;
+        ndFloat32 m_internalFrictionCoef;
 
     private:
-        void AlignMatrix();
         ndFloat32 CalculateAcceleration(ndConstraintDescritor& desc, float resolvedTorque);
-        ndFloat32 ResolvedTorque(ndConstraintDescritor& desc);
+        ndFloat32 FinalTorque(ndConstraintDescritor& desc);
         void JacobianDerivative(ndConstraintDescritor& desc);
 
     };

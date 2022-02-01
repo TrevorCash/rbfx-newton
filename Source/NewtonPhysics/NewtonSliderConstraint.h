@@ -8,9 +8,6 @@ namespace Urho3D {
 
     class Context;
 
-#define SLIDER_CONSTRAINT_DEF_SPRING_COEF 100.0f
-#define SLIDER_CONSTRAINT_DEF_DAMPER_COEF 1.0f
-#define SLIDER_CONSTRAINT_DEF_RELAX 0.9f
 
     class URHONEWTON_API NewtonSliderConstraint : public NewtonConstraint
     {
@@ -27,16 +24,10 @@ namespace Urho3D {
 
         virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
 
+        void SetCommandedForce(float force);
 
-
-
-        void SetEnableSliderLimits(bool enableLowerLimit, bool enableUpperLimit);
-        void SetSliderUpperLimitEnable(bool enable);
-        bool GetSliderUpperLimitEnabled() const { return enableUpperSliderLimit_; }
-        void SetSliderLowerLimitEnable(bool enable);
-        bool GetSliderLowerLimitEnabled() const { return enableLowerSliderLimit_; }
-
-        float GetSliderPosition() const;
+        //Get the relative displacement of the slider
+        float GetDisplacement() const;
 
         ///Set the distance limits the bodies with be able to slide. lower limit should be negative
         void SetSliderLimits(float lowerLimit, float upperLimit);
@@ -45,96 +36,55 @@ namespace Urho3D {
         void SetSliderLowerLimit(float lowerLimit);
         float GetSliderLowerLimit() const { return sliderLimits_.x_; }
 
-        ///Set the friction for sliding.
+        ///Set the sliding friction coefficient
         void SetSliderFriction(float friction);
-        float GetSliderFriction() const { return sliderFriction_; }
-
-        /// enable/disable spring damper on the linear (slide) motion of the constraint.
-        void SetEnableSliderSpringDamper(bool enable);
-        bool GetEnableSliderSpringDamper() const { return enableSliderSpringDamper_; }
-
-
-        void SetSliderSpringCoefficient(float springCoef);
-        float GetSliderSpringCoefficient() const { return sliderSpringCoef_; }
-
-        void SetSliderDamperCoefficient(float damperCoef);
-        float GetSliderDamperCoefficient() const { return sliderDamperCoef_; }
-
-        void SetSliderSpringDamperRelaxation(float relaxation);
-        float GetSliderSpringDamperRelaxation() const { return sliderRelaxation_; }
-
-
-
-
-
-
-        ///Twist limits
-        void SetEnableTwistLimits(bool enableUpperLimit, bool enableLowerLimit);
-        void SetTwistUpperLimitEnable(bool enable);
-        bool GetTwistUpperLimitEnabled() const { return enableUpperTwistLimit_; }
-        void SetTwistLowerLimitEnable(bool enable);
-        bool GetTwistLowerLimitEnabled() const { return enableLowerTwistLimit_; }
-
-
-
-        void SetTwistLimits(float lowerLimit, float upperLimit);
-        void SetTwistUpperLimit(float upperLimit);
-        float GetTwistUpperLimit() const { return twistLimits_.y_; }
-        void SetTwistLowerLimit(float lowerLimit);
-        float GetTwistLowerLimit() const { return twistLimits_.x_; }
-
-
-        void SetEnableTwistSpringDamper(bool enable);
-        bool GetEnableTwistSpringDamper() const { return enableTwistSpringDamper_; }
-
-
-        void SetTwistSpringCoefficient(float springCoef);
-        float GetTwistSpringCoefficient() const { return twistSpringCoef_; }
-
-
-        void SetTwistDamperCoefficient(float damperCoef);
-        float GetTwistDamperCoefficient() const { return twistDamperCoef_; }
-
-
-        void SetTwistSpringDamperRelaxation(float relaxation);
-        float GetTwistSpringDamperRelaxation() const { return twistRelaxation_; }
-
-		void SetTwistFriction(float friction);
-		float GetTwistFriction() const { return twistFriction_; }
+        float GetSliderFriction() const { return frictionCoef_; }
 
     protected:
 
+        float commandedForce_ = 0.0f;
         bool enableLowerSliderLimit_ = false;
         bool enableUpperSliderLimit_ = false;
-        Vector2 sliderLimits_;
-
-        bool enableSliderSpringDamper_ = false;
-        float sliderRelaxation_ = SLIDER_CONSTRAINT_DEF_RELAX;
-        float sliderSpringCoef_ = SLIDER_CONSTRAINT_DEF_SPRING_COEF;
-        float sliderDamperCoef_ = SLIDER_CONSTRAINT_DEF_DAMPER_COEF;
-
-        float sliderFriction_ = 0.0f;
+        Vector2 sliderLimits_ = Vector2(-FLT_MAX, FLT_MAX);
 
 
-
-        bool enableLowerTwistLimit_ = false;
-        bool enableUpperTwistLimit_ = false;
-        Vector2 twistLimits_;
-
-        bool enableTwistSpringDamper_ = false;
-        float twistRelaxation_ = SLIDER_CONSTRAINT_DEF_RELAX;
-        float twistSpringCoef_ = SLIDER_CONSTRAINT_DEF_SPRING_COEF;
-        float twistDamperCoef_ = SLIDER_CONSTRAINT_DEF_DAMPER_COEF;
-
-		float twistFriction_ = 0.0f;
-
-        void applySliderLimits();
-        void applyTwistLimits();
+        float frictionCoef_ = 0.0f;
 
         virtual void buildConstraint() override;
 
         bool applyAllJointParams();
     };
+
+
+
+
+    //A Simple slider Joint with commandable torque and internal friction coefficient with linear limits.
+    class URHONEWTON_API SliderJoint : public ndJointBilateralConstraint
+    {
+    public:
+        D_CLASS_REFLECTION(SliderJoint);
+        SliderJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix0, const ndMatrix& globalMatrix1);
+
+        ndFloat32 m_commandedForce;
+        ndFloat32 m_minLimit;
+        ndFloat32 m_maxLimit;
+        ndFloat32 m_internalFrictionCoef;
+        ndFloat32 m_vel;
+        ndFloat32 m_dist;
+
+    private:
+        ndFloat32 CalculateAcceleration(ndConstraintDescritor& desc, float resolvedTorque);
+        ndFloat32 FinalForce(ndConstraintDescritor& desc);
+        void JacobianDerivative(ndConstraintDescritor& desc);
+
+
+
+    };
+
+
+
+
+
 
 
 

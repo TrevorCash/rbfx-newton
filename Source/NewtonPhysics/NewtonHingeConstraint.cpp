@@ -120,18 +120,27 @@ namespace Urho3D {
             WakeBodies();
             if (newtonConstraint_)
             {
-                static_cast<PivotJoint*>(newtonConstraint_)->m_internalFriction = frictionCoef_;
+                static_cast<PivotJoint*>(newtonConstraint_)->m_internalFrictionCoef = frictionCoef_;
             }
             else
                 MarkDirty();
         }
     }
 
-    float NewtonHingeConstraint::GetCurrentAngle()
+    float NewtonHingeConstraint::GetAngle()
     {
         if (newtonConstraint_)
         {
-        	return static_cast<PivotJoint*>(newtonConstraint_)->GetAngle();
+        	return static_cast<PivotJoint*>(newtonConstraint_)->m_angle;
+        }
+        return 0.0f;
+    }
+
+    float NewtonHingeConstraint::GetOmega() const
+    {
+        if (newtonConstraint_)
+        {
+            return static_cast<PivotJoint*>(newtonConstraint_)->m_omega;
         }
         return 0.0f;
     }
@@ -146,7 +155,8 @@ namespace Urho3D {
         newtonConstraint_ = new PivotJoint(
             GetOwnNewtonBodyBuild()->GetAsBodyKinematic(), 
             GetOtherNewtonBodyBuild()->GetAsBodyKinematic(), 
-            UrhoToNewton(GetOwnBuildWorldFrame())
+            UrhoToNewton(GetOwnBuildWorldFrame()),
+            UrhoToNewton(GetOtherBuildWorldFrame())
             );
     }
 
@@ -157,9 +167,9 @@ namespace Urho3D {
 
 
         static_cast<PivotJoint*>(newtonConstraint_)->m_maxLimit = maxAngle_ * ndDegreeToRad;
-        static_cast<PivotJoint*>(newtonConstraint_)->m_minLimit = minAngle_*ndDegreeToRad;
+        static_cast<PivotJoint*>(newtonConstraint_)->m_minLimit = minAngle_ * ndDegreeToRad;
         static_cast<PivotJoint*>(newtonConstraint_)->m_hasLimits = enableLimits_;
-        static_cast<PivotJoint*>(newtonConstraint_)->m_internalFriction = Abs(frictionCoef_);
+        static_cast<PivotJoint*>(newtonConstraint_)->m_internalFrictionCoef = Abs(frictionCoef_);
         static_cast<PivotJoint*>(newtonConstraint_)->SetTorque(commandedTorque_);
     
 
@@ -167,17 +177,15 @@ namespace Urho3D {
     }
 
 
-    PivotJoint::PivotJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix) :
-	ndJointBilateralConstraint(7, body0, body1, globalMatrix ),
+    PivotJoint::PivotJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix0, const ndMatrix& globalMatrix1) :
+	ndJointBilateralConstraint(7, body0, body1, globalMatrix0, globalMatrix1),
     m_commandedTorque(0.0f),
 	m_minLimit(-1.0f),
     m_maxLimit(1.0f),
-	m_limitsFriction(0.1f),
     m_angle(0.0f),
 	m_hasLimits(false),
-	m_internalFriction(0.0f)
+	m_internalFrictionCoef(0.0f)
     {
-
     }
 
 
@@ -186,18 +194,17 @@ namespace Urho3D {
         m_commandedTorque = newtonMeters;
     }
 
-    ndFloat32 PivotJoint::ResolvedTorque(ndConstraintDescritor& desc)
+    ndFloat32 PivotJoint::FinalTorque(ndConstraintDescritor& desc)
     {
-        ndFloat32 frictionTorqueTerm = m_internalFriction * m_omega;
+        ndFloat32 frictionTorqueTerm = m_internalFrictionCoef * m_omega;
         ndFloat32 torque = m_commandedTorque - frictionTorqueTerm;
         return torque;
     }
 
     ndFloat32 PivotJoint::CalculateAcceleration(ndConstraintDescritor& desc, float resolvedTorque)
     {
-        //"Lead" the angular velocity 
-        ndFloat32 diff = m_omega + 1e2f*Sign(resolvedTorque);
-
+        //"Lead" the angular velocity so the torque always the limiting factor.
+        ndFloat32 diff = m_omega + 1e3f*Sign(resolvedTorque);
         ndFloat32 accel = diff * desc.m_invTimestep;
         return accel;
     }
@@ -233,7 +240,7 @@ namespace Urho3D {
         AddAngularRowJacobian(desc, matrix1.m_right, angle1);
 
 
-        float torque = ResolvedTorque(desc);
+        float torque = FinalTorque(desc);
 
 
         if (m_hasLimits)
@@ -252,7 +259,7 @@ namespace Urho3D {
                     const ndFloat32 penetration = m_angle - m_minLimit;
                     const ndFloat32 recoveringAceel = -desc.m_invTimestep * D_HINGE_PENETRATION_RECOVERY_SPEED * dMin(dAbs(penetration / D_HINGE_PENETRATION_LIMIT), ndFloat32(1.0f));
                     SetMotorAcceleration(desc, stopAccel - recoveringAceel);
-                    SetLowerFriction(desc, -m_limitsFriction);
+                    SetLowerFriction(desc, 0);
                 }
                 else if (m_angle > m_maxLimit)
                 {
@@ -261,7 +268,7 @@ namespace Urho3D {
                     const ndFloat32 penetration = m_angle - m_maxLimit;
                     const ndFloat32 recoveringAceel = desc.m_invTimestep * D_HINGE_PENETRATION_RECOVERY_SPEED * dMin(dAbs(penetration / D_HINGE_PENETRATION_LIMIT), ndFloat32(1.0f));
                     SetMotorAcceleration(desc, stopAccel - recoveringAceel);
-                    SetHighFriction(desc, m_limitsFriction);
+                    SetHighFriction(desc, 0);
                 }
                 else 
                 {
