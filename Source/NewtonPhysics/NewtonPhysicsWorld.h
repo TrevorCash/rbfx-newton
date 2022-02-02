@@ -216,7 +216,7 @@ namespace Urho3D
         void Update(float timestep, bool isRootUpdate);
 
         void BuildAndUpdateNewtonModels();
-        void CleanNewtonModels();
+        void CleanNewtonModels() const;
 
         virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
 
@@ -267,10 +267,6 @@ namespace Urho3D
 
         void freeWorld();
 
-        void addToFreeQueue(ndBody* newtonBody);
-        void addToFreeQueue(ndConstraint* newtonConstraint);
-        void addToFreeQueue(ndShapeInstance* newtonShape);
-        void addToFreeQueue(ndModel* newtonShape);
 
 
 

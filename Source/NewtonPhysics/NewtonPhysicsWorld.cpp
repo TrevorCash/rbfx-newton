@@ -384,8 +384,8 @@ namespace Urho3D {
 
     void NewtonPhysicsWorld::removeRigidBody(NewtonRigidBody* body)
     {
-
 		rigidBodyComponentList.erase_at(rigidBodyComponentList.index_of(WeakPtr<NewtonRigidBody>(body)));
+        body->freeBody();
     }
 
     void NewtonPhysicsWorld::addConstraint(NewtonConstraint* constraint)
@@ -399,6 +399,7 @@ namespace Urho3D {
     void NewtonPhysicsWorld::removeConstraint(NewtonConstraint* constraint)
     {
 		constraintList.erase_at(constraintList.index_of(WeakPtr<NewtonConstraint>(constraint)));
+        constraint->freeInternal();
     }
 
     void NewtonPhysicsWorld::addModel(NewtonModel* model)
@@ -409,12 +410,13 @@ namespace Urho3D {
     void NewtonPhysicsWorld::removeModel(NewtonModel* model)
     {
         modelList.erase_at(modelList.index_of(WeakPtr<NewtonModel>(model)));
+        model->freeModel();
     }
 
 
     void NewtonPhysicsWorld::freeWorld()
     {
-        //wait for update to finish if in async mode so we can safely clean up.
+        //wait for update to finish if in async mode 
 		if (newtonWorld_)
 			newtonWorld_->Sync();
 
@@ -438,7 +440,7 @@ namespace Urho3D {
 
 
         //free meshes in mesh cache
-        //newtonMeshCache_.clear();
+        newtonMeshCache_.clear();
 
         //free the actual memory
         freePhysicsInternals();
@@ -455,20 +457,6 @@ namespace Urho3D {
 
 
 
-    void NewtonPhysicsWorld::addToFreeQueue(ndBody* newtonBody)
-    {
-        freeBodyQueue_.push_front(newtonBody);
-    }
-
-    void NewtonPhysicsWorld::addToFreeQueue(ndConstraint* newtonConstraint)
-    {
-        freeConstraintQueue_.push_front(newtonConstraint);
-    }
-
-    void NewtonPhysicsWorld::addToFreeQueue(ndShapeInstance* newtonShape)
-    {
-        freeShapeQueue_.push_front(newtonShape);
-    }
 
     void NewtonPhysicsWorld::applyNewtonWorldSettings()
     {
@@ -661,6 +649,13 @@ namespace Urho3D {
 				constraint->reEvalConstraint();
 			}
         }
+        for (NewtonModel* model : modelList)
+        {
+            if (model->GetDirty()) {
+                model->reBuild();
+            }
+        }
+
 
 
         for (NewtonRigidBody* rigBody : rigidBodyComponentList)
@@ -694,7 +689,7 @@ namespace Urho3D {
         CleanNewtonModels();
     }
 
-    void NewtonPhysicsWorld::CleanNewtonModels()
+    void NewtonPhysicsWorld::CleanNewtonModels() const
     {
         //remove empty models
         ea::vector modelListCopy = modelList;
@@ -759,6 +754,13 @@ namespace Urho3D {
 			delete body;
         }
         freeBodyQueue_.clear();
+
+
+        for (ndModel* model : freeModelQueue_)
+        {
+            delete model;
+        }
+        freeModelQueue_.clear();
 
 
 

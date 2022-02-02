@@ -726,7 +726,7 @@ namespace Urho3D {
     {
         if (newtonBody_ != nullptr) {
 			physicsWorld_->GetNewtonWorld()->RemoveBody(newtonBody_);
-            physicsWorld_->addToFreeQueue(newtonBody_);
+            physicsWorld_->freeBodyQueue_.push_back(newtonBody_);
             newtonBody_ = nullptr;
         }
     }
@@ -969,20 +969,16 @@ namespace Urho3D {
             physicsWorld_->markRigidBodiesNeedSorted();
 
 
+
             prevNode_ = node;
         }
         else
         {
 
             if (physicsWorld_) {
-                physicsWorld_->WaitForUpdateFinished();
                 physicsWorld_->removeRigidBody(this);
             }
 
-
-
-
-            freeBody();
 
             prevNode_ = nullptr;
         }

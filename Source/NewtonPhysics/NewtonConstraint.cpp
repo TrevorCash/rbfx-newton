@@ -24,6 +24,7 @@
 #include "NewtonPhysicsWorld.h"
 #include "UrhoNewtonConversions.h"
 #include "NewtonDebugDrawing.h"
+#include "NewtonModel.h"
 
 
 #include "Urho3D/Core/Context.h"
@@ -144,9 +145,6 @@ namespace Urho3D {
 
     void NewtonConstraint::MarkDirty(bool dirty /*= true*/)
     {
-		//if (dirty)
-		//	URHO3D_LOGINFO("constraint: " + ea::to_string((int)(void*)this) + " marked dirty");
-
         dirty_ = dirty;
     }
 
@@ -653,7 +651,7 @@ namespace Urho3D {
     {
         if (newtonConstraint_ != nullptr) {
 			
-            physicsWorld_->addToFreeQueue(newtonConstraint_);
+            physicsWorld_->freeConstraintQueue_.push_back(newtonConstraint_);
             newtonConstraint_ = nullptr;
         }
     }
