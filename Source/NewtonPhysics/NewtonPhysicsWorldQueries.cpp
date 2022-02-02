@@ -86,16 +86,16 @@ namespace Urho3D {
 
         while (bodyQueue.size())
         {
-            if (!bodyQueue.front()->graphTraverseFlag)
+            if (!bodyQueue.back()->graphTraverseFlag)
             {
-                bodyQueue.front()->graphTraverseFlag = true;
-                rigidBodiesOUT.push_back(bodyQueue.front());
+                bodyQueue.back()->graphTraverseFlag = true;
+                rigidBodiesOUT.push_back(bodyQueue.back());
 
 
                 ea::vector<NewtonConstraint*> constraintsHere;
-                rigidBody->GetConnectedContraints(constraintsHere);
+                bodyQueue.back()->GetConnectedContraints(constraintsHere);
                 ea::vector<NewtonRigidBody*> bodiesHere;
-                rigidBody->GetConnectedBodies(bodiesHere);
+                bodyQueue.back()->GetConnectedBodies(bodiesHere);
 
                 for (auto* constraint : constraintsHere)
                 {
@@ -115,6 +115,7 @@ namespace Urho3D {
             }
             bodyQueue.pop_back();
         }
+
 
         //restore flags.
         for (auto* body : rigidBodiesOUT)

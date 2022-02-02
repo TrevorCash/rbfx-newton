@@ -19,11 +19,12 @@ namespace  Urho3D
 	{
 	}
 
-	void NewtonModel::Grow(NewtonConstraint* constraint)
+	void NewtonModel::GrowFrom(NewtonConstraint* constraint)
 	{
         constraint->model_ = this;
-        ea::vector<NewtonRigidBody*> bodies;
-        ea::vector<NewtonConstraint*> constraints;
+        bodies.clear();
+        constraints.clear();
+
         physicsWorld_->GetConnectedPhysicsComponents(constraint->GetOwnBody(), bodies, constraints);
 
         for (auto* body : bodies)
@@ -34,23 +35,26 @@ namespace  Urho3D
 
 	}
 
+	void NewtonModel::Grow()
+	{
+        GrowFrom(constraints.front());
+	}
+
 	inline void NewtonModel::OnSceneSet(Scene* scene)
 	{
 		Component::OnSceneSet(scene);
         if (scene)
         {
             ///auto create physics world
-            NewtonPhysicsWorld* physicsWorld_ = WeakPtr<NewtonPhysicsWorld>(scene->GetComponent<NewtonPhysicsWorld>());
+            physicsWorld_ = WeakPtr<NewtonPhysicsWorld>(scene->GetComponent<NewtonPhysicsWorld>());
 
             physicsWorld_->addModel(this);
             scene->AddListener(this);
         }
         else
         {
-            //TODO - remove
-            if (physicsWorld_) {
-                physicsWorld_->WaitForUpdateFinished();
-            }
+            if (!physicsWorld_.Expired())
+				physicsWorld_->removeModel(this);
         }
 	}
 }

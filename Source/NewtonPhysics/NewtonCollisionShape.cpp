@@ -327,11 +327,8 @@ namespace Urho3D {
         }
         else
         {
-            if (physicsWorld_) {
-                physicsWorld_->WaitForUpdateFinished();
-
-            }
-
+            if(!physicsWorld_.Expired())
+				physicsWorld_->removeCollisionShape(this);
         }
 
     }

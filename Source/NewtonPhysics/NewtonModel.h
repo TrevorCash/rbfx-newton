@@ -24,18 +24,21 @@ namespace Urho3D
 
         NewtonModel(Context* context);
 
-
-        void Grow(NewtonConstraint* constraint);
-
-
-
-
+        void GrowFrom(NewtonConstraint* constraint);
+        void Grow();
+        bool IsEmpty() {
+            return constraints.empty();
+        }
     protected:
 	    void OnSceneSet(Scene* scene) override;
 
-        
-        ndModel* newtonModel = nullptr;
-        NewtonPhysicsWorld* physicsWorld_ = nullptr;
+        ea::vector<NewtonRigidBody*> bodies;
+        ea::vector<NewtonConstraint*> constraints;
+
+    	ndModel* newtonModel = nullptr;
+
+
+        WeakPtr<NewtonPhysicsWorld> physicsWorld_ = nullptr;
     };
 
 

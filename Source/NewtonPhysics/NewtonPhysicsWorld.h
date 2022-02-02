@@ -159,6 +159,7 @@ namespace Urho3D
         /// Return rigid bodies by contact test with the specified body.
         void GetRigidBodies(ea::vector<NewtonRigidBody*>& result, const NewtonRigidBody* body);
 
+        /// get all connected rigidbodies and constraints including the starting body.
     	void GetConnectedPhysicsComponents(NewtonRigidBody* rigidBody,
             ea::vector<NewtonRigidBody*>& rigidBodiesOUT,
             ea::vector<NewtonConstraint*>& constraintsOUT);
@@ -215,6 +216,7 @@ namespace Urho3D
         void Update(float timestep, bool isRootUpdate);
 
         void BuildAndUpdateNewtonModels();
+        void CleanNewtonModels();
 
         virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
 

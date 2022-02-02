@@ -372,6 +372,11 @@ namespace Urho3D {
 		collisionComponentList.push_front(WeakPtr<NewtonCollisionShape>(collision));
     }
 
+    void NewtonPhysicsWorld::removeCollisionShape(NewtonCollisionShape* collision)
+    {
+        collisionComponentList.erase_at(collisionComponentList.index_of(WeakPtr<NewtonCollisionShape>(collision)));
+    }
+
     void NewtonPhysicsWorld::addRigidBody(NewtonRigidBody* body)
     {
 		rigidBodyComponentList.push_front(WeakPtr<NewtonRigidBody>(body));
@@ -658,8 +663,6 @@ namespace Urho3D {
         }
 
 
-
-        
         for (NewtonRigidBody* rigBody : rigidBodyComponentList)
         {
             //apply properties
@@ -672,14 +675,36 @@ namespace Urho3D {
 
     void NewtonPhysicsWorld::BuildAndUpdateNewtonModels()
     {
-        for(NewtonConstraint* constraint : constraintList)
+        //grow existing models
+        for(NewtonModel* model : modelList)
         {
-            NewtonModel* model = node_->GetOrCreateComponent<NewtonModel>();
-            
-        	//grow the model from constraint outwards
-        	model->Grow(constraint);
+            model->Grow();
         }
 
+        //create new model and grow
+        for(auto constraint : constraintList)
+        {
+	        if(constraint->GetModel() == nullptr)
+	        {
+                NewtonModel* model = node_->CreateComponent<NewtonModel>();
+                model->GrowFrom(constraint);
+	        }
+        }
+
+        CleanNewtonModels();
+    }
+
+    void NewtonPhysicsWorld::CleanNewtonModels()
+    {
+        //remove empty models
+        ea::vector modelListCopy = modelList;
+        for (auto model : modelListCopy)
+        {
+            if (model->IsEmpty())
+            {
+                model->Remove();
+            }
+        }
     }
 
 

@@ -25,7 +25,7 @@
 #include "NewtonPhysicsWorld.h"
 #include "NewtonCollisionShape.h"
 #include "NewtonRigidBody.h"
-
+#include "NewtonModel.h"
 
 #include "Urho3D/Core/Context.h"
 #include "Urho3D/Core/Profiler.h"
@@ -553,7 +553,14 @@ namespace Urho3D {
                     Vector3 min = (NewtonToUrhoVec3(p0));
                     Vector3 max = (NewtonToUrhoVec3(p1));
                     BoundingBox box(min, max);
-                    debug->AddBoundingBox(box, Color::YELLOW, depthTest, false);
+
+					//color by model if the body is part of one.
+                    Color col;
+					if(model_)
+						col.FromUInt(reinterpret_cast<unsigned int>(static_cast<NewtonModel*>(model_)));
+                    col.a_ = 1.0f;
+
+                    debug->AddBoundingBox(box, col, depthTest, false);
 
             }
             if (showCollisionMesh) 
