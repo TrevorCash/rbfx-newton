@@ -384,9 +384,13 @@ namespace Urho3D {
 		return GetOtherNewtonBody(true);
 	}
 
+	NewtonModel* NewtonConstraint::GetModel() const
+	{
+        return model_;
+	}
 
 
-    unsigned NewtonConstraint::GetOtherBodyId() const
+	unsigned NewtonConstraint::GetOtherBodyId() const
     {
         return otherBodyId_;
     }

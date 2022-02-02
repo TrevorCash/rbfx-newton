@@ -2,6 +2,7 @@
 #include "UrhoNewtonConversions.h"
 #include "NewtonRigidBody.h"
 #include "NewtonCollisionShape.h"
+#include "NewtonConstraint.h"
 
 
 #include "Urho3D/Math/Sphere.h"
@@ -74,6 +75,55 @@ namespace Urho3D {
 
         //GetBodiesInConvexCast(result, numContacts);
     }
+
+    void NewtonPhysicsWorld::GetConnectedPhysicsComponents(NewtonRigidBody* rigidBody,
+        ea::vector<NewtonRigidBody*>& rigidBodiesOUT,
+        ea::vector<NewtonConstraint*>& constraintsOUT)
+    {
+
+        ea::vector<NewtonRigidBody*> bodyQueue;
+        bodyQueue.push_front(rigidBody);
+
+        while (bodyQueue.size())
+        {
+            if (!bodyQueue.front()->graphTraverseFlag)
+            {
+                bodyQueue.front()->graphTraverseFlag = true;
+                rigidBodiesOUT.push_back(bodyQueue.front());
+
+
+                ea::vector<NewtonConstraint*> constraintsHere;
+                rigidBody->GetConnectedContraints(constraintsHere);
+                ea::vector<NewtonRigidBody*> bodiesHere;
+                rigidBody->GetConnectedBodies(bodiesHere);
+
+                for (auto* constraint : constraintsHere)
+                {
+                    if (!constraint->graphTraverseFlag)
+                    {
+                        constraint->graphTraverseFlag = true;
+                        constraintsOUT.push_back(constraint);
+                    }
+                }
+
+                for (auto* body : bodiesHere)
+                {
+                    if (!body->graphTraverseFlag)
+                        bodyQueue.push_front(body);
+                }
+
+            }
+            bodyQueue.pop_back();
+        }
+
+        //restore flags.
+        for (auto* body : rigidBodiesOUT)
+            body->graphTraverseFlag = false;
+
+        for (auto* constraint : constraintsOUT)
+            constraint->graphTraverseFlag = false;
+    }
+
 
     //int NewtonPhysicsWorld::DoNewtonCollideTest(const ndFloat32* const matrix, const NewtonCollision* shape)
     //{

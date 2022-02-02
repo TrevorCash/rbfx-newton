@@ -70,16 +70,12 @@ namespace Urho3D {
 			{
 				if (constrainRotation_)
 				{
-					static_cast<ndJointKinematicController*>(newtonConstraint_)->SetControlMode(ndJointKinematicController::m_linear);
-
+                    static_cast<ndJointKinematicController*>(newtonConstraint_)->SetControlMode(ndJointKinematicController::m_full6dof);
 				}
 				else
 				{
-					static_cast<ndJointKinematicController*>(newtonConstraint_)->SetControlMode(ndJointKinematicController::m_full6dof);
-
+					static_cast<ndJointKinematicController*>(newtonConstraint_)->SetControlMode(ndJointKinematicController::m_linear);
 				}
-
-				
 			}
         }
     }

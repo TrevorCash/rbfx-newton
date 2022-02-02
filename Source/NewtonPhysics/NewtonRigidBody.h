@@ -83,6 +83,7 @@ namespace Urho3D
         friend class NewtonCollisionShape;
         friend class NewtonConstraint;
         friend class NewtonPhysicsWorld;
+        friend class NewtonModel;
 
         /// Construct.
         NewtonRigidBody(Context* context);
@@ -352,7 +353,6 @@ namespace Urho3D
 
 
 
-
 	protected:
 
 
@@ -369,7 +369,8 @@ namespace Urho3D
         /// all currently used collision shape components.
 		ea::vector<NewtonCollisionShape*> collisionShapes_;
 
-
+        /// the newton model collection that the body is part of.
+        WeakPtr<NewtonModel> model_;
 
         bool sceneRootBodyMode_ = false;
         ///Continuous Collision
@@ -449,6 +450,9 @@ namespace Urho3D
         /// how many node levels deep the node is on. 0 would mean the node is the scene.
         int sceneDepth_ = 1;
         void calculateSceneDepth();
+
+        bool graphTraverseFlag = false;
+
 
 
         void freeBody();

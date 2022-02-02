@@ -61,6 +61,7 @@
 
 
 #include "ndNewton.h"
+#include "NewtonModel.h"
 
 #include "EASTL/sort.h"
 
@@ -395,6 +396,15 @@ namespace Urho3D {
 		constraintList.erase_at(constraintList.index_of(WeakPtr<NewtonConstraint>(constraint)));
     }
 
+    void NewtonPhysicsWorld::addModel(NewtonModel* model)
+    {
+        modelList.push_front(WeakPtr<NewtonModel>(model));
+    }
+
+    void NewtonPhysicsWorld::removeModel(NewtonModel* model)
+    {
+        modelList.erase_at(modelList.index_of(WeakPtr<NewtonModel>(model)));
+    }
 
 
     void NewtonPhysicsWorld::freeWorld()
@@ -648,6 +658,7 @@ namespace Urho3D {
         }
 
 
+
         
         for (NewtonRigidBody* rigBody : rigidBodyComponentList)
         {
@@ -659,8 +670,17 @@ namespace Urho3D {
         }
     }
 
+    void NewtonPhysicsWorld::BuildAndUpdateNewtonModels()
+    {
+        for(NewtonConstraint* constraint : constraintList)
+        {
+            NewtonModel* model = node_->GetOrCreateComponent<NewtonModel>();
+            
+        	//grow the model from constraint outwards
+        	model->Grow(constraint);
+        }
 
-
+    }
 
 
     Urho3D::StringHash NewtonPhysicsWorld::NewtonMeshKey(eastl::string modelResourceName, int modelLodLevel, eastl::string otherData)
@@ -740,7 +760,9 @@ namespace Urho3D {
         return ("Newton_Thread" + ea::to_string(threadIndex));
     }
 
-    
+   
+
+
     //called when the newton update finished.
     //void Newton_PostUpdateCallback(const NewtonWorld* const world, ndFloat32 timestep)
     //{
@@ -914,6 +936,7 @@ namespace Urho3D {
 
 
 
+
         NewtonMeshObject::RegisterObject(context);
         NewtonConstraint::RegisterObject(context);
         NewtonFixedDistanceConstraint::RegisterObject(context);
@@ -924,6 +947,8 @@ namespace Urho3D {
         NewtonFullyFixedConstraint::RegisterObject(context);
         NewtonKinematicsControllerConstraint::RegisterObject(context);
 		NewtonGearConstraint::RegisterObject(context);
+
+        NewtonModel::RegisterObject(context);
 
     }
 

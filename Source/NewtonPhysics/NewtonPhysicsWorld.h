@@ -33,7 +33,8 @@
 
 namespace Urho3D
 {
-    class Component;
+	class NewtonModel;
+	class Component;
     class NewtonCollisionShape;
     class NewtonRigidBody;
     class NewtonConstraint;
@@ -115,6 +116,7 @@ namespace Urho3D
         friend class NewtonCollisionShape_SceneCollision;
         friend class NewtonRigidBody;
         friend class NewtonConstraint;
+        friend class NewtonModel;
 
         /// Construct.
         NewtonPhysicsWorld(Context* context);
@@ -156,6 +158,11 @@ namespace Urho3D
         void GetRigidBodies(ea::vector<NewtonRigidBody*>& result, const BoundingBox& box, unsigned collisionMask = M_MAX_UNSIGNED);
         /// Return rigid bodies by contact test with the specified body.
         void GetRigidBodies(ea::vector<NewtonRigidBody*>& result, const NewtonRigidBody* body);
+
+    	void GetConnectedPhysicsComponents(NewtonRigidBody* rigidBody,
+            ea::vector<NewtonRigidBody*>& rigidBodiesOUT,
+            ea::vector<NewtonConstraint*>& constraintsOUT);
+
 
 
         /// Force the physics world to rebuild (will rebuild everything)
@@ -207,12 +214,11 @@ namespace Urho3D
 
         void Update(float timestep, bool isRootUpdate);
 
+        void BuildAndUpdateNewtonModels();
+
         virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
 
         void DrawDebugGeometry(DebugRenderer* debug, bool drawConstraints, bool drawContacts, bool drawRigidBodies, bool depthTest);
-
-
-
 
 
         bool isUpdating_ = false;
@@ -245,7 +251,8 @@ namespace Urho3D
         void addConstraint(NewtonConstraint* constraint);
         void removeConstraint(NewtonConstraint* constraint);
 
-
+        void addModel(NewtonModel* model);
+        void removeModel(NewtonModel* model);
 
         void markRigidBodiesNeedSorted() { rigidBodyListNeedsSorted = true; }
         bool rigidBodyListNeedsSorted = true;
@@ -253,6 +260,7 @@ namespace Urho3D
 		eastl::vector<WeakPtr<NewtonCollisionShape>> collisionComponentList;
 		eastl::vector<WeakPtr<NewtonRigidBody>> rigidBodyComponentList;
 		eastl::vector<WeakPtr<NewtonConstraint>> constraintList;
+        eastl::vector<WeakPtr<NewtonModel>> modelList;
 
 
         void freeWorld();
@@ -260,11 +268,14 @@ namespace Urho3D
         void addToFreeQueue(ndBody* newtonBody);
         void addToFreeQueue(ndConstraint* newtonConstraint);
         void addToFreeQueue(ndShapeInstance* newtonShape);
+        void addToFreeQueue(ndModel* newtonShape);
+
 
 
 		eastl::vector<ndBody*> freeBodyQueue_;
 		eastl::vector<ndConstraint*> freeConstraintQueue_;
 		eastl::vector<ndShapeInstance*> freeShapeQueue_;
+        eastl::vector<ndModel*> freeModelQueue_;
 
 
         void applyNewtonWorldSettings();
@@ -279,6 +290,9 @@ namespace Urho3D
         void rebuildDirtyPhysicsComponents();
         bool simulationStarted_ = false;
 		int stepsRemaining_ = -1;
+
+        
+
 
         /// Internal newton world
         ndWorld* newtonWorld_ = nullptr;
@@ -335,6 +349,9 @@ namespace Urho3D
     int Newton_WakeBodiesInAABBCallback(const NewtonBody* const body, void* const userData);
 
 */
+
+
+
 
 
 	URHONEWTON_API void  GetRootRigidBodies(eastl::vector<NewtonRigidBody*>& rigidBodies, Node* node, bool includeScene);

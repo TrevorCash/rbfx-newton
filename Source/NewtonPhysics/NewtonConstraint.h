@@ -29,8 +29,9 @@
 
 
 namespace Urho3D {
+	class NewtonModel;
 
-    class Context;
+	class Context;
     class NewtonRigidBody;
     class NewtonPhysicsWorld;
 
@@ -45,7 +46,7 @@ namespace Urho3D {
 
         friend class NewtonPhysicsWorld;
         friend class NewtonRigidBody;
-
+        friend class NewtonModel;
 
         /// Construct.
         NewtonConstraint(Context* context);
@@ -173,6 +174,7 @@ namespace Urho3D {
 		ndBody* GetOtherNewtonBody(bool resolved = true) const;
 		ndBody* GetOtherNewtonBodyBuild() const;
 
+        NewtonModel* GetModel() const;
 
         ndConstraint* GetNewtonJoint() const {
             return  newtonConstraint_;
@@ -182,6 +184,8 @@ namespace Urho3D {
 
 
 		virtual void OnSetAttribute(const AttributeInfo& attr, const Variant& src) override;
+
+
 
 	protected:
         /// Physics world.
@@ -196,6 +200,10 @@ namespace Urho3D {
 
 		WeakPtr<NewtonRigidBody> ownBodyResolved_;
 		WeakPtr<NewtonRigidBody> otherBodyResolved_;
+
+
+        /// the newton model collection that the constraint is part of.
+        WeakPtr<NewtonModel> model_;
 
         /// Internal newtonJoint.
         ndConstraint* newtonConstraint_ = nullptr;
@@ -215,6 +223,7 @@ namespace Urho3D {
 
 		ndJointBilateralSolverModel solveMode_ = m_jointkinematicOpenLoop;
 
+        bool graphTraverseFlag = false;
 
 
 

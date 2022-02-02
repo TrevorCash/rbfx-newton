@@ -1,6 +1,5 @@
 #pragma once
-
-
+#include "UrhoNewtonApi.h"
 
 
 class NewtonCollision;
@@ -22,29 +21,28 @@ namespace Urho3D {
     class Sphere;
     class BoundingBox;
 
-    ///Conversion Functions From Urho To Newton
-    ndMatrix UrhoToNewton(const Matrix4& mat);
-    ndMatrix UrhoToNewton(const Matrix3x4& mat);
-	ndMatrix UrhoToNewton(const Matrix3& mat3);
-    ndVector UrhoToNewton(const Vector4& vec4);
-    ndVector UrhoToNewton(const Vector3& vec3);
-    ndVector UrhoToNewton(const Vector2& vec2);
-    ndQuaternion UrhoToNewton(const Quaternion& quat);
+    ///Conversion Functions From Urho To Newton ndMatrix UrhoToNewton(const Matrix4& mat);
+    URHONEWTON_API ndMatrix UrhoToNewton(const Matrix3x4& mat);
+    URHONEWTON_API ndMatrix UrhoToNewton(const Matrix3& mat3);
+    URHONEWTON_API ndVector UrhoToNewton(const Vector4& vec4);
+    URHONEWTON_API ndVector UrhoToNewton(const Vector3& vec3);
+    URHONEWTON_API ndVector UrhoToNewton(const Vector2& vec2);
+    URHONEWTON_API ndQuaternion UrhoToNewton(const Quaternion& quat);
 
     ///Conversion Function From Newton To Urho
-    Vector3 NewtonToUrhoVec3(const ndVector& vec);
-    Vector4 NewtonToUrhoVec4(const ndVector& vec);
-    Matrix4 NewtonToUrhoMat4(const ndMatrix& mat);
+    URHONEWTON_API Vector3 NewtonToUrhoVec3(const ndVector& vec);
+    URHONEWTON_API Vector4 NewtonToUrhoVec4(const ndVector& vec);
+    URHONEWTON_API Matrix4 NewtonToUrhoMat4(const ndMatrix& mat);
     //Quaternion NewtonToUrhoQuat(const dQuaternion& quat);
-    Quaternion NewtonToUrhoQuat(const ndQuaternion& quat);
+    URHONEWTON_API Quaternion NewtonToUrhoQuat(const ndQuaternion& quat);
 
 
 
     ///shape conversion
 
     ///return a newton collision from an urho shape - optionally include the translation of the shape in the collision. Remember to NewtonDestroy the NewtonCollision when you are done with it!
-    ndShape* UrhoShapeToNewtonCollision(const NewtonWorld* newtonWorld, const Sphere& sphere);
-    ndShape* UrhoShapeToNewtonCollision(const NewtonWorld* newtonWorld, const BoundingBox& box);
+    URHONEWTON_API ndShape* UrhoShapeToNewtonCollision(const NewtonWorld* newtonWorld, const Sphere& sphere);
+    URHONEWTON_API ndShape* UrhoShapeToNewtonCollision(const NewtonWorld* newtonWorld, const BoundingBox& box);
 
 
 
@@ -59,7 +57,7 @@ namespace Urho3D {
 
 
     ///Printing Helpers
-    void PrintNewtonMatrix(ndMatrix mat);
+    URHONEWTON_API void PrintNewtonMatrix(ndMatrix mat);
 
 
 
