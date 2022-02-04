@@ -124,7 +124,10 @@ namespace Urho3D {
 
         Matrix3x4 GetOtherWorldFrame() const;
 
-
+        Vector3 GetOwnWorldFrameVel() const;
+        Vector3 GetOwnWorldFrameOmega() const;
+        Vector3 GetOtherWorldFrameVel() const;
+        Vector3 GetOtherWorldFrameOmega() const;
 
         
 

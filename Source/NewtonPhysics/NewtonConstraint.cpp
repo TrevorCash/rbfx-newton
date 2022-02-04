@@ -407,15 +407,9 @@ namespace Urho3D {
 
     Matrix3x4 NewtonConstraint::GetOwnWorldFrame() const
     {
-
         //return a frame with no scale at the position and rotation in node space
         Matrix3x4 worldFrame = ownBody_->GetWorldTransform() * Matrix3x4(position_, rotation_, 1.0f);
-
-        //the frame could have uniform scale - reconstruct with no scale
-        Matrix3x4 worldFrameNoScale = Matrix3x4(worldFrame.Translation(), worldFrame.Rotation(), 1.0f);
-		 
-        return worldFrameNoScale;
-
+        return worldFrame;
     }
 
     Matrix3x4 NewtonConstraint::GetOtherWorldFrame() const
@@ -423,12 +417,29 @@ namespace Urho3D {
 
         //return a frame with no scale at the position and rotation in node space.
         Matrix3x4 worldFrame = otherBody_->GetWorldTransform() * Matrix3x4(otherPosition_, otherRotation_, 1.0f);
+        return worldFrame;
+    }
 
-        //the frame could have uniform scale - reconstruct with no scale
-        Matrix3x4 worldFrameNoScale = Matrix3x4(worldFrame.Translation(), worldFrame.Rotation(), 1.0f);
+    Vector3 NewtonConstraint::GetOwnWorldFrameVel() const
+    {
+        Vector3 worldDelta = GetOwnWorldFrame().Translation() - ownBody_->GetWorldTransform().Translation();
+        return ownBody_->GetLinearVelocity(TS_WORLD) + ownBody_->GetAngularVelocity(TS_WORLD).CrossProduct(worldDelta);
+    }
 
+    Vector3 NewtonConstraint::GetOwnWorldFrameOmega() const
+    {
+        return ownBody_->GetAngularVelocity(TS_WORLD);
+    }
 
-        return worldFrameNoScale;
+    Vector3 NewtonConstraint::GetOtherWorldFrameVel() const
+    {
+        Vector3 worldDelta = GetOtherWorldFrame().Translation() - otherBody_->GetWorldTransform().Translation();
+        return otherBody_->GetLinearVelocity(TS_WORLD) + otherBody_->GetAngularVelocity(TS_WORLD).CrossProduct(worldDelta);
+    }
+
+    Vector3 NewtonConstraint::GetOtherWorldFrameOmega() const
+    {
+        return ownBody_->GetAngularVelocity(TS_WORLD);
     }
 
     void NewtonConstraint::OnSetEnabled()

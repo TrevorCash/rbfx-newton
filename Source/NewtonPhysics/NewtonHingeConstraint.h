@@ -45,8 +45,8 @@ namespace Urho3D {
         //Get Relative Angle
         float GetAngle();
 
-        //Get Relative Omega
-        float GetOmega() const;
+        //Get relative angular velocity on the hinge axis.
+        float GetHingeAngularVelocity() const;
 
 
         virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;

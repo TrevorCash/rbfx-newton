@@ -37,9 +37,12 @@ namespace Urho3D {
         void SetSliderLowerLimit(float lowerLimit);
         float GetSliderLowerLimit() const { return sliderLimits_.x_; }
 
+        void SetEnableSpin(bool enable);
+
         ///Set the sliding friction coefficient
         void SetSliderFriction(float friction);
         float GetSliderFriction() const { return frictionCoef_; }
+
 
     protected:
 
@@ -47,7 +50,7 @@ namespace Urho3D {
         bool enableLowerSliderLimit_ = false;
         bool enableUpperSliderLimit_ = false;
         Vector2 sliderLimits_ = Vector2(-FLT_MAX, FLT_MAX);
-
+        bool enableSpin_ = false;
 
         float frictionCoef_ = 0.0f;
 
@@ -72,7 +75,7 @@ namespace Urho3D {
         ndFloat32 m_internalFrictionCoef;
         ndFloat32 m_vel;
         ndFloat32 m_dist;
-
+        bool m_enableSpin;
     private:
         ndFloat32 CalculateAcceleration(ndConstraintDescritor& desc, float resolvedTorque);
         ndFloat32 FinalForce(ndConstraintDescritor& desc);

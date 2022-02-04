@@ -229,7 +229,6 @@ namespace Urho3D {
             //return the last transform altered by any recent calls to set transform etc..
             if (nextTransformNeeded_)
             {
-				
                 return nextTransform_;
             }
 			

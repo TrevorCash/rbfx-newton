@@ -95,7 +95,6 @@ namespace Urho3D {
         }
     }
 
-   
 
     void NewtonHingeConstraint::SetCommandedTorque(float torque)
     {
@@ -136,11 +135,12 @@ namespace Urho3D {
         return 0.0f;
     }
 
-    float NewtonHingeConstraint::GetOmega() const
+    float NewtonHingeConstraint::GetHingeAngularVelocity() const
     {
         if (newtonConstraint_)
         {
-            return static_cast<PivotJoint*>(newtonConstraint_)->m_omega;
+            //neg because newton to urho.
+            return -1.0f*static_cast<PivotJoint*>(newtonConstraint_)->m_omega;
         }
         return 0.0f;
     }
@@ -193,6 +193,7 @@ namespace Urho3D {
         }
 
         debug->AddLine(GetOwnWorldFrame().Translation(), GetOwnWorldFrame() * Vector3(commandedTorque_, 0, 0), Color::YELLOW, depthTest);
+        debug->AddLine(GetOwnWorldFrame().Translation(), GetOwnWorldFrame() * Vector3(GetHingeAngularVelocity(), 0, 0), Color::RED, depthTest);
 
 
     }

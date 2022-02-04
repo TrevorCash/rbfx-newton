@@ -89,6 +89,21 @@ namespace Urho3D
         }
     }
 
+    void NewtonSliderConstraint::SetEnableSpin(bool enable)
+    {
+        if (enableSpin_ != enable)
+        {
+            enableSpin_ = enable;
+            if (newtonConstraint_)
+            {
+                static_cast<SliderJoint*>(newtonConstraint_)->m_enableSpin = enable;
+            }
+            else
+                MarkDirty();
+        }
+    }
+
+
     void NewtonSliderConstraint::SetSliderFriction(float friction)
     {
         if (frictionCoef_ != friction) {
@@ -173,6 +188,7 @@ namespace Urho3D
         static_cast<SliderJoint*>(newtonConstraint_)->m_maxLimit = sliderLimits_.y_;
         static_cast<SliderJoint*>(newtonConstraint_)->m_internalFrictionCoef = Abs(frictionCoef_);
         static_cast<SliderJoint*>(newtonConstraint_)->m_commandedForce = commandedForce_;
+        static_cast<SliderJoint*>(newtonConstraint_)->m_enableSpin = enableSpin_;
 
         return true;
     }
@@ -189,6 +205,7 @@ namespace Urho3D
         , m_maxLimit(FLT_MAX)
 		, m_commandedForce(0.0f)
         , m_internalFrictionCoef(0.0f)
+		, m_enableSpin(false)
     {
     }
 
