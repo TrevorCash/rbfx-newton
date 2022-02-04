@@ -129,8 +129,11 @@ namespace Urho3D {
         Vector3 GetOtherWorldFrameVel() const;
         Vector3 GetOtherWorldFrameOmega() const;
 
-        
+        Vector3 GetRelativeWorldFrameVel() const;
+        Vector3 GetRelativeWorldFrameOmega() const;
 
+        Vector3 GetRelativeWorldOmegaInOwnLocalFrame() const;
+        Vector3 GetRelativeWorldOmegaInOtherLocalFrame() const;
 
         void SetSolveMode(ndJointBilateralSolverModel mode);
         void SetSolveMode(int mode) {

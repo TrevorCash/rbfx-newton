@@ -439,7 +439,27 @@ namespace Urho3D {
 
     Vector3 NewtonConstraint::GetOtherWorldFrameOmega() const
     {
-        return ownBody_->GetAngularVelocity(TS_WORLD);
+        return otherBody_->GetAngularVelocity(TS_WORLD);
+    }
+
+    Vector3 NewtonConstraint::GetRelativeWorldFrameVel() const
+    {
+        return GetOtherWorldFrameVel() - GetOwnWorldFrameVel();
+    }
+
+    Vector3 NewtonConstraint::GetRelativeWorldFrameOmega() const
+    {
+        return  GetOtherWorldFrameOmega() - GetOwnWorldFrameOmega();
+    }
+
+    Vector3 NewtonConstraint::GetRelativeWorldOmegaInOwnLocalFrame() const
+    {
+        return GetOwnWorldFrame().RotationMatrix().Inverse() * GetRelativeWorldFrameOmega();
+    }
+
+    Vector3 NewtonConstraint::GetRelativeWorldOmegaInOtherLocalFrame() const
+    {
+        return GetOtherWorldFrame().RotationMatrix().Inverse() * GetRelativeWorldFrameOmega();
     }
 
     void NewtonConstraint::OnSetEnabled()

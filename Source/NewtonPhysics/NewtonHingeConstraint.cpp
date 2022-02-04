@@ -140,10 +140,11 @@ namespace Urho3D {
         if (newtonConstraint_)
         {
             //neg because newton to urho.
-            return -1.0f*static_cast<PivotJoint*>(newtonConstraint_)->m_omega;
+            return 1.0f*static_cast<PivotJoint*>(newtonConstraint_)->m_omega;
         }
         return 0.0f;
     }
+
 
     void NewtonHingeConstraint::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
     {

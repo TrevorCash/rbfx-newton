@@ -49,6 +49,7 @@ namespace Urho3D {
         float GetHingeAngularVelocity() const;
 
 
+
         virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
 
     protected:
