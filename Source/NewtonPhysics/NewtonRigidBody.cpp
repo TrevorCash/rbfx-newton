@@ -868,7 +868,7 @@ namespace Urho3D {
 
 			newtonBody_->GetAsBodyKinematic()->SetCollisionShape(effectiveCollision_);
 			newtonBody_->GetAsBodyDynamic()->SetMassMatrix(mass_, effectiveCollision_);
-
+            //newtonBody_->GetAsBodyDynamic()->SetMassMatrix(1.0 / mass_, 1.0 / mass_, 1.0 / mass_, mass_);
 			finalCenterOfMass = newtonBody_->GetAsBodyDynamic()->GetCentreOfMass();
 		}
 

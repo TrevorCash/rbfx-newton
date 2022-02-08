@@ -104,7 +104,7 @@ namespace Urho3D {
             WakeBodies();
             if (newtonConstraint_)
             {
-            	static_cast<PivotJoint*>(newtonConstraint_)->SetTorque(commandedTorque_);
+            	static_cast<PivotJoint*>(newtonConstraint_)->SetTorque(-commandedTorque_);
             }
             else
                 MarkDirty();
@@ -219,7 +219,7 @@ namespace Urho3D {
         static_cast<PivotJoint*>(newtonConstraint_)->m_minLimit = minAngle_ * ndDegreeToRad;
         static_cast<PivotJoint*>(newtonConstraint_)->m_hasLimits = enableLimits_;
         static_cast<PivotJoint*>(newtonConstraint_)->m_internalFrictionCoef = Abs(frictionCoef_);
-        static_cast<PivotJoint*>(newtonConstraint_)->SetTorque(commandedTorque_);
+        static_cast<PivotJoint*>(newtonConstraint_)->SetTorque(-commandedTorque_);
     
 
         return true;
