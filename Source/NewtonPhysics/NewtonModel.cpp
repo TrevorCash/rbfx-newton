@@ -8,11 +8,28 @@
 #include "Urho3D/Scene/Scene.h"
 #include "Urho3D/SystemUI/SystemUI.h"
 
+
 #include "ndNewton.h"
 
 
 namespace  Urho3D
 {
+	void ChainJacobian::ToEigenMatrix(Eigen::MatrixXd& J)
+	{
+        int numJoints = J_v.size();
+        J.resize(6, numJoints);
+        for (int c = 0; c < numJoints; c++)
+        {
+            J(0, c) = J_v[c].x_;
+            J(1, c) = J_v[c].y_;
+            J(2, c) = J_v[c].z_;
+
+            J(3, c) = J_w[c].x_;
+            J(4, c) = J_w[c].y_;
+            J(5, c) = J_w[c].z_;
+        }
+	}
+
 	void NewtonModel::RegisterObject(Context* context)
 	{
 		context->RegisterFactory<NewtonModel>(DEF_PHYSICS_CATEGORY.c_str());
@@ -87,7 +104,7 @@ namespace  Urho3D
             Vector3 d_i_0 = rootTransform.Inverse() * constraintChain[i]->GetOwnWorldFrame().Translation();
             J.J_v[i] = (r_i_0 * hingeLocalRotationAxis).CrossProduct(d_n_0 - d_i_0);
         }
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < constraintChain.size(); i++)
         {
             Matrix3x4 rootSpace = rootTransform.Inverse() * constraintChain[i]->GetOwnWorldFrame();
             Matrix3 r_i_0 = rootSpace.RotationMatrix();
@@ -95,9 +112,53 @@ namespace  Urho3D
         }
     }
 
-    void NewtonModel::SolveForJointVelocities(ChainJacobian& J, Vector3 endVelWorld,
+    void NewtonModel::SolveForJointVelocities(ChainJacobian& J, ea::vector<NewtonHingeConstraint*>& constraintChain, Vector3 endVelWorld,
 	    Vector3 endOmegaWorld, ea::vector<float>& velocitiesOut)
 	{
+        int numJoints = J.J_v.size();
+        Eigen::MatrixXd jeig;
+        J.ToEigenMatrix(jeig);
+
+
+        Eigen::VectorXd EndTargetVel(6);
+        EndTargetVel(0) = endVelWorld.x_;
+        EndTargetVel(1) = endVelWorld.y_;
+        EndTargetVel(2) = endVelWorld.z_;
+        EndTargetVel(3) = endOmegaWorld.x_;
+        EndTargetVel(4) = endOmegaWorld.y_;
+        EndTargetVel(5) = endOmegaWorld.z_;
+
+
+        Eigen::VectorXd SolvedQ_vel = jeig.completeOrthogonalDecomposition().solve(EndTargetVel);// J_inv* target_vel;
+
+
+        velocitiesOut.clear();
+        for(int i = 0; i < numJoints; i++)
+			velocitiesOut.push_back(SolvedQ_vel(i));
+
+	}
+
+    void NewtonModel::SolveForJointTorques(ChainJacobian& J, ea::vector<NewtonHingeConstraint*>& constraintChain,
+	    Vector3 endForceWorld, Vector3 endTorqueWorld, ea::vector<float>& torquesOut)
+	{
+        int numJoints = J.J_v.size();
+        Eigen::MatrixXd jeig;
+        J.ToEigenMatrix(jeig);
+
+        Eigen::VectorXd EndTargetWrench(6);
+        EndTargetWrench(0) = endForceWorld.x_;
+        EndTargetWrench(1) = endForceWorld.y_;
+        EndTargetWrench(2) = endForceWorld.z_;
+        EndTargetWrench(3) = endTorqueWorld.x_;
+        EndTargetWrench(4) = endTorqueWorld.y_;
+        EndTargetWrench(5) = endTorqueWorld.z_;
+
+
+        Eigen::VectorXd SolvedQ_torques = jeig.transpose() * EndTargetWrench;
+
+        torquesOut.clear();
+        for (int i = 0; i < numJoints; i++)
+            torquesOut.push_back(SolvedQ_torques(i));
 
 	}
 

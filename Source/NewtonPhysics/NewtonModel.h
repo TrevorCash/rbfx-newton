@@ -1,7 +1,10 @@
+#pragma once
+
+
 #include "ndModel.h"
 #include "Urho3D/Scene/Component.h"
 #include "UrhoNewtonApi.h"
-
+#include "eigen/Eigen/Dense"
 
 class ndModel;
 
@@ -18,6 +21,8 @@ namespace Urho3D
     public:
         ea::vector<Vector3> J_v;
         ea::vector<Vector3> J_w;
+
+        void ToEigenMatrix(Eigen::MatrixXd& J);
     };
 
 
@@ -64,12 +69,12 @@ namespace Urho3D
 
 
         //constraintChain from base to end.
-        void SolveForJointVelocities(ChainJacobian& J,
+        void SolveForJointVelocities(ChainJacobian& J, ea::vector<NewtonHingeConstraint*>& constraintChain,
             Vector3 endVelWorld, Vector3 endOmegaWorld, ea::vector<float>& velocitiesOut);
 
         //constraintChain from base to end.
-        void SolveForJointTorques(ChainJacobian& J,
-            Vector3 endForceWorld, Vector3 endTorqueWorld, ea::vector<float>& torquesOut){}
+        void SolveForJointTorques(ChainJacobian& J, ea::vector<NewtonHingeConstraint*>& constraintChain,
+            Vector3 endForceWorld, Vector3 endTorqueWorld, ea::vector<float>& torquesOut);
 
         //void SolveForEndVelocity();
         //void SolveForEndForces();
