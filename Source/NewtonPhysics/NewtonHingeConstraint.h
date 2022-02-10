@@ -8,11 +8,6 @@ namespace Urho3D {
     class Context;
 
 
-#define HINGE_CONSTRAINT_DEF_SPRING_COEF 100.0f
-#define HINGE_CONSTRAINT_DEF_DAMPER_COEF 1.0f
-#define HINGE_CONSTRAINT_DEF_RELAX 0.9f
-
-
 
     class URHONEWTON_API NewtonHingeConstraint : public NewtonConstraint
     {
@@ -45,9 +40,11 @@ namespace Urho3D {
         //Get Relative Angle
         float GetAngle();
 
+        //Local Axis of rotation.
+        static Vector3 LocalHingeAxis() { return {1, 0, 0}; }
+
         //Get relative angular velocity on the hinge axis.
         float GetHingeAngularVelocity() const;
-
 
 
         virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
@@ -89,10 +86,6 @@ namespace Urho3D {
         void JacobianDerivative(ndConstraintDescritor& desc);
 
     };
-
-
-
-
 
 
 }

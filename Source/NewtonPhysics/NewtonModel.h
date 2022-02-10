@@ -1,12 +1,28 @@
 #include "ndModel.h"
 #include "Urho3D/Scene/Component.h"
 #include "UrhoNewtonApi.h"
+
+
 class ndModel;
 
 namespace Urho3D
 {
+	class NewtonHingeConstraint;
 	class NewtonModelHandler;
 	class NewtonConstraint;
+
+
+    //6xN Jacobian
+    class URHONEWTON_API ChainJacobian
+    {
+    public:
+        ea::vector<Vector3> J_v;
+        ea::vector<Vector3> J_w;
+    };
+
+
+
+
 
 	///newton model component representing collection of bodies and joints.
     ///exists only on scene node
@@ -35,6 +51,29 @@ namespace Urho3D
 
         void MarkDirty() { dirty_ = true; }
         bool GetDirty() const { return dirty_; }
+
+
+        bool GetShortestChain(NewtonConstraint* rootConstraint, NewtonConstraint* endConstraint, ea::vector<NewtonConstraint*>& chain)
+        {
+            return false;
+        }
+
+
+        //return the jacobian for the constraintChain
+        void CalculateChainJabobian(ea::vector<NewtonHingeConstraint*>& constraintChain, ChainJacobian& J);
+
+
+        //constraintChain from base to end.
+        void SolveForJointVelocities(ChainJacobian& J,
+            Vector3 endVelWorld, Vector3 endOmegaWorld, ea::vector<float>& velocitiesOut);
+
+        //constraintChain from base to end.
+        void SolveForJointTorques(ChainJacobian& J,
+            Vector3 endForceWorld, Vector3 endTorqueWorld, ea::vector<float>& torquesOut){}
+
+        //void SolveForEndVelocity();
+        //void SolveForEndForces();
+
 
         void PreSolveComputations(ndWorld* const world, ndFloat32 timestep);
 

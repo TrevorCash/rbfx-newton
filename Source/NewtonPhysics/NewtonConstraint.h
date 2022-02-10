@@ -146,19 +146,15 @@ namespace Urho3D {
         void SetStiffness(float stiffness);
         float GetStiffness() const { return stiffness_; }
 
-        /// Enable force calculations on the joint.  Enable to use functions like GetOwnForce() etc..
-        void SetEnableForceCalculation(bool enabled);
 
-        bool GetEnableForceCalculation() const;
-
-        ///return the force exerted on rigid body. Generally equal and opposite to GetOtherForce().  Only functional if ForceCalculation is enabled.
+        ///return the force exerted on rigid body.
         Vector3 GetOwnForce();
-        ///return the force exerted on other rigid body. Generally equal and opposite to GetOwnForce(). Only functional if ForceCalculation is enabled.
+        ///return the force exerted on other rigid body. 
         Vector3 GetOtherForce();
 
-        ///return the torque exerted on rigid body. Only functional if ForceCalculation is enabled.
+        ///return the torque exerted on rigid body. 
         Vector3 GetOwnTorque();
-        ///return the torque exerted on other rigid body. Only functional if ForceCalculation is enabled.
+        ///return the torque exerted on other rigid body.
         Vector3 GetOtherTorque();
 
         //return the relative angular vel between the 2 bodies in world space

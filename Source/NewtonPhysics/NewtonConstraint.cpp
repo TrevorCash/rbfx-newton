@@ -66,7 +66,6 @@ namespace Urho3D {
 
         URHO3D_ENUM_ACCESSOR_ATTRIBUTE("Solver Iterations", GetSolveMode, SetSolveMode, ndJointBilateralSolverModel, solveModeNames, m_jointkinematicOpenLoop, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Stiffness", GetStiffness, SetStiffness, float, 0.7f, AM_DEFAULT);
-        URHO3D_ACCESSOR_ATTRIBUTE("ForceCalculationsEnabled", GetEnableForceCalculation, SetEnableForceCalculation, bool, false, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Other Body ID", GetOtherBodyId, SetOtherBodyId, unsigned, 0, AM_DEFAULT | AM_COMPONENTID);
 
         URHO3D_ATTRIBUTE("Prev Built Own Transform", Matrix3x4, initialBuiltOwnWorldPinTransform_, Matrix3x4::IDENTITY, AM_DEFAULT);
@@ -285,19 +284,6 @@ namespace Urho3D {
             stiffness_ = stiffness;
             applyAllJointParams();
         }
-    }
-
-    void NewtonConstraint::SetEnableForceCalculation(bool enabled)
-    {
-        if (enabled != enableForceCalculations_) {
-            enableForceCalculations_ = enabled;
-            applyAllJointParams();
-        }
-    }
-
-    bool NewtonConstraint::GetEnableForceCalculation() const
-    {
-        return enableForceCalculations_;
     }
 
     Vector3 NewtonConstraint::GetOwnForce()

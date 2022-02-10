@@ -6,6 +6,7 @@
 #include "NewtonRigidBody.h"
 
 #include "Urho3D/Scene/Scene.h"
+#include "Urho3D/SystemUI/SystemUI.h"
 
 #include "ndNewton.h"
 
@@ -64,24 +65,41 @@ namespace  Urho3D
     }
 
 
+    void NewtonModel::CalculateChainJabobian(ea::vector<NewtonHingeConstraint*>& constraintChain,
+        ChainJacobian& J)
+    {
+        //compute the Jacobian From end to base
+        J.J_v.resize(constraintChain.size());
+        J.J_w.resize(constraintChain.size());
 
+        Matrix3x4 rootTransform = constraintChain[0]->GetOwnWorldFrame();
+        Vector3 rootWorldVel = constraintChain[0]->GetOwnWorldFrameVel();
+        Vector3 rootWorldOmega = constraintChain[0]->GetOwnWorldFrameOmega();
+        Matrix3x4 endEffectorWorld = constraintChain[constraintChain.size()-1]->GetOwnWorldFrame();
+        Matrix3x4 endEffectorRelRoot = rootTransform.Inverse() * endEffectorWorld;
+        Vector3 hingeLocalRotationAxis = NewtonHingeConstraint::LocalHingeAxis();
+        Vector3 d_n_0 = endEffectorRelRoot.Translation();
 
+        for (int i = 0; i < constraintChain.size(); i++)
+        {
+            Matrix3x4 rootSpace = rootTransform.Inverse() * constraintChain[i]->GetOwnWorldFrame();
+            Matrix3 r_i_0 = rootSpace.RotationMatrix();
+            Vector3 d_i_0 = rootTransform.Inverse() * constraintChain[i]->GetOwnWorldFrame().Translation();
+            J.J_v[i] = (r_i_0 * hingeLocalRotationAxis).CrossProduct(d_n_0 - d_i_0);
+        }
+        for (int i = 0; i < 6; i++)
+        {
+            Matrix3x4 rootSpace = rootTransform.Inverse() * constraintChain[i]->GetOwnWorldFrame();
+            Matrix3 r_i_0 = rootSpace.RotationMatrix();
+            J.J_w[i] = (r_i_0 * hingeLocalRotationAxis);
+        }
+    }
 
+    void NewtonModel::SolveForJointVelocities(ChainJacobian& J, Vector3 endVelWorld,
+	    Vector3 endOmegaWorld, ea::vector<float>& velocitiesOut)
+	{
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	}
 
     void NewtonModel::PreSolveComputations(ndWorld* const world, ndFloat32 timestep)
     {
@@ -122,6 +140,24 @@ namespace  Urho3D
 
 
        //// }
+
+
+
+        //ui::Begin("Joint Torques");
+        //ui::BeginTable("Torques", 6);
+        //for (int i = 0; i < constraints.size(); i++)
+        //{
+        //    ui::TableNextColumn();
+        //    ui::Text("Own x %f", constraints[i]->GetOwnTorque().x_);
+        //    ui::Text("Own y %f", constraints[i]->GetOwnTorque().y_);
+        //    ui::Text("Own z %f", constraints[i]->GetOwnTorque().z_);
+        //    ui::Text("Other x %f", constraints[i]->GetOtherTorque().x_);
+        //    ui::Text("Other y %f", constraints[i]->GetOtherTorque().y_);
+        //    ui::Text("Other z %f", constraints[i]->GetOtherTorque().z_);
+        //}
+
+        //ui::EndTable();
+        //ui::End();
 
 
 
