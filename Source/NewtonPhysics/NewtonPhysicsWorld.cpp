@@ -53,7 +53,7 @@
 #include "NewtonKinematicsJoint.h"
 #include "NewtonDebugDrawing.h"
 #include "NewtonFullyFixedConstraint.h"
-#include "NewtonHingeConstraint.h"
+#include "NewtonRevoluteJoint.h"
 #include "NewtonSliderConstraint.h"
 #include "Newton6DOFConstraint.h"
 #include "NewtonGearConstraint.h"
@@ -969,7 +969,7 @@ namespace Urho3D {
         NewtonFixedDistanceConstraint::RegisterObject(context);
         NewtonBallAndSocketConstraint::RegisterObject(context);
         //NewtonSixDofConstraint::RegisterObject(context);
-        NewtonHingeConstraint::RegisterObject(context);
+        NewtonRevoluteJoint::RegisterObject(context);
         NewtonSliderConstraint::RegisterObject(context);
         NewtonFullyFixedConstraint::RegisterObject(context);
         NewtonKinematicsControllerConstraint::RegisterObject(context);

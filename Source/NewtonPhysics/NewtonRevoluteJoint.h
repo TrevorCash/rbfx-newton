@@ -9,14 +9,14 @@ namespace Urho3D {
 
 
 
-    class URHONEWTON_API NewtonHingeConstraint : public NewtonConstraint
+    class URHONEWTON_API NewtonRevoluteJoint : public NewtonConstraint
     {
-        URHO3D_OBJECT(NewtonHingeConstraint, NewtonConstraint);
+        URHO3D_OBJECT(NewtonRevoluteJoint, NewtonConstraint);
 
     public:
 
-        NewtonHingeConstraint(Context* context);
-        ~NewtonHingeConstraint();
+        NewtonRevoluteJoint(Context* context);
+        ~NewtonRevoluteJoint();
 
 
         static void RegisterObject(Context* context);
@@ -65,11 +65,11 @@ namespace Urho3D {
 
     //A Simple Hinge Joint with commandable torque and internal friction coefficient.
     //Option Angular Limits.
-    class URHONEWTON_API PivotJoint : public ndJointBilateralConstraint
+    class URHONEWTON_API ndRevoluteJoint : public ndJointBilateralConstraint
     {
     public:
-        D_CLASS_REFLECTION(PivotJoint);
-        PivotJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix0, const ndMatrix& globalMatrix1);
+        D_CLASS_REFLECTION(ndRevoluteJoint);
+        ndRevoluteJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix0, const ndMatrix& globalMatrix1);
     	void SetTorque(ndFloat32 newtonMeters);
 
         ndFloat32 m_commandedTorque;

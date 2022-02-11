@@ -1,4 +1,4 @@
-#include "NewtonHingeConstraint.h"
+#include "NewtonRevoluteJoint.h"
 #include "NewtonPhysicsWorld.h"
 #include "UrhoNewtonConversions.h"
 #include "NewtonDebugDrawing.h"
@@ -30,19 +30,19 @@ namespace Urho3D {
     };
 
 
-    NewtonHingeConstraint::NewtonHingeConstraint(Context* context) : NewtonConstraint(context)
+    NewtonRevoluteJoint::NewtonRevoluteJoint(Context* context) : NewtonConstraint(context)
     {
 
     }
 
-    NewtonHingeConstraint::~NewtonHingeConstraint()
+    NewtonRevoluteJoint::~NewtonRevoluteJoint()
     {
 
     }
 
-    void NewtonHingeConstraint::RegisterObject(Context* context)
+    void NewtonRevoluteJoint::RegisterObject(Context* context)
     {
-        context->RegisterFactory<NewtonHingeConstraint>(DEF_PHYSICS_CATEGORY.c_str());
+        context->RegisterFactory<NewtonRevoluteJoint>(DEF_PHYSICS_CATEGORY.c_str());
         URHO3D_COPY_BASE_ATTRIBUTES(NewtonConstraint);
 
         URHO3D_ACCESSOR_ATTRIBUTE("Enable Limits", GetLimitsEnabled, SetEnableLimits, bool, true, AM_DEFAULT);
@@ -51,7 +51,7 @@ namespace Urho3D {
         URHO3D_ACCESSOR_ATTRIBUTE("Torque", GetCommandedTorque, SetCommandedTorque, float, 0.0f, AM_DEFAULT);
     }
 
-    void NewtonHingeConstraint::SetMinAngle(float minAngle)
+    void NewtonRevoluteJoint::SetMinAngle(float minAngle)
     {
         if (minAngle_ != minAngle) {
             minAngle_ = minAngle;
@@ -60,34 +60,34 @@ namespace Urho3D {
 
 			if (newtonConstraint_)
 			{
-                static_cast<PivotJoint*>(newtonConstraint_)->m_minLimit = minAngle_ * ndDegreeToRad;
+                static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_minLimit = minAngle_ * ndDegreeToRad;
 			}
             else
                 MarkDirty();
         }
     }
 
-    void NewtonHingeConstraint::SetMaxAngle(float maxAngle)
+    void NewtonRevoluteJoint::SetMaxAngle(float maxAngle)
     {
         if (maxAngle_ != maxAngle) {
             maxAngle_ = maxAngle;
             WakeBodies();
             if (newtonConstraint_) {
-                static_cast<PivotJoint*>(newtonConstraint_)->m_maxLimit = maxAngle_ * ndDegreeToRad;
+                static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_maxLimit = maxAngle_ * ndDegreeToRad;
             }
             else
                 MarkDirty();
         }
     }
 
-    void NewtonHingeConstraint::SetEnableLimits(bool enable)
+    void NewtonRevoluteJoint::SetEnableLimits(bool enable)
     {
         if (enableLimits_ != enable) 
 		{
             enableLimits_ = enable;
             WakeBodies();
             if (newtonConstraint_) {
-                static_cast<PivotJoint*>(newtonConstraint_)->m_hasLimits = enableLimits_;
+                static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_hasLimits = enableLimits_;
 
             }
             else
@@ -96,7 +96,7 @@ namespace Urho3D {
     }
 
 
-    void NewtonHingeConstraint::SetCommandedTorque(float torque)
+    void NewtonRevoluteJoint::SetCommandedTorque(float torque)
     {
         if (commandedTorque_ != torque)
         {
@@ -104,14 +104,14 @@ namespace Urho3D {
             WakeBodies();
             if (newtonConstraint_)
             {
-            	static_cast<PivotJoint*>(newtonConstraint_)->SetTorque(-commandedTorque_);
+            	static_cast<ndRevoluteJoint*>(newtonConstraint_)->SetTorque(-commandedTorque_);
             }
             else
                 MarkDirty();
         }
     }
 
-    void NewtonHingeConstraint::SetFrictionCoef(float frictionCoef)
+    void NewtonRevoluteJoint::SetFrictionCoef(float frictionCoef)
     {
         if (frictionCoef_ != frictionCoef)
         {
@@ -119,34 +119,34 @@ namespace Urho3D {
             WakeBodies();
             if (newtonConstraint_)
             {
-                static_cast<PivotJoint*>(newtonConstraint_)->m_internalFrictionCoef = frictionCoef_;
+                static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_internalFrictionCoef = frictionCoef_;
             }
             else
                 MarkDirty();
         }
     }
 
-    float NewtonHingeConstraint::GetAngle()
+    float NewtonRevoluteJoint::GetAngle()
     {
         if (newtonConstraint_)
         {
-        	return static_cast<PivotJoint*>(newtonConstraint_)->m_angle * ndRadToDegree;
+        	return static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_angle * ndRadToDegree;
         }
         return 0.0f;
     }
 
-    float NewtonHingeConstraint::GetHingeAngularVelocity() const
+    float NewtonRevoluteJoint::GetHingeAngularVelocity() const
     {
         if (newtonConstraint_)
         {
             //neg because newton to urho.
-            return 1.0f*static_cast<PivotJoint*>(newtonConstraint_)->m_omega;
+            return 1.0f*static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_omega;
         }
         return 0.0f;
     }
 
 
-    void NewtonHingeConstraint::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
+    void NewtonRevoluteJoint::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
     {
         NewtonConstraint::DrawDebugGeometry(debug, depthTest);
 
@@ -199,9 +199,9 @@ namespace Urho3D {
 
     }
 
-    void NewtonHingeConstraint::buildConstraint()
+    void NewtonRevoluteJoint::buildConstraint()
     {
-        newtonConstraint_ = new PivotJoint(
+        newtonConstraint_ = new ndRevoluteJoint(
             GetOwnNewtonBodyBuild()->GetAsBodyKinematic(), 
             GetOtherNewtonBodyBuild()->GetAsBodyKinematic(), 
             UrhoToNewton(GetOwnBuildWorldFrame()),
@@ -209,24 +209,24 @@ namespace Urho3D {
             );
     }
 
-    bool NewtonHingeConstraint::applyAllJointParams()
+    bool NewtonRevoluteJoint::applyAllJointParams()
     {
         if (!NewtonConstraint::applyAllJointParams())
             return false;
 
 
-        static_cast<PivotJoint*>(newtonConstraint_)->m_maxLimit = maxAngle_ * ndDegreeToRad;
-        static_cast<PivotJoint*>(newtonConstraint_)->m_minLimit = minAngle_ * ndDegreeToRad;
-        static_cast<PivotJoint*>(newtonConstraint_)->m_hasLimits = enableLimits_;
-        static_cast<PivotJoint*>(newtonConstraint_)->m_internalFrictionCoef = Abs(frictionCoef_);
-        static_cast<PivotJoint*>(newtonConstraint_)->SetTorque(-commandedTorque_);
+        static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_maxLimit = maxAngle_ * ndDegreeToRad;
+        static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_minLimit = minAngle_ * ndDegreeToRad;
+        static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_hasLimits = enableLimits_;
+        static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_internalFrictionCoef = Abs(frictionCoef_);
+        static_cast<ndRevoluteJoint*>(newtonConstraint_)->SetTorque(-commandedTorque_);
     
 
         return true;
     }
 
 
-    PivotJoint::PivotJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix0, const ndMatrix& globalMatrix1) :
+    ndRevoluteJoint::ndRevoluteJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix0, const ndMatrix& globalMatrix1) :
 	ndJointBilateralConstraint(7, body0, body1, globalMatrix0, globalMatrix1),
     m_commandedTorque(0.0f),
 	m_minLimit(-1.0f),
@@ -238,19 +238,19 @@ namespace Urho3D {
     }
 
 
-    void PivotJoint::SetTorque(ndFloat32 newtonMeters)
+    void ndRevoluteJoint::SetTorque(ndFloat32 newtonMeters)
     {
         m_commandedTorque = newtonMeters;
     }
 
-    ndFloat32 PivotJoint::FinalTorque(ndConstraintDescritor& desc)
+    ndFloat32 ndRevoluteJoint::FinalTorque(ndConstraintDescritor& desc)
     {
         ndFloat32 frictionTorqueTerm = m_internalFrictionCoef * m_omega;
         ndFloat32 torque = m_commandedTorque - frictionTorqueTerm;
         return torque;
     }
 
-    ndFloat32 PivotJoint::CalculateAcceleration(ndConstraintDescritor& desc, float resolvedTorque)
+    ndFloat32 ndRevoluteJoint::CalculateAcceleration(ndConstraintDescritor& desc, float resolvedTorque)
     {
         //"Lead" the angular velocity so the torque always the limiting factor.
         ndFloat32 diff = m_omega + 1e3f*Sign(resolvedTorque);
@@ -260,7 +260,7 @@ namespace Urho3D {
 
 
 
-    void PivotJoint::JacobianDerivative(ndConstraintDescritor& desc)
+    void ndRevoluteJoint::JacobianDerivative(ndConstraintDescritor& desc)
     {
         ndMatrix matrix0;
         ndMatrix matrix1;

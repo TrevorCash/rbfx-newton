@@ -1,7 +1,7 @@
 #include "NewtonModel.h"
 
 #include "NewtonConstraint.h"
-#include "NewtonHingeConstraint.h"
+#include "NewtonRevoluteJoint.h"
 #include "NewtonPhysicsWorld.h"
 #include "NewtonRigidBody.h"
 
@@ -82,7 +82,7 @@ namespace  Urho3D
     }
 
 
-    void NewtonModel::CalculateChainJabobian(ea::vector<NewtonHingeConstraint*>& constraintChain,
+    void NewtonModel::CalculateChainJabobian(ea::vector<NewtonRevoluteJoint*>& constraintChain,
         ChainJacobian& J)
     {
         //compute the Jacobian From end to base
@@ -94,7 +94,7 @@ namespace  Urho3D
         Vector3 rootWorldOmega = constraintChain[0]->GetOwnWorldFrameOmega();
         Matrix3x4 endEffectorWorld = constraintChain[constraintChain.size()-1]->GetOwnWorldFrame();
         Matrix3x4 endEffectorRelRoot = rootTransform.Inverse() * endEffectorWorld;
-        Vector3 hingeLocalRotationAxis = NewtonHingeConstraint::LocalHingeAxis();
+        Vector3 hingeLocalRotationAxis = NewtonRevoluteJoint::LocalHingeAxis();
         Vector3 d_n_0 = endEffectorRelRoot.Translation();
 
         for (int i = 0; i < constraintChain.size(); i++)
@@ -112,7 +112,7 @@ namespace  Urho3D
         }
     }
 
-    void NewtonModel::SolveForJointVelocities(ChainJacobian& J, ea::vector<NewtonHingeConstraint*>& constraintChain, Vector3 endVelWorld,
+    void NewtonModel::SolveForJointVelocities(ChainJacobian& J, ea::vector<NewtonRevoluteJoint*>& constraintChain, Vector3 endVelWorld,
 	    Vector3 endOmegaWorld, ea::vector<float>& velocitiesOut)
 	{
         int numJoints = J.J_v.size();
@@ -138,7 +138,7 @@ namespace  Urho3D
 
 	}
 
-    void NewtonModel::SolveForJointTorques(ChainJacobian& J, ea::vector<NewtonHingeConstraint*>& constraintChain,
+    void NewtonModel::SolveForJointTorques(ChainJacobian& J, ea::vector<NewtonRevoluteJoint*>& constraintChain,
 	    Vector3 endForceWorld, Vector3 endTorqueWorld, ea::vector<float>& torquesOut)
 	{
         int numJoints = J.J_v.size();
@@ -196,7 +196,7 @@ namespace  Urho3D
        //     ea::vector<NewtonConstraint*> constraint;
        //     base->GetConnectedContraints(constraint);
 
-       //     dynamic_cast<NewtonHingeConstraint*>(constraint[0])->SetCommandedTorque(angular.GetX());
+       //     dynamic_cast<NewtonRevoluteJoint*>(constraint[0])->SetCommandedTorque(angular.GetX());
        //     
 
 
