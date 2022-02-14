@@ -110,6 +110,9 @@ namespace Urho3D {
         NewtonBodyNotifications* notifications0 = static_cast<NewtonBodyNotifications*>(body0->GetNotifyCallback());
         NewtonBodyNotifications* notifications1 = static_cast<NewtonBodyNotifications*>(body1->GetNotifyCallback());
 
+        if (notifications0 == nullptr || notifications1 == nullptr)
+            return false;
+
         NewtonRigidBody* rigBody0 = notifications0->rigidBodyComponent_;
         NewtonRigidBody* rigBody1 = notifications1->rigidBodyComponent_;
 
@@ -375,6 +378,7 @@ namespace Urho3D {
     void NewtonPhysicsWorld::removeCollisionShape(NewtonCollisionShape* collision)
     {
         collisionComponentList.erase_at(collisionComponentList.index_of(WeakPtr<NewtonCollisionShape>(collision)));
+        //freeShapeQueue_.push_back(collision->GetNewtonShape());
     }
 
     void NewtonPhysicsWorld::addRigidBody(NewtonRigidBody* body)
@@ -400,17 +404,20 @@ namespace Urho3D {
     {
 		constraintList.erase_at(constraintList.index_of(WeakPtr<NewtonConstraint>(constraint)));
         constraint->freeInternal();
+
     }
 
     void NewtonPhysicsWorld::addModel(NewtonModel* model)
     {
         modelList.push_front(WeakPtr<NewtonModel>(model));
+
     }
 
     void NewtonPhysicsWorld::removeModel(NewtonModel* model)
     {
         modelList.erase_at(modelList.index_of(WeakPtr<NewtonModel>(model)));
         model->freeModel();
+
     }
 
 
@@ -689,16 +696,19 @@ namespace Urho3D {
         CleanNewtonModels();
     }
 
-    void NewtonPhysicsWorld::CleanNewtonModels() const
+    void NewtonPhysicsWorld::CleanNewtonModels() 
     {
         //remove empty models
         ea::vector modelListCopy = modelList;
+        modelList.clear();
         for (auto model : modelListCopy)
         {
             if (model->IsEmpty())
             {
                 model->Remove();
             }
+            else
+                modelList.push_back(model);
         }
     }
 
@@ -733,34 +743,31 @@ namespace Urho3D {
 
     void NewtonPhysicsWorld::freePhysicsInternals()
     {
-        for (ndConstraint* constraint : freeConstraintQueue_)
+        for (ndConstraint* constraint : removeNewtonConstraintQueue_)
         {
 			if(constraint->GetAsBilateral())
 				newtonWorld_->RemoveJoint(constraint->GetAsBilateral());
             delete constraint;
         }
-        freeConstraintQueue_.clear();
+        removeNewtonConstraintQueue_.clear();
 
 
-        for (ndShapeInstance* shape : freeShapeQueue_)
+
+
+        for (ndBody* body : removeNewtonBodyQueue_)
         {
-			delete shape;
-        }
-        freeShapeQueue_.clear();
-
-
-        for (ndBody* body : freeBodyQueue_)
-        {
+            newtonWorld_->RemoveBody(body);
 			delete body;
         }
-        freeBodyQueue_.clear();
+        removeNewtonBodyQueue_.clear();
 
 
-        for (ndModel* model : freeModelQueue_)
+        for (ndModel* model : removeNewtonModelQueue_)
         {
+            newtonWorld_->RemoveModel(model);
             delete model;
         }
-        freeModelQueue_.clear();
+        removeNewtonModelQueue_.clear();
 
 
 

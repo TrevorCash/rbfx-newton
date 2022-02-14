@@ -8,7 +8,7 @@
 #include "Urho3D/Scene/Scene.h"
 #include "Urho3D/SystemUI/SystemUI.h"
 
-
+#include "UrhoNewtonConversions.h"
 #include "ndNewton.h"
 
 
@@ -40,24 +40,30 @@ namespace  Urho3D
 	{
 	}
 
-	void NewtonModel::GrowFrom(NewtonConstraint* constraint)
+	void NewtonModel::GrowFrom(WeakPtr<NewtonConstraint> constraint)
 	{
-        constraint->model_ = this;
+
         bodies.clear();
         constraints.clear();
 
+        if (!constraint)
+            return;
+
+        constraint->model_ = this;
+
         physicsWorld_->GetConnectedPhysicsComponents(constraint->GetOwnBody(), bodies, constraints);
 
-        for (auto* body : bodies)
+        for (auto body : bodies)
             body->model_ = this;
 
-        for (auto* constraint : constraints)
+        for (auto constraint : constraints)
             constraint->model_ = this;
 
 	}
 
 	void NewtonModel::Grow()
 	{
+
         GrowFrom(constraints.front());
 	}
 
@@ -67,8 +73,7 @@ namespace  Urho3D
     {
         if (newtonModel_ != nullptr) 
         {
-            physicsWorld_->GetNewtonWorld()->RemoveModel(newtonModel_);
-            physicsWorld_->freeModelQueue_.push_back(newtonModel_);
+            physicsWorld_->removeNewtonModelQueue_.push_back(newtonModel_);
             newtonModel_ = nullptr;
         }
     }
@@ -222,6 +227,20 @@ namespace  Urho3D
 
 
 
+    }
+
+    void NewtonModel::UpdateBoundingBox()
+    {
+        boundingBox_.Clear();
+        for(auto body : bodies)
+        {
+            ndVector p0;
+            ndVector p1;
+
+            body->GetNewtonBody()->GetAABB(p0,p1);
+            boundingBox_.Merge(NewtonToUrhoVec3(p0));
+            boundingBox_.Merge(NewtonToUrhoVec3(p1));
+        }
     }
 
     inline void NewtonModel::OnSceneSet(Scene* scene)

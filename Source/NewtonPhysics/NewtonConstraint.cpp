@@ -666,9 +666,9 @@ namespace Urho3D {
 
     void NewtonConstraint::freeInternal()
     {
-        if (newtonConstraint_ != nullptr) {
-			
-            physicsWorld_->freeConstraintQueue_.push_back(newtonConstraint_);
+        if (newtonConstraint_ != nullptr) 
+        {
+            physicsWorld_->removeNewtonConstraintQueue_.push_back(newtonConstraint_);
             newtonConstraint_ = nullptr;
         }
     }

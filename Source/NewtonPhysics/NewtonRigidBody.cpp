@@ -56,6 +56,7 @@ namespace Urho3D {
 
 	void NewtonBodyNotifications::OnTransform(ndInt32 threadIndex, const ndMatrix& matrix)
 	{
+
 		rigidBodyComponent_->MarkInternalTransformDirty();
 	}
 
@@ -490,7 +491,7 @@ namespace Urho3D {
     bool NewtonRigidBody::GetAwake() const
     {
 		if (newtonBody_)
-			return newtonBody_->GetAsBodyDynamic()->GetAutoSleep();
+			return newtonBody_->GetAsBodyDynamic()->GetSleepState();
         else
             return false;
     }
@@ -534,7 +535,9 @@ namespace Urho3D {
 
     }
 
-    void NewtonRigidBody::DrawDebugGeometry(DebugRenderer* debug, bool depthTest, bool showAABB /*= true*/, bool showCollisionMesh /*= true*/, bool showCenterOfMass /*= true*/, bool showContactForces /*= true*/, bool showBodyFrame /*= true*/)
+    void NewtonRigidBody::DrawDebugGeometry(DebugRenderer* debug, bool depthTest,
+        bool showAABB /*= true*/, bool showCollisionMesh /*= true*/,
+        bool showCenterOfMass /*= true*/, bool showContactForces /*= true*/, bool showBodyFrame /*= true*/)
     {
         Component::DrawDebugGeometry(debug, depthTest);
         if (newtonBody_) {
@@ -644,7 +647,7 @@ namespace Urho3D {
 		    }
 		    else {
 			    // body is active
-			    options.color = Color::RED;
+			    options.color = Color::GREEN;
 		    }
 	    }
 	    else if (newtonBody_->GetAsBodyKinematic())
@@ -724,8 +727,10 @@ namespace Urho3D {
     void NewtonRigidBody::freeBody()
     {
         if (newtonBody_ != nullptr) {
-			physicsWorld_->GetNewtonWorld()->RemoveBody(newtonBody_);
-            physicsWorld_->freeBodyQueue_.push_back(newtonBody_);
+            physicsWorld_->removeNewtonBodyQueue_.push_back(newtonBody_);
+            newtonBody_->SetNotifyCallback(nullptr);
+            newtonNotifications_ = nullptr;
+           
             newtonBody_ = nullptr;
         }
     }
@@ -899,7 +904,7 @@ namespace Urho3D {
 		newtonBody_->GetAsBodyDynamic()->SetAngularDamping(UrhoToNewton(angularDampeningInternal_));
 
         //set auto sleep mode.
-		newtonBody_->GetAsBodyDynamic()->SetAutoSleep(autoSleep_);
+		newtonBody_->GetAsBodyKinematic()->SetAutoSleep(autoSleep_);
 
 		
 
@@ -1010,7 +1015,7 @@ namespace Urho3D {
 
             if (oldParent)
             {
-                //RebuildPhysicsNodeTree(oldParent);
+                RebuildPhysicsNodeTree(oldParent);
             }
             else
             {
@@ -1216,7 +1221,6 @@ namespace Urho3D {
 	{
 		Vector3 vel = Vector3::ZERO;
 		if (newtonBody_) {
-
 			ndVector dVel = newtonBody_->GetVelocity();
 			vel = (NewtonToUrhoVec3(dVel));
 		}

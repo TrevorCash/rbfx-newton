@@ -161,8 +161,8 @@ namespace Urho3D
 
         /// get all connected rigidbodies and constraints including the starting body.
     	void GetConnectedPhysicsComponents(NewtonRigidBody* rigidBody,
-            ea::vector<NewtonRigidBody*>& rigidBodiesOUT,
-            ea::vector<NewtonConstraint*>& constraintsOUT);
+            ea::vector<WeakPtr<NewtonRigidBody>>& rigidBodiesOUT,
+            ea::vector<WeakPtr<NewtonConstraint>>& constraintsOUT);
 
 
 
@@ -216,7 +216,7 @@ namespace Urho3D
         void Update(float timestep, bool isRootUpdate);
 
         void BuildAndUpdateNewtonModels();
-        void CleanNewtonModels() const;
+        void CleanNewtonModels() ;
 
         virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
 
@@ -270,10 +270,19 @@ namespace Urho3D
 
 
 
-		eastl::vector<ndBody*> freeBodyQueue_;
-		eastl::vector<ndConstraint*> freeConstraintQueue_;
-		eastl::vector<ndShapeInstance*> freeShapeQueue_;
-        eastl::vector<ndModel*> freeModelQueue_;
+
+
+        //queues for newton object waiting to be removed from newton world.
+        eastl::vector<ndBody*> removeNewtonBodyQueue_;
+        eastl::vector<ndConstraint*> removeNewtonConstraintQueue_;
+        eastl::vector<ndModel*> removeNewtonModelQueue_;
+
+
+		//eastl::vector<ndBody*> freeBodyQueue_;
+		//eastl::vector<ndConstraint*> freeConstraintQueue_;
+		//eastl::vector<ndShapeInstance*> freeShapeQueue_;
+  //      eastl::vector<ndModel*> freeModelQueue_;
+
 
 
         void applyNewtonWorldSettings();

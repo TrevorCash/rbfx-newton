@@ -77,8 +77,8 @@ namespace Urho3D {
     }
 
     void NewtonPhysicsWorld::GetConnectedPhysicsComponents(NewtonRigidBody* rigidBody,
-        ea::vector<NewtonRigidBody*>& rigidBodiesOUT,
-        ea::vector<NewtonConstraint*>& constraintsOUT)
+        ea::vector<WeakPtr<NewtonRigidBody>>& rigidBodiesOUT,
+        ea::vector< WeakPtr<NewtonConstraint>>& constraintsOUT)
     {
 
         ea::vector<NewtonRigidBody*> bodyQueue;
@@ -89,7 +89,7 @@ namespace Urho3D {
             if (!bodyQueue.back()->graphTraverseFlag)
             {
                 bodyQueue.back()->graphTraverseFlag = true;
-                rigidBodiesOUT.push_back(bodyQueue.back());
+                rigidBodiesOUT.push_back(WeakPtr<NewtonRigidBody>(bodyQueue.back()));
 
 
                 ea::vector<NewtonConstraint*> constraintsHere;
@@ -102,7 +102,7 @@ namespace Urho3D {
                     if (!constraint->graphTraverseFlag)
                     {
                         constraint->graphTraverseFlag = true;
-                        constraintsOUT.push_back(constraint);
+                        constraintsOUT.push_back(WeakPtr<NewtonConstraint>(constraint));
                     }
                 }
 
@@ -118,10 +118,10 @@ namespace Urho3D {
 
 
         //restore flags.
-        for (auto* body : rigidBodiesOUT)
+        for (auto body : rigidBodiesOUT)
             body->graphTraverseFlag = false;
 
-        for (auto* constraint : constraintsOUT)
+        for (auto constraint : constraintsOUT)
             constraint->graphTraverseFlag = false;
     }
 

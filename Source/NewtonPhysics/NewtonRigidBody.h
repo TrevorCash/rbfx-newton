@@ -298,6 +298,8 @@ namespace Urho3D
         ndShapeInstance& GetEffectiveNewtonShape() const;
 
 
+        NewtonModel* GetModel() const { return model_; }
+
         Vector3 GetLinearVelocity(TransformSpace space = TS_WORLD) const;
 
 

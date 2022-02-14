@@ -5,6 +5,7 @@
 #include "Urho3D/Scene/Component.h"
 #include "UrhoNewtonApi.h"
 #include "eigen/Eigen/Dense"
+#include "Urho3D/Math/BoundingBox.h"
 
 class ndModel;
 
@@ -13,7 +14,7 @@ namespace Urho3D
 	class NewtonRevoluteJoint;
 	class NewtonModelHandler;
 	class NewtonConstraint;
-
+    class BoundingBox;
 
     //6xN Jacobian
     class URHONEWTON_API ChainJacobian
@@ -47,7 +48,7 @@ namespace Urho3D
 
         NewtonModel(Context* context);
 
-        void GrowFrom(NewtonConstraint* constraint);
+        void GrowFrom(WeakPtr<NewtonConstraint> constraint);
         void Grow();
 
         bool IsEmpty() {
@@ -82,18 +83,24 @@ namespace Urho3D
 
         void PreSolveComputations(ndWorld* const world, ndFloat32 timestep);
 
+        void UpdateBoundingBox();
+
+        BoundingBox GetBoundingBox()  { UpdateBoundingBox(); return boundingBox_; }
+
     protected:
 	    void OnSceneSet(Scene* scene) override;
         void freeModel();
         void reBuild();
 
-        ea::vector<NewtonRigidBody*> bodies;
-        ea::vector<NewtonConstraint*> constraints;
+        ea::vector<WeakPtr<NewtonRigidBody>> bodies;
+        ea::vector<WeakPtr<NewtonConstraint>> constraints;
 
         NewtonModelHandler* newtonModel_ = nullptr;
         bool dirty_ = true;
 
         WeakPtr<NewtonPhysicsWorld> physicsWorld_ = nullptr;
+
+        BoundingBox boundingBox_;
     };
 
 
