@@ -500,7 +500,8 @@ namespace Urho3D {
     {
         if (newtonBody_)
         {
-			newtonBody_->GetAsBodyDynamic()->SetSleepState(false);
+            if(newtonBody_->GetAsBodyDynamic())
+				newtonBody_->GetAsBodyDynamic()->SetSleepState(false);
         }
         else
         {
@@ -872,9 +873,12 @@ namespace Urho3D {
 
 
 			newtonBody_->GetAsBodyKinematic()->SetCollisionShape(effectiveCollision_);
-			newtonBody_->GetAsBodyDynamic()->SetMassMatrix(mass_, effectiveCollision_);
-            //newtonBody_->GetAsBodyDynamic()->SetMassMatrix(1.0 / mass_, 1.0 / mass_, 1.0 / mass_, mass_);
-			finalCenterOfMass = newtonBody_->GetAsBodyDynamic()->GetCentreOfMass();
+            if (newtonBody_->GetAsBodyDynamic())
+            {
+                newtonBody_->GetAsBodyDynamic()->SetMassMatrix(mass_, effectiveCollision_);
+                //newtonBody_->GetAsBodyDynamic()->SetMassMatrix(1.0 / mass_, 1.0 / mass_, 1.0 / mass_, mass_);
+                finalCenterOfMass = newtonBody_->GetAsBodyDynamic()->GetCentreOfMass();
+            }
 		}
 
 		//if we are building the scene body - set the COM to (0,0,0)
@@ -898,11 +902,14 @@ namespace Urho3D {
 		newtonBody_->SetCentreOfMass(UrhoToNewton(centerOfMassEffective_));
 
 
-        //ensure newton damping is 0 because we apply our own as a force.
-		newtonBody_->GetAsBodyDynamic()->SetLinearDamping(linearDampeningInternal_);
+        if (newtonBody_->GetAsBodyDynamic())
+        {
+            //ensure newton damping is 0 because we apply our own as a force.
+            newtonBody_->GetAsBodyDynamic()->SetLinearDamping(linearDampeningInternal_);
 
-		newtonBody_->GetAsBodyDynamic()->SetAngularDamping(UrhoToNewton(angularDampeningInternal_));
+            newtonBody_->GetAsBodyDynamic()->SetAngularDamping(UrhoToNewton(angularDampeningInternal_));
 
+        }
         //set auto sleep mode.
 		newtonBody_->GetAsBodyKinematic()->SetAutoSleep(autoSleep_);
 
@@ -1105,15 +1112,18 @@ namespace Urho3D {
         if (!newtonBody_)
             return;
 
-		if (newtonBody_->GetAsBodyDynamic()->GetLinearDamping() != linearDampeningInternal_)
-			newtonBody_->GetAsBodyDynamic()->SetLinearDamping(linearDampeningInternal_);
+        if(newtonBody_->GetAsBodyDynamic())
+        {
+			if (newtonBody_->GetAsBodyDynamic()->GetLinearDamping() != linearDampeningInternal_)
+				newtonBody_->GetAsBodyDynamic()->SetLinearDamping(linearDampeningInternal_);
 
 
-		ndVector angularDamping = newtonBody_->GetAsBodyDynamic()->GetAngularDamping();
+			ndVector angularDamping = newtonBody_->GetAsBodyDynamic()->GetAngularDamping();
 
-		if (NewtonToUrhoVec3(angularDamping) != angularDampeningInternal_)
-			newtonBody_->GetAsBodyDynamic()->SetAngularDamping(UrhoToNewton(angularDampeningInternal_));
+			if (NewtonToUrhoVec3(angularDamping) != angularDampeningInternal_)
+				newtonBody_->GetAsBodyDynamic()->SetAngularDamping(UrhoToNewton(angularDampeningInternal_));
 
+        }
 
     }
 

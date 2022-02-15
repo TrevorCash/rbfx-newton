@@ -45,7 +45,7 @@ namespace Urho3D {
         context->RegisterFactory<NewtonRevoluteJoint>(DEF_PHYSICS_CATEGORY.c_str());
         URHO3D_COPY_BASE_ATTRIBUTES(NewtonConstraint);
 
-        URHO3D_ACCESSOR_ATTRIBUTE("Enable Limits", GetLimitsEnabled, SetEnableLimits, bool, true, AM_DEFAULT);
+        URHO3D_ACCESSOR_ATTRIBUTE("Enable Limits", GetHingeLimitsEnabled, SetEnableHingeLimits, bool, true, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Angle Min", GetMinAngle, SetMinAngle, float, -45.0f, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Angle Max", GetMaxAngle, SetMaxAngle, float, 45.0f, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Torque", GetCommandedTorque, SetCommandedTorque, float, 0.0f, AM_DEFAULT);
@@ -80,14 +80,29 @@ namespace Urho3D {
         }
     }
 
-    void NewtonRevoluteJoint::SetEnableLimits(bool enable)
+    void NewtonRevoluteJoint::SetEnableHingeLimits(bool enable)
     {
-        if (enableLimits_ != enable) 
+        if (enableHingeLimits_ != enable) 
 		{
-            enableLimits_ = enable;
+            enableHingeLimits_ = enable;
             WakeBodies();
             if (newtonConstraint_) {
-                static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_hasLimits = enableLimits_;
+                static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_hasRotationLimits = enableHingeLimits_;
+
+            }
+            else
+                MarkDirty();
+        }
+    }
+
+    void NewtonRevoluteJoint::SetEnableOffsetLimits(bool enable)
+    {
+        if (enableOffsetLimits_ != enable)
+        {
+            enableOffsetLimits_ = enable;
+            WakeBodies();
+            if (newtonConstraint_) {
+                static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_hasOffsetLimits = enableOffsetLimits_;
 
             }
             else
@@ -150,7 +165,7 @@ namespace Urho3D {
     {
         NewtonConstraint::DrawDebugGeometry(debug, depthTest);
 
-        if (enableLimits_) 
+        if (enableHingeLimits_) 
         {
             constexpr float lenScale = 4.0f;
             float minIndicator = lenScale * minAngle_ / 360.0f;
@@ -217,7 +232,7 @@ namespace Urho3D {
 
         static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_maxLimit = maxAngle_ * ndDegreeToRad;
         static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_minLimit = minAngle_ * ndDegreeToRad;
-        static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_hasLimits = enableLimits_;
+        static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_hasRotationLimits = enableHingeLimits_;
         static_cast<ndRevoluteJoint*>(newtonConstraint_)->m_internalFrictionCoef = Abs(frictionCoef_);
         static_cast<ndRevoluteJoint*>(newtonConstraint_)->SetTorque(-commandedTorque_);
     
@@ -232,7 +247,8 @@ namespace Urho3D {
 	m_minLimit(-1.0f),
     m_maxLimit(1.0f),
     m_angle(0.0f),
-	m_hasLimits(false),
+	m_hasRotationLimits(false),
+    m_hasOffsetLimits(true),
 	m_internalFrictionCoef(0.0f)
     {
     }
@@ -280,10 +296,11 @@ namespace Urho3D {
         const ndFloat32 deltaAngle = AnglesAdd(-CalculateAngle(matrix0.m_up, matrix1.m_up, matrix1.m_front), -m_angle);
         m_angle += deltaAngle;
 
-        AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1.m_front);
-        AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1.m_up);
-        AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1.m_right);
-
+        if (m_hasOffsetLimits) {
+            AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1.m_front);
+            AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1.m_up);
+            AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1.m_right);
+        }
 
         AddAngularRowJacobian(desc, matrix1.m_up, angle0);
         AddAngularRowJacobian(desc, matrix1.m_right, angle1);
@@ -292,7 +309,7 @@ namespace Urho3D {
         float torque = FinalTorque(desc);
 
 
-        if (m_hasLimits)
+        if (m_hasRotationLimits)
         {
             if ((m_minLimit > ndFloat32(-1.e-4f)) && (m_maxLimit < ndFloat32(1.e-4f)))
             {

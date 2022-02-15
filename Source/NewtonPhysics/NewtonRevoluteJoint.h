@@ -27,8 +27,11 @@ namespace Urho3D {
         void SetMaxAngle(float maxAngle);
         float GetMaxAngle() const { return maxAngle_; }
 
-        void SetEnableLimits(bool enable);
-        bool GetLimitsEnabled() const { return enableLimits_; }
+        void SetEnableHingeLimits(bool enable);
+        bool GetHingeLimitsEnabled() const { return enableHingeLimits_; }
+
+        void SetEnableOffsetLimits(bool enable);
+        bool GetEnableOffsetLimits() const { return enableOffsetLimits_; }
 
         /// Set max torque for actuator powered modes.
         void SetCommandedTorque(float torque);
@@ -52,7 +55,8 @@ namespace Urho3D {
     protected:
 
         float frictionCoef_ = 0.1f;
-        bool  enableLimits_ = true;
+        bool  enableHingeLimits_ = true;
+        bool  enableOffsetLimits_ = true;
         float minAngle_ = -45.0f;
         float maxAngle_ = 45.0f;
         float commandedTorque_ = 0.0f;
@@ -75,7 +79,8 @@ namespace Urho3D {
         ndFloat32 m_commandedTorque;
         ndFloat32 m_minLimit;
         ndFloat32 m_maxLimit;
-        bool m_hasLimits;
+        bool m_hasRotationLimits;
+        bool m_hasOffsetLimits;
         ndFloat32 m_angle;
         ndFloat32 m_omega;
         ndFloat32 m_internalFrictionCoef;
