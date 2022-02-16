@@ -161,6 +161,7 @@ namespace Urho3D {
 
             const Matrix3x4 scaleLessTransform((transform.Translation()), transform.Rotation(), 1.0f);
 			newtonBody_->SetMatrix(UrhoToNewton(scaleLessTransform));
+
         }
         else
         {
@@ -177,10 +178,10 @@ namespace Urho3D {
 
             ndQuaternion orientation = newtonBody_->GetRotation();
 
-
             const Matrix3x4 transform((position), NewtonToUrhoQuat(orientation), 1.0f);
 
 			newtonBody_->SetMatrix(UrhoToNewton(transform));
+            
         }
         else
         {
@@ -881,11 +882,6 @@ namespace Urho3D {
             }
 		}
 
-		//if we are building the scene body - set the COM to (0,0,0)
-		if (GetIsSceneRootBody()) {
-			
-			finalCenterOfMass = ndVector(0, 0, 0, 1);
-		}
 
 		//always keep reference to the calculated COM
 		centerOfMassCalculated_ = NewtonToUrhoVec3(finalCenterOfMass);
@@ -921,7 +917,7 @@ namespace Urho3D {
 
 		physicsWorld_->GetNewtonWorld()->AddBody(newtonBody_);
 
-
+        
         // move the body.
         SetWorldTransformToNode();
         lastSetNodeWorldTransform_ = node_->GetWorldTransform();

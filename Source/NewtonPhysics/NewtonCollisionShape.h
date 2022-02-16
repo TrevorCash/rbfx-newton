@@ -45,6 +45,9 @@ namespace Urho3D
 #define COLLISION_SHAPE_DEF_ELASTICITY 0.5f
 #define COLLISION_SHAPE_DEF_SOFTNESS 0.5f
 
+
+
+
     /// base component for attaching collision shapes to nodes.
     class URHONEWTON_API NewtonCollisionShape : public Component
     {
@@ -198,7 +201,11 @@ namespace Urho3D
 
 
 
-
+    struct URHONEWTON_API NewtonShapeInstanceShapeUserData
+    {
+        WeakPtr<NewtonCollisionShape> collisionComp;
+        
+    };
 
 
 

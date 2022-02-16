@@ -87,7 +87,10 @@ namespace Urho3D {
             //call the derived class createNewtonCollision function.
             if (buildNewtonCollision())
             {
+                ndShapeMaterial mat = newtonShape_.GetMaterial();
 
+                mat.m_data.m_userData = static_cast<void*>(this);
+                newtonShape_.SetMaterial(mat);
 
                 ////determine if the built collision is a compound.
                 //int numSubShapes = 0;

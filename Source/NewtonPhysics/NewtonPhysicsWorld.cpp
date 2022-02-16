@@ -90,7 +90,25 @@ namespace Urho3D {
 
     ndMaterial NewtonWorldContactNotify::GetMaterial(const ndContact* const contact, const ndShapeInstance& shape1, ndShapeInstance& shape2) const
     {
-	    return ndMaterial();
+	    ndMaterial material;
+
+        NewtonCollisionShape* colComp1 = static_cast<NewtonCollisionShape*>(shape1.GetMaterial().m_data.m_userData);
+        NewtonCollisionShape* colComp2 = static_cast<NewtonCollisionShape*>(shape2.GetMaterial().m_data.m_userData);
+
+
+        material.m_staticFriction0 = colComp1->GetStaticFriction();
+        material.m_staticFriction1 = colComp2->GetStaticFriction();
+
+        material.m_dynamicFriction0 = colComp1->GetKineticFriction();
+        material.m_dynamicFriction1 = colComp2->GetKineticFriction();
+
+        material.m_restitution = colComp1->GetElasticity() + colComp2->GetElasticity();//
+        material.m_softness = colComp1->GetSoftness() + colComp2->GetSoftness();
+
+        
+
+
+        return material;
     }
 
     bool NewtonWorldContactNotify::OnCompoundSubShapeOverlap(const ndContact* const contact, ndFloat32 timestep, const ndShapeInstance* const subShapeA, const ndShapeInstance* const subShapeB)
@@ -160,7 +178,7 @@ namespace Urho3D {
            const ndShapeInstance* shape0 = contactPoint.m_shapeInstance0;
            const ndShapeInstance* shape1 = contactPoint.m_shapeInstance1;
 
-
+ 
            
 
            //#todo debugging
@@ -352,7 +370,7 @@ namespace Urho3D {
 				newtonContactNotify_ = new NewtonWorldContactNotify();
 				newtonWorld_->SetContactNotify(newtonContactNotify_);
 				
-
+                
                 //NewtonMaterialSetCollisionCallback(newtonWorld_, 0, 0, Newton_AABBOverlapCallback, Newton_ProcessContactsCallback);
                 //NewtonMaterialSetCompoundCollisionCallback(newtonWorld_, 0, 0, Newton_AABBCompoundOverlapCallback);
                 //NewtonSetPostUpdateCallback(newtonWorld_, Newton_PostUpdateCallback);
