@@ -88,28 +88,7 @@ namespace Urho3D {
     {
     }
 
-    ndMaterial NewtonWorldContactNotify::GetMaterial(const ndContact* const contact, const ndShapeInstance& shape1, ndShapeInstance& shape2) const
-    {
-	    ndMaterial material;
 
-        NewtonCollisionShape* colComp1 = static_cast<NewtonCollisionShape*>(shape1.GetMaterial().m_data.m_userData);
-        NewtonCollisionShape* colComp2 = static_cast<NewtonCollisionShape*>(shape2.GetMaterial().m_data.m_userData);
-
-
-        material.m_staticFriction0 = colComp1->GetStaticFriction();
-        material.m_staticFriction1 = colComp2->GetStaticFriction();
-
-        material.m_dynamicFriction0 = colComp1->GetKineticFriction();
-        material.m_dynamicFriction1 = colComp2->GetKineticFriction();
-
-        material.m_restitution = colComp1->GetElasticity() + colComp2->GetElasticity();//
-        material.m_softness = colComp1->GetSoftness() + colComp2->GetSoftness();
-
-        
-
-
-        return material;
-    }
 
     bool NewtonWorldContactNotify::OnCompoundSubShapeOverlap(const ndContact* const contact, ndFloat32 timestep, const ndShapeInstance* const subShapeA, const ndShapeInstance* const subShapeB)
     {
@@ -147,9 +126,9 @@ namespace Urho3D {
         return res;
     }
 
-    void NewtonWorldContactNotify::OnContactCallback(ndInt32 threadIndex, const ndContact* const contact, ndFloat32 timestep)
+    void NewtonWorldContactNotify::OnContactCallback( const ndContact* const contact, ndFloat32 timestep)
     {
-    	//URHO3D_PROFILE_THREAD(NewtonThreadProfilerString(threadIndex).c_str());
+
        URHO3D_PROFILE_FUNCTION();
 
        //Get handles To NewtonBodies and RigidBody Components.
@@ -164,6 +143,7 @@ namespace Urho3D {
 
 
 
+
        if (!rigBody0->GetGenerateContacts() || !rigBody1->GetGenerateContacts())
            return;
 
@@ -171,45 +151,31 @@ namespace Urho3D {
 
        for (auto* node = contact->GetContactPoints().GetFirst(); node != contact->GetContactPoints().GetLast(); node = node->GetNext() )
        {
-           auto contactPoint = node->GetInfo();
+           ndContactMaterial& contactMaterial = node->GetInfo();
+
+           const ndShapeInstance* shape0 = contactMaterial.m_shapeInstance0;
+           const ndShapeInstance* shape1 = contactMaterial.m_shapeInstance1;
+
+           NewtonCollisionShape* colComp1 = static_cast<NewtonCollisionShape*>(shape0->GetMaterial().m_data.m_userData);
+           NewtonCollisionShape* colComp2 = static_cast<NewtonCollisionShape*>(shape1->GetMaterial().m_data.m_userData);
 
 
-       	   ndMaterial material = contactPoint.m_material;
-           const ndShapeInstance* shape0 = contactPoint.m_shapeInstance0;
-           const ndShapeInstance* shape1 = contactPoint.m_shapeInstance1;
+           float staticFriction  = (colComp1->GetStaticFriction() + colComp2->GetStaticFriction())*0.5f;
+           float kineticFriction = (colComp1->GetKineticFriction() + colComp2->GetKineticFriction())*0.5f;
 
- 
-           
-
-           //#todo debugging
-           //GetSubsystem<VisualDebugger>()->AddCross(contactEntry->contactPositions[contactIdx], 0.1f, Color::BLUE, true);
+           float restitution = (colComp1->GetElasticity() + colComp2->GetElasticity())*0.5f;
+           float softness = (colComp1->GetSoftness()+ colComp2->GetSoftness())*0.5f;
 
 
-           //float staticFriction0 = colShape0->GetStaticFriction();
-           //float kineticFriction0 = colShape0->GetKineticFriction();
-           //float elasticity0 = colShape0->GetElasticity();
-           //float softness0 = colShape0->GetSoftness();
+           contactMaterial.m_material.m_staticFriction0 = staticFriction;
+           contactMaterial.m_material.m_staticFriction1 = staticFriction;
 
-           //float staticFriction1 = colShape1->GetStaticFriction();
-           //float kineticFriction1 = colShape1->GetKineticFriction();
-           //float elasticity1 = colShape1->GetElasticity();
-           //float softness1 = colShape1->GetSoftness();
+           contactMaterial.m_material.m_dynamicFriction0 = kineticFriction;
+           contactMaterial.m_material.m_dynamicFriction1 = kineticFriction;
 
 
-           //float finalStaticFriction = Max(staticFriction0, staticFriction1);
-           //float finalKineticFriction = Max(kineticFriction0, kineticFriction1);
-           //float finalElasticity = Min(elasticity0, elasticity1);
-           //float finalSoftness = Max(softness0, softness1);
-
-           ////apply material settings to contact.
-           //NewtonMaterialSetContactFrictionCoef(material, finalStaticFriction, finalKineticFriction, 0);
-           //NewtonMaterialSetContactElasticity(material, finalElasticity);
-           //NewtonMaterialSetContactSoftness(material, finalSoftness);
-
-           //if (rigBody0->GetTriggerMode() || rigBody1->GetTriggerMode()) {
-           //    NewtonContactJointRemoveContact(contactJoint, contact);
-           //    continue;
-           //}
+           contactMaterial.m_material.m_restitution = restitution;
+           contactMaterial.m_material.m_softness = softness;
        }
     }
 

@@ -92,13 +92,14 @@ namespace Urho3D
 
 		virtual void OnBodyRemoved(ndBodyKinematic* const) const;
 
-		virtual ndMaterial GetMaterial(const ndContact* const contact, const ndShapeInstance& shape1,  ndShapeInstance& shape2) const;
-
 		virtual bool OnCompoundSubShapeOverlap(const ndContact* const contact, ndFloat32 timestep, const ndShapeInstance* const subShapeA, const ndShapeInstance* const subShapeB);
 
 		virtual bool OnAabbOverlap(const ndContact* const contact, ndFloat32 timestep);
 
-		virtual void OnContactCallback(ndInt32 threadIndex, const ndContact* const contact, ndFloat32 timestep);
+		virtual void OnContactCallback( const ndContact* const contact, ndFloat32 timestep);
+
+
+       
 	};
 
 
