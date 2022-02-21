@@ -803,6 +803,15 @@ namespace Urho3D {
             GetRootRigidBodies(rigidBodies, node->GetParent(), includeScene);
     }
 
+    NewtonRigidBody* GetRootRigidBody(Node* node, bool includeScene)
+    {
+        ea::vector<NewtonRigidBody*> rigidBodies;
+        GetRootRigidBodies(rigidBodies, node, includeScene);
+        if (rigidBodies.size())
+            return rigidBodies.back();
+        else
+            return nullptr;
+    }
 
 
 	void NewtonCompoundGetSubShapes(ndShapeCompound* compound, ea::vector<ndShapeInstance*>& subShapes)

@@ -363,6 +363,7 @@ namespace Urho3D
 
 
 	URHONEWTON_API void  GetRootRigidBodies(eastl::vector<NewtonRigidBody*>& rigidBodies, Node* node, bool includeScene);
+    URHONEWTON_API NewtonRigidBody* GetRootRigidBody(Node* node, bool includeScene);
 
 	URHONEWTON_API void NewtonCompoundGetSubShapes(ndShapeCompound* compound, ea::vector<ndShapeInstance*>& subShapes);
 
