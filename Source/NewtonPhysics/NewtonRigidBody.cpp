@@ -849,7 +849,9 @@ namespace Urho3D {
 
 
 					shape.SetLocalMatrix(UrhoToNewton(localMatrixPosRot));//no sheer for newton..
-					shape.SetScale(UrhoToNewton(colComp->GetNode()->GetScale() * colComp->GetScaleFactor() * densityScale));
+                    Vector3 scale = colComp->GetNode()->GetScale() * colComp->GetScaleFactor() * densityScale;
+                    scale = colComp->GetRotationOffset().RotationMatrix() * scale;
+					shape.SetScale(UrhoToNewton(scale));
 
 
 					subShapes.push_back(shape);

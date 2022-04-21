@@ -8,13 +8,11 @@ namespace Urho3D {
     class Context;
 
 
-
     class URHONEWTON_API NewtonRevoluteJoint : public NewtonConstraint
     {
         URHO3D_OBJECT(NewtonRevoluteJoint, NewtonConstraint);
 
     public:
-
         NewtonRevoluteJoint(Context* context);
         ~NewtonRevoluteJoint();
 
