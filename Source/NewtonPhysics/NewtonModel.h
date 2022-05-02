@@ -74,9 +74,10 @@ namespace Urho3D
             Vector3 endVelWorld, Vector3 endOmegaWorld, ea::vector<float>& velocitiesOut);
 
         //constraintChain from base to end.
-        void SolveForJointTorques(ChainJacobian& J, ea::vector<NewtonRevoluteJoint*>& constraintChain,
+        void ComputeJointTorquesForEndEffector(ChainJacobian& J, ea::vector<NewtonRevoluteJoint*>& constraintChain,
             Vector3 endForceWorld, Vector3 endTorqueWorld, ea::vector<float>& torquesOut);
 
+        void ComputeCounterGravitationalTorque(ea::vector<NewtonRevoluteJoint*>& constraintChain, ea::vector<float>& torquesOut);
         //void SolveForEndVelocity();
         //void SolveForEndForces();
 

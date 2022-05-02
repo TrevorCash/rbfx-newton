@@ -143,7 +143,7 @@ namespace  Urho3D
 
 	}
 
-    void NewtonModel::SolveForJointTorques(ChainJacobian& J, ea::vector<NewtonRevoluteJoint*>& constraintChain,
+    void NewtonModel::ComputeJointTorquesForEndEffector(ChainJacobian& J, ea::vector<NewtonRevoluteJoint*>& constraintChain,
 	    Vector3 endForceWorld, Vector3 endTorqueWorld, ea::vector<float>& torquesOut)
 	{
         int numJoints = J.J_v.size();
@@ -164,8 +164,39 @@ namespace  Urho3D
         torquesOut.clear();
         for (int i = 0; i < numJoints; i++)
             torquesOut.push_back(SolvedQ_torques(i));
-
 	}
+
+
+    void NewtonModel::ComputeCounterGravitationalTorque(ea::vector<NewtonRevoluteJoint*>& constraintChain, ea::vector<float>& torquesOut)
+    {
+        for (int i = 0; i < constraintChain.size(); i++)
+        {
+            //compute effective current inertia frame on the remaining links
+            float totalMass = 0.0f;
+            Vector3 totalCOM;
+            
+            for (int j = i; j < constraintChain.size(); j++)
+            {
+                float mass = constraintChain[j]->GetOtherBody()->GetEffectiveMass();
+                Matrix3x4 com = constraintChain[j]->GetOtherBody()->GetCOMWorldTransform();
+
+                totalCOM += mass * com.Translation();
+                totalMass += mass;
+            }
+            totalCOM *= 1 / (totalMass);
+
+
+            Vector3 forceDueToGravity(0, totalMass * -9.81f, 0);
+            Vector3 counterTorque = (totalCOM - constraintChain[i]->GetOwnWorldFrame().Translation()).CrossProduct(forceDueToGravity)*-1.0f;
+            
+            Vector3 constraintWorldHingeAxis = constraintChain[i]->GetOwnWorldFrame().RotationMatrix() * constraintChain[i]->LocalHingeAxis();
+            float jointTorque = counterTorque.ProjectOntoAxis(constraintWorldHingeAxis);
+            torquesOut.push_back(jointTorque);
+        }
+
+    }
+
+
 
     void NewtonModel::PreSolveComputations(ndWorld* const world, ndFloat32 timestep)
     {
