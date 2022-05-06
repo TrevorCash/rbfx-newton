@@ -23,7 +23,9 @@ namespace Urho3D
         ea::vector<Vector3> J_v;
         ea::vector<Vector3> J_w;
 
-        void ToEigenMatrix(Eigen::MatrixXd& J);
+        void ToEigenMatrix_Full(Eigen::MatrixXd& J);
+        void ToEigenMatrix_Linear(Eigen::MatrixXd& J);
+        void ToEigenMatrix_Angular(Eigen::MatrixXd& J);
     };
 
 
@@ -78,8 +80,9 @@ namespace Urho3D
             Vector3 endForceWorld, Vector3 endTorqueWorld, ea::vector<float>& torquesOut);
 
         void ComputeCounterGravitationalTorque(ea::vector<NewtonRevoluteJoint*>& constraintChain, ea::vector<float>& torquesOut);
-        //void SolveForEndVelocity();
-        //void SolveForEndForces();
+        
+
+        void ComputeEndEffectorManipulabilityElipse(ChainJacobian& J, Vector3& v1, Vector3& v2, Vector3& v3, Vector3& lengths);
 
 
         void PreSolveComputations(ndWorld* const world, ndFloat32 timestep);

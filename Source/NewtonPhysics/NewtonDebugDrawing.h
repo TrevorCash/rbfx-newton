@@ -38,7 +38,7 @@ namespace Urho3D
 
         virtual void SetColor(const ndVector& color);
         virtual void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32 thickness = ndFloat32(1.0f));
-
+        virtual void DrawPoint(const ndVector& point, const ndVector& color, ndFloat32 thickness = ndFloat32(8.0f)) {}
 
 	protected:
         float worldScale_ = 1.0f;

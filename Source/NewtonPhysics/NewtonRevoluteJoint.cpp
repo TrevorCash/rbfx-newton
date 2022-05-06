@@ -17,7 +17,8 @@
 
 #include "ndNewton.h"
 
-
+#define D_MAX_HINGE_RECOVERY_SPEED	ndFloat32 (0.25f)
+#define D_MAX_HINGE_PENETRATION		(ndFloat32 (4.0f) * ndDegreeToRad)
 
 namespace Urho3D {
 
@@ -323,7 +324,7 @@ namespace Urho3D {
                     AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
                     const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
                     const ndFloat32 penetration = m_angle - m_minLimit;
-                    const ndFloat32 recoveringAceel = -desc.m_invTimestep * D_HINGE_PENETRATION_RECOVERY_SPEED * dMin(dAbs(penetration / D_HINGE_PENETRATION_LIMIT), ndFloat32(1.0f));
+                    const ndFloat32 recoveringAceel = -desc.m_invTimestep * D_MAX_HINGE_RECOVERY_SPEED * dMin(dAbs(penetration / D_MAX_HINGE_PENETRATION), ndFloat32(1.0f));
                     SetMotorAcceleration(desc, stopAccel - recoveringAceel);
                     SetLowerFriction(desc, 0);
                 }
@@ -332,7 +333,7 @@ namespace Urho3D {
                     AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
                     const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
                     const ndFloat32 penetration = m_angle - m_maxLimit;
-                    const ndFloat32 recoveringAceel = desc.m_invTimestep * D_HINGE_PENETRATION_RECOVERY_SPEED * dMin(dAbs(penetration / D_HINGE_PENETRATION_LIMIT), ndFloat32(1.0f));
+                    const ndFloat32 recoveringAceel = desc.m_invTimestep * D_MAX_HINGE_RECOVERY_SPEED * dMin(dAbs(penetration / D_MAX_HINGE_PENETRATION), ndFloat32(1.0f));
                     SetMotorAcceleration(desc, stopAccel - recoveringAceel);
                     SetHighFriction(desc, 0);
                 }

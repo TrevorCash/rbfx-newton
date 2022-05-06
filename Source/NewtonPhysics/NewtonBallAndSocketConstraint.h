@@ -30,15 +30,15 @@ namespace Urho3D {
         float GetTwistLimitMax() const;
         Vector2 GetTwistLimits() const;
 
-        void SetTwistFriction(float frictionTorque);
-        float GetTwistFriction() const;
+      /*  void SetTwistFriction(float frictionTorque);
+        float GetTwistFriction() const;*/
 
 
         void SetConeAngle(float angle);
         float GetConeAngle() const;
 
-        void SetConeFriction(float frictionTorque);
-        float GetConeFriction() const;
+        //void SetConeFriction(float frictionTorque);
+        //float GetConeFriction() const;
 
 
 

@@ -99,31 +99,31 @@ namespace Urho3D {
 
 
 
-    void NewtonBallAndSocketConstraint::SetConeFriction(float frictionTorque)
-    {
-        if (frictionTorque != coneFriction_) {
-            coneFriction_ = frictionTorque;
-            if (newtonConstraint_)
-            {
-                static_cast<ndJointBallAndSocket*>(newtonConstraint_)->SetConeFriction(1.0f, (coneFriction_));
-            }
-            else
-                MarkDirty();
-        }
-    }
+    //void NewtonBallAndSocketConstraint::SetConeFriction(float frictionTorque)
+    //{
+    //    if (frictionTorque != coneFriction_) {
+    //        coneFriction_ = frictionTorque;
+    //        if (newtonConstraint_)
+    //        {
+    //            static_cast<ndJointSpherical*>(newtonConstraint_)->SetConeFriction(1.0f, (coneFriction_));
+    //        }
+    //        else
+    //            MarkDirty();
+    //    }
+    //}
 
-    float NewtonBallAndSocketConstraint::GetConeFriction() const
-    {
-        return coneFriction_;
-    }
+    //float NewtonBallAndSocketConstraint::GetConeFriction() const
+    //{
+    //    return coneFriction_;
+    //}
 
-    void NewtonBallAndSocketConstraint::SetTwistFriction(float frictionTorque)
+   /* void NewtonBallAndSocketConstraint::SetTwistFriction(float frictionTorque)
     {
         if (twistFriction_ != frictionTorque) {
             twistFriction_ = frictionTorque;
             if (newtonConstraint_)
             {
-                static_cast<ndJointBallAndSocket*>(newtonConstraint_)->SetTwistFriction(1.0f,(twistFriction_));
+                static_cast<ndJointSpherical*>(newtonConstraint_)->SetTwistFriction(1.0f,(twistFriction_));
             }
             else
                 MarkDirty();
@@ -133,7 +133,7 @@ namespace Urho3D {
     float NewtonBallAndSocketConstraint::GetTwistFriction() const
     {
         return twistFriction_;
-    }
+    }*/
 
     void NewtonBallAndSocketConstraint::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
     {
@@ -155,10 +155,10 @@ namespace Urho3D {
         URHO3D_COPY_BASE_ATTRIBUTES(NewtonConstraint);
 
         URHO3D_ACCESSOR_ATTRIBUTE("Cone Angle", GetConeAngle, SetConeAngle, float, 20.0f, AM_DEFAULT);
-        URHO3D_ACCESSOR_ATTRIBUTE("Cone Friction", GetConeFriction, SetConeFriction, float, 0.0f, AM_DEFAULT);
+        //URHO3D_ACCESSOR_ATTRIBUTE("Cone Friction", GetConeFriction, SetConeFriction, float, 0.0f, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Twist Angle Min", GetTwistLimitMin, SetTwistLimitMin, float, -45.0f, AM_DEFAULT);
         URHO3D_ACCESSOR_ATTRIBUTE("Twist Angle Max", GetTwistLimitMax, SetTwistLimitMax, float, 45.0f, AM_DEFAULT);
-        URHO3D_ACCESSOR_ATTRIBUTE("Twist Friction", GetTwistFriction, SetTwistFriction, float, 0.0f, AM_DEFAULT);
+        //URHO3D_ACCESSOR_ATTRIBUTE("Twist Friction", GetTwistFriction, SetTwistFriction, float, 0.0f, AM_DEFAULT);
 
     }
 
@@ -176,8 +176,8 @@ namespace Urho3D {
 
         //static_cast<ndJointBallAndSocket*>(newtonConstraint_)->SetConeLimit(coneAngle_ * ndDegreeToRad);
        // static_cast<ndJointBallAndSocket*>(newtonConstraint_)->SetTwistLimits(twistMinAngle_* ndDegreeToRad, twistMaxAngle_ * ndDegreeToRad);
-        static_cast<ndJointBallAndSocket*>(newtonConstraint_)->SetConeFriction(1.0f, (coneFriction_));
-        static_cast<ndJointBallAndSocket*>(newtonConstraint_)->SetTwistFriction(1.0f, (twistFriction_));
+        //static_cast<ndJointSpherical*>(newtonConstraint_)->SetConeFriction(1.0f, (coneFriction_));
+        //static_cast<ndJointSpherical*>(newtonConstraint_)->SetTwistFriction(1.0f, (twistFriction_));
 
 
         return true;

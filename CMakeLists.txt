@@ -25,7 +25,7 @@ target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/new
 target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dJoints)
 target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dModels)
 target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dModels/dVehicle)
-target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dModels/dIKSolver)
+target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dIkSolver)
 target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dNewton/dModels/dCharacter)
 target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dTinyxml)
 target_include_directories( rbfx-newton PUBLIC    ThirdParty/newton-dynamics/newton-4.00/sdk/dCollision)

@@ -7,6 +7,7 @@
 
 #include "Urho3D/Scene/Scene.h"
 #include "Urho3D/SystemUI/SystemUI.h"
+#include "Urho3D/SystemUI/Imgui_eigen.h"
 
 #include "UrhoNewtonConversions.h"
 #include "ndNewton.h"
@@ -14,7 +15,7 @@
 
 namespace  Urho3D
 {
-	void ChainJacobian::ToEigenMatrix(Eigen::MatrixXd& J)
+	void ChainJacobian::ToEigenMatrix_Full(Eigen::MatrixXd& J)
 	{
         int numJoints = J_v.size();
         J.resize(6, numJoints);
@@ -29,6 +30,30 @@ namespace  Urho3D
             J(5, c) = J_w[c].z_;
         }
 	}
+    void ChainJacobian::ToEigenMatrix_Linear(Eigen::MatrixXd& J)
+    {
+        int numJoints = J_v.size();
+        J.resize(3, numJoints);
+        for (int c = 0; c < numJoints; c++)
+        {
+            J(0, c) = J_v[c].x_;
+            J(1, c) = J_v[c].y_;
+            J(2, c) = J_v[c].z_;
+        }
+    }
+    void ChainJacobian::ToEigenMatrix_Angular(Eigen::MatrixXd& J)
+    {
+        int numJoints = J_v.size();
+        J.resize(3, numJoints);
+        for (int c = 0; c < numJoints; c++)
+        {
+            J(0, c) = J_w[c].x_;
+            J(1, c) = J_w[c].y_;
+            J(2, c) = J_w[c].z_;
+        }
+    }
+
+
 
 	void NewtonModel::RegisterObject(Context* context)
 	{
@@ -122,7 +147,7 @@ namespace  Urho3D
 	{
         int numJoints = J.J_v.size();
         Eigen::MatrixXd jeig;
-        J.ToEigenMatrix(jeig);
+        J.ToEigenMatrix_Full(jeig);
 
 
         Eigen::VectorXd EndTargetVel(6);
@@ -144,19 +169,19 @@ namespace  Urho3D
 	}
 
     void NewtonModel::ComputeJointTorquesForEndEffector(ChainJacobian& J, ea::vector<NewtonRevoluteJoint*>& constraintChain,
-	    Vector3 endForceWorld, Vector3 endTorqueWorld, ea::vector<float>& torquesOut)
+	    Vector3 endForceRobotSpace, Vector3 endTorqueRobotSpace, ea::vector<float>& torquesOut)
 	{
         int numJoints = J.J_v.size();
         Eigen::MatrixXd jeig;
-        J.ToEigenMatrix(jeig);
+        J.ToEigenMatrix_Full(jeig);
 
         Eigen::VectorXd EndTargetWrench(6);
-        EndTargetWrench(0) = endForceWorld.x_;
-        EndTargetWrench(1) = endForceWorld.y_;
-        EndTargetWrench(2) = endForceWorld.z_;
-        EndTargetWrench(3) = endTorqueWorld.x_;
-        EndTargetWrench(4) = endTorqueWorld.y_;
-        EndTargetWrench(5) = endTorqueWorld.z_;
+        EndTargetWrench(0) = endForceRobotSpace.x_;
+        EndTargetWrench(1) = endForceRobotSpace.y_;
+        EndTargetWrench(2) = endForceRobotSpace.z_;
+        EndTargetWrench(3) = endTorqueRobotSpace.x_;
+        EndTargetWrench(4) = endTorqueRobotSpace.y_;
+        EndTargetWrench(5) = endTorqueRobotSpace.z_;
 
 
         Eigen::VectorXd SolvedQ_torques = jeig.transpose() * EndTargetWrench;
@@ -195,6 +220,59 @@ namespace  Urho3D
         }
 
     }
+
+    void NewtonModel::ComputeEndEffectorManipulabilityElipse(ChainJacobian& J, Vector3& v1, Vector3& v2, Vector3& v3, Vector3& lengths)
+    {
+        Eigen::EigenSolver<Eigen::MatrixXd> eigenSolver;
+        Eigen::MatrixXd Jac_v;
+        J.ToEigenMatrix_Linear(Jac_v);
+
+
+        Eigen::MatrixXd A = Jac_v * Jac_v.transpose();
+        eigenSolver.compute(A, true);
+
+        
+        auto eigenVectors = eigenSolver.eigenvectors();
+        auto eigenValues = eigenSolver.eigenvalues();
+
+        v1.x_ = eigenVectors(0, 0).real();
+        v1.y_ = eigenVectors(1, 0).real();
+        v1.z_ = eigenVectors(2, 0).real();
+        v1.Normalize();
+
+        v2.x_ = eigenVectors(0, 1).real();
+        v2.y_ = eigenVectors(1, 1).real();
+        v2.z_ = eigenVectors(2, 1).real();
+        v2.Normalize();
+
+        v3.x_ = eigenVectors(0, 2).real();
+        v3.y_ = eigenVectors(1, 2).real();
+        v3.z_ = eigenVectors(2, 2).real();
+        v3.Normalize();
+
+        lengths.x_ = Sqrt(eigenValues(0).real());
+        lengths.y_ = Sqrt(eigenValues(1).real());
+        lengths.z_ = Sqrt(eigenValues(2).real());
+
+
+        //ui::Text("Jac_v");
+        //ui::EIGEN_MATRIX_XD_TABLE("jac_v", Jac_v);
+
+        //ui::Text("A");
+        //ui::EIGEN_MATRIX_XD_TABLE("A", A);
+
+        //ui::Text("EigenVectors");
+        //ui::EIGEN_MATRIX_XCD_TABLE("eigvectors", eigenVectors);
+
+        //ui::Text("v1 dot v2: %f", v1.DotProduct(v2));
+        //ui::Text("v1 dot v3: %f", v1.DotProduct(v3));
+        //ui::Text("v2 dot v3: %f", v2.DotProduct(v3));
+
+        //ui::Text("EigenValues");
+        //ui::EIGEN_VECTOR_XCD_TABLE("eigvals", eigenValues);
+
+    }
+
 
 
 
