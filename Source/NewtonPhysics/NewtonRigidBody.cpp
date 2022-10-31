@@ -750,7 +750,7 @@ namespace Urho3D {
         freeBody();
         ndMatrix finalInertia;
         ndVector finalCenterOfMass;
-		ndMatrix identity = dGetIdentityMatrix();
+		ndMatrix identity = ndGetIdentityMatrix();
 
 
         if (!IsEnabledEffective())

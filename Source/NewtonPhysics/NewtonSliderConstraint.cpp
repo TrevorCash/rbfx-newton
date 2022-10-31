@@ -271,8 +271,8 @@ namespace Urho3D
             AddLinearRowJacobian(desc, matrix0.m_posit, matrix0.m_posit, matrix1.m_front);
             const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
             const ndFloat32 penetration = x - m_minLimit;
-            const ndFloat32 recoveringAceel = -desc.m_invTimestep * D_MAX_SLIDER_RECOVERY_SPEED
-        	* dMin(dAbs(penetration / D_MAX_SLIDER_PENETRATION), ndFloat32(1.0f));
+             ndFloat32 recoveringAceel = -desc.m_invTimestep * D_MAX_SLIDER_RECOVERY_SPEED
+        	* ndMin(ndAbs(penetration / D_MAX_SLIDER_PENETRATION), ndFloat32(1.0f));
             SetMotorAcceleration(desc, stopAccel - recoveringAceel);
             SetLowerFriction(desc, 0);
         }
@@ -281,8 +281,8 @@ namespace Urho3D
             AddLinearRowJacobian(desc, matrix0.m_posit, matrix0.m_posit, matrix1.m_front);
             const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
             const ndFloat32 penetration = x - m_maxLimit;
-            const ndFloat32 recoveringAceel = desc.m_invTimestep * D_MAX_SLIDER_RECOVERY_SPEED
-        	* dMin(dAbs(penetration / D_MAX_SLIDER_PENETRATION), ndFloat32(1.0f));
+             ndFloat32 recoveringAceel = desc.m_invTimestep * D_MAX_SLIDER_RECOVERY_SPEED
+        	* ndMin(ndAbs(penetration / D_MAX_SLIDER_PENETRATION), ndFloat32(1.0f));
             SetMotorAcceleration(desc, stopAccel - recoveringAceel);
             SetHighFriction(desc, 0);
         }

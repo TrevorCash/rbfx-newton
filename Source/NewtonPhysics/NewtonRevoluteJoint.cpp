@@ -292,9 +292,9 @@ namespace Urho3D {
         const ndVector relOmega(omega0 - omega1);
         m_omega = matrix0.UnrotateVector(relOmega).GetX();
 
-
+        
     	// the joint angle can be determined by getting the angle between any two non parallel vectors
-        const ndFloat32 deltaAngle = AnglesAdd(-CalculateAngle(matrix0.m_up, matrix1.m_up, matrix1.m_front), -m_angle);
+        const ndFloat32 deltaAngle = ndAnglesAdd(-CalculateAngle(matrix0.m_up, matrix1.m_up, matrix1.m_front), -m_angle);
         m_angle += deltaAngle;
 
         if (m_hasOffsetLimits) {
@@ -324,7 +324,7 @@ namespace Urho3D {
                     AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
                     const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
                     const ndFloat32 penetration = m_angle - m_minLimit;
-                    const ndFloat32 recoveringAceel = -desc.m_invTimestep * D_MAX_HINGE_RECOVERY_SPEED * dMin(dAbs(penetration / D_MAX_HINGE_PENETRATION), ndFloat32(1.0f));
+                     ndFloat32 recoveringAceel = -desc.m_invTimestep * D_MAX_HINGE_RECOVERY_SPEED * ndMin(ndAbs(penetration / D_MAX_HINGE_PENETRATION), ndFloat32(1.0f));
                     SetMotorAcceleration(desc, stopAccel - recoveringAceel);
                     SetLowerFriction(desc, 0);
                 }
@@ -333,7 +333,7 @@ namespace Urho3D {
                     AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
                     const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
                     const ndFloat32 penetration = m_angle - m_maxLimit;
-                    const ndFloat32 recoveringAceel = desc.m_invTimestep * D_MAX_HINGE_RECOVERY_SPEED * dMin(dAbs(penetration / D_MAX_HINGE_PENETRATION), ndFloat32(1.0f));
+                     ndFloat32 recoveringAceel = desc.m_invTimestep * D_MAX_HINGE_RECOVERY_SPEED * ndMin(ndAbs(penetration / D_MAX_HINGE_PENETRATION), ndFloat32(1.0f));
                     SetMotorAcceleration(desc, stopAccel - recoveringAceel);
                     SetHighFriction(desc, 0);
                 }

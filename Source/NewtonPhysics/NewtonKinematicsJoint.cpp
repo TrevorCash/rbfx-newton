@@ -140,7 +140,7 @@ namespace Urho3D {
         ndFloat32 mass;
 		ownBody_->GetNewtonBody()->GetAsBodyDynamic()->GetMassMatrix(Ixx, Iyy, Izz, mass);
 
-        const ndFloat32 inertia = dMax(Izz, dMax(Ixx, Iyy));
+        const ndFloat32 inertia = ndMax(Izz, ndMax(Ixx, Iyy));
 
 
         static_cast<ndJointKinematicController*>(newtonConstraint_)->SetMaxLinearFriction(mass * linearFrictionalAcceleration);
