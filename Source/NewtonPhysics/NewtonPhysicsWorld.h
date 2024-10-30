@@ -84,7 +84,7 @@ namespace Urho3D
 	class NewtonWorldContactNotify : public ndContactNotify
 	{
 	public:
-		NewtonWorldContactNotify();
+		NewtonWorldContactNotify(ndScene* const scene);
 
 		virtual ~NewtonWorldContactNotify();
 
@@ -303,7 +303,9 @@ namespace Urho3D
 
 
         /// Internal newton world
+        ndWorldScene* newtonScene_ = nullptr;
         ndWorld* newtonWorld_ = nullptr;
+        
 
         NewtonRigidBody* sceneBody_ = nullptr;
 

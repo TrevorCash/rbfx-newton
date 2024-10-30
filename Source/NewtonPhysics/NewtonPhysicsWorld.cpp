@@ -72,7 +72,7 @@ namespace Urho3D {
 
     static const Vector3 DEFAULT_GRAVITY = Vector3(0.0f, -9.81f, 0.0f);
 
-    NewtonWorldContactNotify::NewtonWorldContactNotify(): ndContactNotify()
+    NewtonWorldContactNotify::NewtonWorldContactNotify(ndScene* const scene): ndContactNotify(scene)
     {
     }
 
@@ -321,7 +321,9 @@ namespace Urho3D {
         if (scene) {
             //create the newton world
             if (newtonWorld_ == nullptr) {
-				newtonWorld_ = new ndWorld();
+                newtonWorld_ = new ndWorld();
+                newtonScene_ = new ndWorldScene(newtonWorld_);
+				
                 applyNewtonWorldSettings();
 
 
@@ -333,7 +335,7 @@ namespace Urho3D {
                     sceneBody_->SetTemporary(true);
                 }
 
-				newtonContactNotify_ = new NewtonWorldContactNotify();
+				newtonContactNotify_ = new NewtonWorldContactNotify(newtonScene_);
 				newtonWorld_->SetContactNotify(newtonContactNotify_);
 				
                 
