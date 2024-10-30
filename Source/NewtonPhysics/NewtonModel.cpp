@@ -395,7 +395,7 @@ namespace  Urho3D
 
     void NewtonModelHandler::Update(ndWorld* const world, ndFloat32 timestep)
     {
-        ndModel::Update(world, timestep);
+        //ndModel::Update(world, timestep);
         model_->PreSolveComputations(world, timestep);
 
 
@@ -403,12 +403,12 @@ namespace  Urho3D
 
     void NewtonModelHandler::PostUpdate(ndWorld* const world, ndFloat32 timestep)
     {
-        ndModel::PostUpdate(world, timestep);
+        //ndModel::PostUpdate(world, timestep);
     }
 
     void NewtonModelHandler::PostTransformUpdate(ndWorld* const world, ndFloat32 timestep)
     {
-        ndModel::PostTransformUpdate(world, timestep);
+        //ndModel::PostTransformUpdate(world, timestep);
     }
 
 

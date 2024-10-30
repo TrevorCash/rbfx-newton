@@ -114,14 +114,14 @@ namespace Urho3D
     {
     public:
     public:
-        D_CLASS_REFLECTION(NewtonModelHandler);
+        D_CLASS_REFLECTION(NewtonModelHandler, ndModel);
         NewtonModelHandler();
 
         friend class NewtonModel;
     protected:
-        inline void Update(ndWorld* const world, ndFloat32 timestep) override;
-        inline void PostUpdate(ndWorld* const world, ndFloat32 timestep) override;
-        inline void PostTransformUpdate(ndWorld* const world, ndFloat32 timestep) override;
+        inline void Update(ndWorld* const world, ndFloat32 timestep) ;
+        inline void PostUpdate(ndWorld* const world, ndFloat32 timestep) ;
+        inline void PostTransformUpdate(ndWorld* const world, ndFloat32 timestep) ;
 
         NewtonModel* model_ = nullptr;
     };

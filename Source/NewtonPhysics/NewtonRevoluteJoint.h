@@ -70,7 +70,7 @@ namespace Urho3D {
     class URHONEWTON_API ndRevoluteJoint : public ndJointBilateralConstraint
     {
     public:
-        D_CLASS_REFLECTION(ndRevoluteJoint);
+        D_CLASS_REFLECTION(ndRevoluteJoint, ndJointBilateralConstraint);
         ndRevoluteJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix0, const ndMatrix& globalMatrix1);
     	void SetTorque(ndFloat32 newtonMeters);
 

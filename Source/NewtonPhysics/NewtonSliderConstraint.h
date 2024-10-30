@@ -66,7 +66,7 @@ namespace Urho3D {
     class URHONEWTON_API SliderJoint : public ndJointBilateralConstraint
     {
     public:
-        D_CLASS_REFLECTION(SliderJoint);
+        D_CLASS_REFLECTION(SliderJoint, ndJointBilateralConstraint);
         SliderJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix0, const ndMatrix& globalMatrix1);
 
         ndFloat32 m_commandedForce;
