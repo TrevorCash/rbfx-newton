@@ -535,14 +535,14 @@ namespace Urho3D
 	class NewtonBodyNotifications : public ndBodyNotify
 	{
 	public:
-		D_CLASS_REFLECTION(NewtonBodyNotifications);
+		D_CLASS_REFLECTION(NewtonBodyNotifications, ndBodyNotify);
 
 		NewtonBodyNotifications();
 
 
 		virtual void OnTransform(ndInt32 threadIndex, const ndMatrix& matrix);
 
-		virtual void Save(const ndLoadSaveBase::ndSaveDescriptor& desc) const;
+		//virtual void Save(const ndLoadSaveBase::ndSaveDescriptor& desc) const;
 
 		virtual void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep);
 

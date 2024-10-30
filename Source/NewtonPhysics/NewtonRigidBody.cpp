@@ -60,10 +60,10 @@ namespace Urho3D {
 		rigidBodyComponent_->MarkInternalTransformDirty();
 	}
 
-	void NewtonBodyNotifications::Save(const ndLoadSaveBase::ndSaveDescriptor& desc) const
-	{
+	//void NewtonBodyNotifications::Save(const ndLoadSaveBase::ndSaveDescriptor& desc) const
+	//{
 
-	}
+	//}
 
 	void NewtonBodyNotifications::OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep)
 	{
